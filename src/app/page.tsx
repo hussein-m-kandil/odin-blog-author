@@ -1,3 +1,10 @@
+import { AuthForm } from '@/components/auth-form';
+
 export default function Home() {
-  return <div>Home page...</div>;
+  return (
+    <div>
+      <div>Home page...</div>
+      <AuthForm />
+    </div>
+  );
 }
