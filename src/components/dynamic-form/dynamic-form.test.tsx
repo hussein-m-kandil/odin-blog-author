@@ -23,10 +23,24 @@ describe('<DynamicForm />', () => {
       label: 'Password',
       schema: z.string().min(8, { message: 'Password must have 8 characters' }),
     },
+    bio: {
+      defaultValue: '',
+      type: 'textarea',
+      label: 'Bio',
+      schema: z.string().optional(),
+    },
+    public: {
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Public Profile',
+      placeholder: '',
+      schema: z.boolean(),
+    },
   };
 
   const username = formAttrs.username.label;
   const password = formAttrs.password.label;
+  const bio = formAttrs.bio.label;
 
   const formSchema = z.object(
     Object.fromEntries(
@@ -69,14 +83,22 @@ describe('<DynamicForm />', () => {
     const submitter = getSubmitBtn();
     const usernameInp = screen.getByLabelText(username) as HTMLInputElement;
     const passwordInp = screen.getByLabelText(password) as HTMLInputElement;
-    expect(Array.from(new FormData(form))).toHaveLength(2);
+    const bioInp = screen.getByLabelText(bio) as HTMLTextAreaElement;
+    const publicInp = screen.getByRole('checkbox') as HTMLInputElement;
+    expect(form).toBeInTheDocument();
+    expect(form).toHaveAttribute('noValidate');
+    expect(Array.from(new FormData(form))).toHaveLength(3);
     expect(submitter.type).toBe('submit');
     expect(usernameInp.type).toBe('text');
     expect(passwordInp.type).toBe('password');
+    expect(bioInp).toBeInstanceOf(HTMLTextAreaElement);
+    expect(bioInp.defaultValue).toBe(formAttrs.bio.defaultValue);
+    expect(publicInp.ariaChecked).toBe(`${formAttrs.public.defaultValue}`);
     expect(usernameInp.defaultValue).toBe(formAttrs.username.defaultValue);
     expect(passwordInp.defaultValue).toBe(formAttrs.password.defaultValue);
     expect(usernameInp.placeholder).toBe(formAttrs.username.placeholder ?? '');
     expect(passwordInp.placeholder).toBe(formAttrs.password.placeholder ?? '');
+    expect(bioInp.placeholder).toBe(formAttrs.bio.placeholder ?? '');
     expect(screen.getByText(formAttrs.username.description ?? ''));
   });
 
@@ -118,8 +140,10 @@ describe('<DynamicForm />', () => {
     const submitter = getSubmitBtn();
     const usernameInp = screen.getByLabelText(username) as HTMLInputElement;
     const passwordInp = screen.getByLabelText(password) as HTMLInputElement;
+    const publicInp = screen.getByRole('checkbox') as HTMLInputElement;
     await user.type(usernameInp, 'xy');
     await user.type(passwordInp, '1234567');
+    await user.click(publicInp);
     await user.click(submitter);
     expect(onSubmit).not.toBeCalled();
     expect(screen.getByText(/3 characters/i)).toBeInTheDocument();
@@ -132,8 +156,10 @@ describe('<DynamicForm />', () => {
     expect(await findSubmittingBtn()).toBeInTheDocument();
     expect(onSubmit).toHaveBeenCalledOnce();
     expect(onSubmit.mock.calls[0]).toContainEqual({
-      username: 'xyz',
       password: '12345678',
+      username: 'xyz',
+      public: true,
+      bio: '',
     });
     expect(await findSubmittingBtn()).toBeInTheDocument();
     expect(screen.queryByText(/3 characters/i)).toBeNull();
