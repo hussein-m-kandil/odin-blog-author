@@ -2,11 +2,11 @@ import { UseFormReturn, SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 
 export interface DynamicFormFieldAttrs {
-  type?: 'text' | 'password' | undefined;
+  type?: 'text' | 'password' | 'textarea' | 'checkbox' | undefined;
   label: string;
   placeholder?: string;
   description?: string;
-  defaultValue: string;
+  defaultValue: string | boolean;
   schema: z.ZodSchema;
 }
 

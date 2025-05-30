@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PasswordInput } from '@/components/password-input';
 import { DynamicFormProps } from './dynamic-form.types';
@@ -62,6 +64,7 @@ export function DynamicForm({
   return (
     <Form {...hookForm}>
       <form
+        noValidate
         {...formProps}
         onSubmit={handleSubmit}
         className={cn('space-y-5', className)}>
@@ -71,17 +74,40 @@ export function DynamicForm({
             control={hookForm.control}
             name={name}
             render={({ field }) => {
+              if (attrs.type === 'checkbox') delete field.value;
               const fieldProps = { ...field, placeholder: attrs.placeholder };
               return (
                 <FormItem>
-                  <FormLabel>{attrs.label}</FormLabel>
-                  <FormControl>
-                    {attrs.type === 'password' ? (
-                      <PasswordInput {...fieldProps} autoComplete='off' />
-                    ) : (
-                      <Input {...fieldProps} autoComplete='on' />
-                    )}
-                  </FormControl>
+                  {attrs.type === 'checkbox' ? (
+                    <FormItem className='flex flex-row justify-center items-center gap-2'>
+                      <FormControl>
+                        <Checkbox
+                          {...field}
+                          defaultChecked={Boolean(attrs.defaultValue)}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel>{attrs.label}</FormLabel>
+                    </FormItem>
+                  ) : (
+                    <>
+                      <FormLabel>{attrs.label}</FormLabel>
+                      <FormControl>
+                        {(() => {
+                          switch (attrs.type) {
+                            case 'password':
+                              return <PasswordInput {...fieldProps} />;
+                            case 'textarea':
+                              return <Textarea {...fieldProps} />;
+                            default:
+                              return (
+                                <Input {...fieldProps} autoComplete='on' />
+                              );
+                          }
+                        })()}
+                      </FormControl>
+                    </>
+                  )}
                   {attrs.description && (
                     <FormDescription>{attrs.description}</FormDescription>
                   )}
