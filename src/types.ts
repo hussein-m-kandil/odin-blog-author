@@ -12,3 +12,39 @@ export interface AuthRes {
   token: string;
   user: User;
 }
+
+export interface Category {
+  name: string;
+}
+
+export interface Vote {
+  id: string;
+  user: User;
+  userId: string;
+  postId: string;
+  isUpvote: boolean;
+}
+
+export interface Comment {
+  id: string;
+  author: User;
+  postId: string;
+  content: string;
+  authorId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  content: string;
+  authorId: string;
+  createdAt: string;
+  updatedAt: string;
+  published: boolean;
+  categories: Category[];
+  comments: Comment[];
+  votes: Vote[];
+  author: User;
+}
