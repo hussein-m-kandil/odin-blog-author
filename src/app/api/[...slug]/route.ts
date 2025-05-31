@@ -1,7 +1,12 @@
 import logger from '@/lib/logger';
-import { NextRequest } from 'next/server';
+import {
+  signoutAndRedirect,
+  signinAndRedirect,
+  AUTH_COOKIE_KEY,
+  isAuthRes,
+} from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
-import { isAuthRes, signoutAndRedirect, signinAndRedirect } from '@/lib/auth';
+import { NextRequest } from 'next/server';
 
 if (!process.env.API_BASE_URL || !process.env.NEXT_PUBLIC_API_BASE_URL) {
   const error = 'Public/Private API base URL is not defined';
@@ -22,15 +27,20 @@ function handleRequestError(error: unknown) {
 }
 
 async function handleRequest(req: NextRequest, { params }: RouteContext) {
+  const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
   try {
     const endpoint = `/${(await params).slug.join('/')}`;
-    const Authorization = req.cookies.get('authorization')?.value || '';
-    return await fetch(`${apiBaseUrl}${endpoint}`, {
+    const Authorization = req.cookies.get(AUTH_COOKIE_KEY)?.value || '';
+    const apiRes = await fetch(`${apiBaseUrl}${endpoint}`, {
       headers: { 'Content-Type': 'application/json', Authorization },
-      body: ['GET', 'HEAD'].includes(req.method) ? undefined : await req.text(),
+      body: isMutation ? await req.text() : undefined,
       method: req.method,
       cache: 'no-store',
     });
+    if (isMutation && apiRes.ok) {
+      revalidatePath('/', 'layout');
+    }
+    return apiRes;
   } catch (error) {
     return handleRequestError(error);
   }
@@ -49,7 +59,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
     const endpoint = `/${(await params).slug.join('/')}`;
 
     if (/\/signout$/.test(endpoint)) {
-      revalidatePath('/');
+      revalidatePath('/', 'layout');
       return signoutAndRedirect(req);
     }
 
@@ -65,7 +75,6 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
         return Response.json({ error: 'Invalid operation' }, { status: 409 });
       }
       logger.info(`Signing ${signupEndpoint ? 'up' : 'in'}...`, authRes);
-      revalidatePath('/');
       return signinAndRedirect(authRes, req);
     }
 
