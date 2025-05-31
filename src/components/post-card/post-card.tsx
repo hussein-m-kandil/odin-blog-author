@@ -15,14 +15,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { BookOpen, EllipsisVertical, Trash2 } from 'lucide-react';
+import { BookOpen, EllipsisVertical } from 'lucide-react';
 import { Muted } from '@/components/typography/muted';
 import { Lead } from '@/components/typography/lead';
 import { Button } from '@/components/ui/button';
 import { Post } from '@/types';
 import Link from 'next/link';
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+import { PostFormDialog } from '../post-form-dialog';
 
 interface PostCardProps {
   isMutable: boolean;
@@ -64,18 +63,7 @@ export function PostCard({ post, isMutable = false }: PostCardProps) {
               </DropdownMenuItem>
               {isMutable && (
                 <DropdownMenuItem asChild>
-                  <form
-                    method='delete'
-                    action={`${apiBaseUrl}/posts/${post.id}`}>
-                    <Button
-                      type='submit'
-                      variant='link'
-                      aria-description={`Delete ${post.title}`}
-                      className='text-destructive has-[>svg]:px-0 hover:no-underline'>
-                      <Trash2 />
-                      Delete
-                    </Button>
-                  </form>
+                  <PostFormDialog post={post} toDelete={true} />
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>

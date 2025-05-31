@@ -9,13 +9,16 @@ import {
   showFieldErrors,
 } from '@/lib/utils';
 import { DynamicForm, DynamicFormSubmitHandler } from '../dynamic-form';
-import { postFormAttrs, postFormSchema } from './post-form.data';
+import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
 import { PostFormProps } from './post-form.types';
 import { P } from '../typography/p';
 import { z } from 'zod';
 
-export function PostForm({ onSuccess, ...formProps }: PostFormProps) {
+export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
+
+  const postFormAttrs = createPostFormAttrs(post);
+  const postFormSchema = createPostFormSchema(postFormAttrs);
 
   const handleCreatePost: DynamicFormSubmitHandler<
     z.infer<typeof postFormSchema>
@@ -61,7 +64,11 @@ export function PostForm({ onSuccess, ...formProps }: PostFormProps) {
         formSchema={postFormSchema}
         onSubmit={handleCreatePost}
         submitterClassName='w-full'
-        submitterLabel={{ idle: 'Create Post', submitting: 'Creating...' }}
+        submitterLabel={
+          post
+            ? { idle: 'Update Post', submitting: 'Updating...' }
+            : { idle: 'Create Post', submitting: 'Creating...' }
+        }
       />
     </>
   );
