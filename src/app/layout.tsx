@@ -1,3 +1,5 @@
+import { DialogProvider } from '@/contexts/dialog-context/';
+
 import './globals.css';
 
 import { Metadata } from 'next';
@@ -16,7 +18,9 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body>{children}</body>
+      <body>
+        <DialogProvider>{children}</DialogProvider>
+      </body>
     </html>
   );
 }
