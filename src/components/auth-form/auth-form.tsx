@@ -49,7 +49,8 @@ export function AuthForm({ formType }: AuthFormProps) {
         // This block is just a fallback: the API route handler should redirect the user
         hookForm.reset();
         setErrorMessage('');
-        router.replace('/');
+        if (apiRes.redirected) window.location.href = apiRes.url;
+        else router.replace('/');
       } else {
         const data = await apiRes.json();
         if (Array.isArray(data) && data.every(isIssue)) {
