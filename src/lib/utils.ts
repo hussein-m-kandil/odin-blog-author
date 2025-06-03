@@ -6,6 +6,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function formatDate(date: Date | string) {
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return dateObj.toLocaleDateString('en-US', {
+    year: 'numeric',
+    day: 'numeric',
+    month: 'long',
+  });
+}
+
 export const isObject = (x: unknown): x is Record<string, unknown> => {
   return typeof x === 'object' && x !== null && !Array.isArray(x);
 };

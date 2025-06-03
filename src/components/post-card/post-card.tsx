@@ -19,11 +19,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { BookOpen, EllipsisVertical, Lock, Globe } from 'lucide-react';
 import { Muted } from '@/components/typography/muted';
+import { PostFormDialog } from '../post-form-dialog';
 import { Lead } from '@/components/typography/lead';
 import { Button } from '@/components/ui/button';
+import { formatDate } from '@/lib/utils';
 import { Post } from '@/types';
 import Link from 'next/link';
-import { PostFormDialog } from '../post-form-dialog';
 
 interface PostCardProps {
   isMutable: boolean;
@@ -31,12 +32,6 @@ interface PostCardProps {
 }
 
 export function PostCard({ post, isMutable = false }: PostCardProps) {
-  const updateDate = new Date(post.updatedAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    day: 'numeric',
-    month: 'long',
-  });
-
   const postUrl = `/blog/${post.id}`;
 
   return (
@@ -98,8 +93,8 @@ export function PostCard({ post, isMutable = false }: PostCardProps) {
         <Lead className='line-clamp-3'>{post.content}</Lead>
       </CardContent>
       <CardFooter className='flex items-center justify-between'>
-        <Muted>
-          Last updated at <span className='italic'>{updateDate}</span>
+        <Muted className='italic'>
+          Last updated at {formatDate(post.updatedAt)}
         </Muted>
         <Button type='button' variant={'outline'} asChild>
           <Link
