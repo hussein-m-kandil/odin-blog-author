@@ -1,8 +1,12 @@
-import { getSignedInUser } from '@/lib/auth';
 import { Navbar } from '@/components/navbar';
+import { getSignedInUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
-export default async function Home() {
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   const user = await getSignedInUser();
 
   if (!user) {
@@ -11,12 +15,8 @@ export default async function Home() {
 
   return (
     <>
-      <header>
-        <Navbar user={user} />
-      </header>
-      <main>
-        <div>Home page...</div>
-      </main>
+      <Navbar user={user} />
+      {children}
     </>
   );
 }
