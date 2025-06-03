@@ -29,9 +29,14 @@ export function createAuthCookie(value: string, maxAge = 7 * 24 * 60 * 60) {
   return `${cookieKey}=${cookieValue}; Path=/; HttpOnly; Secure; SameSite=Strict; Expires=${expires}; Max-Age=${maxAge}`;
 }
 
-export const getResWithXHeaders = (req: NextRequest, res: NextResponse) => {
+export const getResWithXHeaders = (
+  req: NextRequest,
+  res: NextResponse,
+  user?: User | null
+) => {
   res.headers.set('x-pathname', req.nextUrl.pathname);
   res.headers.set('x-url', req.nextUrl.toString());
+  if (user) res.headers.set('x-uid', user.id);
   return res;
 };
 
