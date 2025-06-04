@@ -5,11 +5,14 @@ import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
 import { DynamicForm, DynamicFormSubmitHandler } from '../dynamic-form';
 import { PostFormProps } from './post-form.types';
+import { useRouter } from 'next/navigation';
 import { P } from '../typography/p';
+import { Post } from '@/types';
 import { z } from 'zod';
 
 export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
+  const router = useRouter();
 
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
@@ -31,6 +34,8 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         hookForm.reset();
         setErrorMessage('');
         onSuccess?.();
+        const postData = post || ((await apiRes.json()) as Post);
+        router.push(`/blog${postData && postData.id ? '/' + postData.id : ''}`);
       } else {
         setErrorMessage(await getResErrorMessageOrThrow(apiRes, hookForm));
       }
