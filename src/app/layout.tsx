@@ -16,7 +16,7 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang='en' suppressHydrationWarning>
-      <body>
+      <body className='pb-4'>
         <ThemeProvider
           enableSystem
           attribute='class'
