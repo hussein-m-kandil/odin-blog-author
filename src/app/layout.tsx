@@ -1,5 +1,6 @@
 import './globals.css';
 import { Metadata } from 'next';
+import { ThemeProvider } from 'next-themes';
 import { DialogProvider } from '@/contexts/dialog-context/';
 
 export const metadata: Metadata = {
@@ -14,9 +15,15 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang='en'>
+    <html lang='en' suppressHydrationWarning>
       <body>
-        <DialogProvider>{children}</DialogProvider>
+        <ThemeProvider
+          enableSystem
+          attribute='class'
+          defaultTheme='system'
+          disableTransitionOnChange>
+          <DialogProvider>{children}</DialogProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
