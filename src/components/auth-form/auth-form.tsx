@@ -1,13 +1,7 @@
 'use client';
 
+import Link from 'next/link';
 import React from 'react';
-
-import {
-  isIssue,
-  parseIssues,
-  showFieldErrors,
-  getErrorMessageOrThrow,
-} from '@/lib/utils';
 import {
   signinFormAttrs,
   signinFormSchema,
@@ -19,13 +13,12 @@ import {
   DynamicFormProps,
   DynamicFormSubmitHandler,
 } from '@/components/dynamic-form';
+import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
 import { AuthFormProps } from './auth-form.types';
 import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
 import { H2 } from '../typography/h2';
 import { z } from 'zod';
-import Link from 'next/link';
-import logger from '@/lib/logger';
 
 export function AuthForm({ formType }: AuthFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
@@ -49,22 +42,14 @@ export function AuthForm({ formType }: AuthFormProps) {
         // This block is just a fallback: the API route handler should redirect the user
         hookForm.reset();
         setErrorMessage('');
-        if (apiRes.redirected) window.location.href = apiRes.url;
-        else router.replace('/');
+        if (apiRes.redirected) {
+          window.location.href = apiRes.url;
+        } else router.replace('/');
       } else {
-        const data = await apiRes.json();
-        if (Array.isArray(data) && data.every(isIssue)) {
-          const { formErrors, fieldErrors } = parseIssues(data);
-          if (formErrors.length) setErrorMessage(formErrors[0]);
-          showFieldErrors(hookForm, fieldErrors);
-        } else {
-          setErrorMessage(getErrorMessageOrThrow(data));
-        }
+        setErrorMessage(await getResErrorMessageOrThrow(apiRes, hookForm));
       }
     } catch (error) {
-      const defaultMessage = 'An error occurred while signing in';
-      logger.error(error?.toString() ?? defaultMessage, error);
-      setErrorMessage('Something went wrong, please try again later');
+      setErrorMessage(getUnknownErrorMessage(error));
     }
   };
 
@@ -81,7 +66,7 @@ export function AuthForm({ formType }: AuthFormProps) {
     togglerHref = '/signin';
     togglerText = 'Sign in';
     key = `${id}-signup`;
-    title = 'Sign UP';
+    title = 'Sign Up';
     authFormJSX = (
       <DynamicForm
         {...commonFormProps}
@@ -109,12 +94,12 @@ export function AuthForm({ formType }: AuthFormProps) {
   }
 
   return (
-    <div className='px-4 max-w-md mx-auto mt-5' key={key}>
-      <H2 id={titleId} className='text-center mb-5'>
+    <div className='px-4 max-w-md mx-auto mt-6' key={key}>
+      <H2 id={titleId} className='font-normal text-2xl text-center mb-6'>
         {title}
       </H2>
       {errorMessage && (
-        <P className='text-destructive text-sm text-center mt-0 mb-5'>
+        <P className='text-destructive text-sm text-center mt-0 mb-6'>
           {errorMessage}
         </P>
       )}

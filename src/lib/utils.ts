@@ -1,6 +1,7 @@
 import { twMerge } from 'tailwind-merge';
 import { clsx, type ClassValue } from 'clsx';
 import { UseFormReturn } from 'react-hook-form';
+import logger from './logger';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -43,8 +44,27 @@ export const isErrorResponseWithStringErrorMessage = (
   );
 };
 
-export const getErrorMessageOrThrow = (resData: unknown) => {
-  if (isErrorResponseWithStringErrorMessage(resData)) {
+export const getUnknownErrorMessage = (
+  error: unknown,
+  defaultMessage = 'Unexpected error'
+) => {
+  logger.error(error?.toString() ?? defaultMessage, error);
+  return 'Something went wrong';
+};
+
+export const getResErrorMessageOrThrow = async (
+  res: Response,
+  hookForm?: UseFormReturn
+) => {
+  if (res.status === 401 || res.status === 403) {
+    return 'You are unauthorized';
+  }
+  const resData = await res.json();
+  if (hookForm && Array.isArray(resData) && resData.every(isIssue)) {
+    const { formErrors, fieldErrors } = parseIssues(resData);
+    showFieldErrors(hookForm, fieldErrors);
+    if (formErrors.length) return formErrors[0];
+  } else if (isErrorResponseWithStringErrorMessage(resData)) {
     return resData.error.message;
   } else if (isErrorResponseWithStringError(resData)) {
     return resData.error;

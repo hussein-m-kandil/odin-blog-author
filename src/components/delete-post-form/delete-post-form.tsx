@@ -3,8 +3,7 @@ import { Post } from '@/types';
 import { P } from '@/components/typography/p';
 import { Button } from '@/components/ui/button';
 import { Loader2, PanelLeftClose, Trash2 } from 'lucide-react';
-import logger from '@/lib/logger';
-import { getErrorMessageOrThrow } from '@/lib/utils';
+import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
@@ -28,16 +27,13 @@ export function DeletePostForm({
       const apiRes = await fetch(`${apiBaseUrl}/posts/${post.id}`, {
         method: 'DELETE',
       });
-      if (apiRes.ok) return onSuccess();
-      if (apiRes.status === 401) {
-        setErrorMessage('You are unauthorized');
+      if (apiRes.ok) {
+        return onSuccess();
       } else {
-        const data = await apiRes.json();
-        setErrorMessage(getErrorMessageOrThrow(data));
+        setErrorMessage(await getResErrorMessageOrThrow(apiRes));
       }
     } catch (error) {
-      logger.error(error?.toString() ?? 'Unexpected error', error);
-      setErrorMessage('Something went wrong, please try again later');
+      setErrorMessage(getUnknownErrorMessage(error));
     } finally {
       setSubmitting(false);
     }

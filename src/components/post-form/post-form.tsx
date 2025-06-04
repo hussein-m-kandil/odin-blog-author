@@ -1,15 +1,9 @@
 'use client';
 
 import React from 'react';
-import logger from '@/lib/logger';
-import {
-  getErrorMessageOrThrow,
-  isIssue,
-  parseIssues,
-  showFieldErrors,
-} from '@/lib/utils';
-import { DynamicForm, DynamicFormSubmitHandler } from '../dynamic-form';
+import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
+import { DynamicForm, DynamicFormSubmitHandler } from '../dynamic-form';
 import { PostFormProps } from './post-form.types';
 import { P } from '../typography/p';
 import { z } from 'zod';
@@ -37,21 +31,11 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         hookForm.reset();
         setErrorMessage('');
         onSuccess?.();
-      } else if (apiRes.status === 401) {
-        setErrorMessage('You are unauthorized');
       } else {
-        const data = await apiRes.json();
-        if (Array.isArray(data) && data.every(isIssue)) {
-          const { formErrors, fieldErrors } = parseIssues(data);
-          if (formErrors.length) setErrorMessage(formErrors[0]);
-          showFieldErrors(hookForm, fieldErrors);
-        } else {
-          setErrorMessage(getErrorMessageOrThrow(data));
-        }
+        setErrorMessage(await getResErrorMessageOrThrow(apiRes, hookForm));
       }
     } catch (error) {
-      logger.error(error?.toString() ?? 'Unexpected error', error);
-      setErrorMessage('Something went wrong, please try again later');
+      setErrorMessage(getUnknownErrorMessage(error));
     }
   };
 
