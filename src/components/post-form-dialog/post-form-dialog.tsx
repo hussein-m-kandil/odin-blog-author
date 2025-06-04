@@ -4,7 +4,7 @@ import React from 'react';
 import { Post } from '@/types';
 import { PostForm } from '../post-form';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, Edit } from 'lucide-react';
+import { PenSquare, Trash2, Edit } from 'lucide-react';
 import { DeletePostForm } from '../delete-post-form';
 import { useDialog } from '@/contexts/dialog-context/';
 
@@ -61,12 +61,13 @@ export function PostFormDialog({
     </Button>
   ) : (
     <Button
+      size='icon'
       type='button'
       title={title}
       variant='outline'
-      onClick={showPostFormDialog}
-      aria-label={title}>
-      <Plus className='size-5 stroke-3' />
+      aria-label={title}
+      onClick={showPostFormDialog}>
+      <PenSquare />
     </Button>
   );
 }
