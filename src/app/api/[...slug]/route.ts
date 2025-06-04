@@ -1,4 +1,3 @@
-import logger from '@/lib/logger';
 import {
   signoutAndRedirect,
   signinAndRedirect,
@@ -7,15 +6,7 @@ import {
 } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { NextRequest } from 'next/server';
-
-if (!process.env.API_BASE_URL || !process.env.NEXT_PUBLIC_API_BASE_URL) {
-  const error = 'Public/Private API base URL is not defined';
-  logger.error(error, {
-    ...process.env,
-    API_BASE_URL: process.env.API_BASE_URL,
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  });
-}
+import logger from '@/lib/logger';
 
 type RouteContext = { params: Promise<{ slug: string[] }> };
 
