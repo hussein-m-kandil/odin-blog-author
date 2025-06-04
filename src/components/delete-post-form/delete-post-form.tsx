@@ -1,5 +1,6 @@
 import React from 'react';
 import { Post } from '@/types';
+import { useRouter } from 'next/navigation';
 import { P } from '@/components/typography/p';
 import { Button } from '@/components/ui/button';
 import { Loader2, PanelLeftClose, Trash2 } from 'lucide-react';
@@ -19,6 +20,7 @@ export function DeletePostForm({
 }) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
+  const router = useRouter();
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -28,7 +30,8 @@ export function DeletePostForm({
         method: 'DELETE',
       });
       if (apiRes.ok) {
-        return onSuccess();
+        onSuccess();
+        router.replace('/blog');
       } else {
         setErrorMessage(await getResErrorMessageOrThrow(apiRes));
       }
