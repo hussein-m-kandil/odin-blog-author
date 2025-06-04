@@ -2,16 +2,19 @@
 
 import React from 'react';
 import { Post } from '@/types';
+import { cn } from '@/lib/utils';
 import { PostForm } from '../post-form';
 import { Button } from '@/components/ui/button';
-import { PenSquare, Trash2, Edit } from 'lucide-react';
 import { DeletePostForm } from '../delete-post-form';
+import { PenSquare, Trash2, Edit } from 'lucide-react';
 import { useDialog } from '@/contexts/dialog-context/';
 
 export function PostFormDialog({
-  post,
   showDeleteForm = false,
-}: {
+  className,
+  post,
+  ...triggerProps
+}: React.ComponentProps<'button'> & {
   post?: Post;
   showDeleteForm?: boolean;
 }) {
@@ -50,23 +53,29 @@ export function PostFormDialog({
 
   return post ? (
     <Button
+      onClick={showPostFormDialog}
+      className={cn(
+        'has-[>svg]:px-0 hover:no-underline py-0',
+        'h-auto w-full justify-start font-normal',
+        toDelete && 'text-destructive',
+        className
+      )}
       type='button'
       variant='link'
-      onClick={showPostFormDialog}
-      className={`${
-        toDelete ? 'text-destructive' : ''
-      } has-[>svg]:px-0 hover:no-underline py-0 h-auto w-full justify-start font-normal`}>
+      {...triggerProps}>
       {toDelete ? <Trash2 /> : <Edit />}
       {verb} <span className='sr-only'>{post.title}</span>
     </Button>
   ) : (
     <Button
+      onClick={showPostFormDialog}
+      className={className}
+      aria-label={title}
+      title={title}
       size='icon'
       type='button'
-      title={title}
       variant='outline'
-      aria-label={title}
-      onClick={showPostFormDialog}>
+      {...triggerProps}>
       <PenSquare />
     </Button>
   );
