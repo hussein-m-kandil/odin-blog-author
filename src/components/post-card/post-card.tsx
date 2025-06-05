@@ -37,7 +37,9 @@ export function PostCard({ post, isMutable = false }: PostCardProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className='hover:underline truncate' title={post.title}>
+        <CardTitle
+          title={post.title}
+          className='hover:underline truncate outline-ring-50 dark:outline-foreground outline-offset-3 has-focus-visible:outline-2'>
           <Link href={postUrl}>{post.title}</Link>
         </CardTitle>
         <CardDescription>
@@ -90,7 +92,7 @@ export function PostCard({ post, isMutable = false }: PostCardProps) {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <Lead className='line-clamp-3'>{post.content}</Lead>
+        <Lead className='line-clamp-3 font-light'>{post.content}</Lead>
       </CardContent>
       <CardFooter className='flex items-center justify-between'>
         <Muted className='italic'>
