@@ -1,8 +1,8 @@
 import {
-  signoutAndRedirect,
-  signinAndRedirect,
-  AUTH_COOKIE_KEY,
+  signin,
   isAuthRes,
+  AUTH_COOKIE_KEY,
+  signoutAndRedirect,
 } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { NextRequest } from 'next/server';
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
         return Response.json({ error: 'Invalid operation' }, { status: 409 });
       }
       logger.info(`Signing ${signupEndpoint ? 'up' : 'in'}...`, authRes);
-      return signinAndRedirect(authRes, req);
+      return signin(authRes, req);
     }
 
     return apiRes;

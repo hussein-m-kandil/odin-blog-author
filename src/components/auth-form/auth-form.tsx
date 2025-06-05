@@ -19,6 +19,7 @@ import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
 import { H2 } from '../typography/h2';
 import { z } from 'zod';
+import { toast } from 'sonner';
 
 export function AuthForm({ formType }: AuthFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
@@ -33,18 +34,26 @@ export function AuthForm({ formType }: AuthFormProps) {
     try {
       const endpoint = isSignupForm ? '/users' : '/auth/signin';
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const toastId = toast.loading(
+        `Signing ${isSignupForm ? 'up' : 'in'}...`,
+        { dismissible: true }
+      );
       const apiRes = await fetch(`${apiBaseUrl}${endpoint}`, {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
         method: 'POST',
       });
+      toast.dismiss(toastId);
       if (apiRes.ok) {
         // This block is just a fallback: the API route handler should redirect the user
         hookForm.reset();
         setErrorMessage('');
-        if (apiRes.redirected) {
-          window.location.href = apiRes.url;
-        } else router.replace('/');
+        router.replace('/');
+        toast.success(`Hello, ${values.username}!`, {
+          description: `You have signed ${
+            isSignupForm ? 'up' : 'in'
+          } successfully`,
+        });
       } else {
         setErrorMessage(await getResErrorMessageOrThrow(apiRes, hookForm));
       }
@@ -73,7 +82,7 @@ export function AuthForm({ formType }: AuthFormProps) {
         formSchema={signupFormSchema}
         formAttrs={signupFormAttrs}
         onSubmit={handleSubmit}
-        submitterLabel={{ idle: 'Sign up', submitting: 'Signing up' }}
+        submitterLabel={{ idle: 'Sign up', submitting: 'Signing up...' }}
       />
     );
   } else {
@@ -88,7 +97,7 @@ export function AuthForm({ formType }: AuthFormProps) {
         formSchema={signinFormSchema}
         formAttrs={signinFormAttrs}
         onSubmit={handleSubmit}
-        submitterLabel={{ idle: 'Sign in', submitting: 'Signing in' }}
+        submitterLabel={{ idle: 'Sign in', submitting: 'Signing in...' }}
       />
     );
   }

@@ -63,15 +63,13 @@ export function signoutAndRedirect(
   });
 }
 
-export function signinAndRedirect(
-  authRes: AuthRes,
-  req: NextRequest,
-  redirectRelativeUrl = '/'
-) {
-  const authCookie = createAuthCookie(authRes.token);
-  const res = NextResponse.redirect(new URL(redirectRelativeUrl, req.nextUrl), {
-    headers: { 'set-cookie': authCookie },
-    status: 303,
+export function signin(authRes: AuthRes, req: NextRequest) {
+  const res = new NextResponse(JSON.stringify(authRes), {
+    headers: {
+      'set-cookie': createAuthCookie(authRes.token),
+      'Content-Type': 'application/json',
+    },
+    status: 200,
   });
   return getResWithXHeaders(req, res);
 }
