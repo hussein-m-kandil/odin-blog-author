@@ -6,6 +6,7 @@ import { Lead } from '@/components/typography/lead';
 import { H2 } from '@/components/typography/h2';
 import { formatDate } from '@/lib/utils';
 import { Post } from '@/types';
+import { Separator } from '@/components/ui/separator';
 
 export default async function BlogPost({
   params,
@@ -36,13 +37,13 @@ export default async function BlogPost({
   return (
     <main className='max-w-2xl mx-auto my-6 px-3'>
       {userId === post.authorId && (
-        <div className='text-center mb-6'>
+        <div className='flex justify-center space-x-4 h-6 mb-6'>
           <PostFormDialog {...commonTriggerProps} />
-          <span className='inline-block mx-2'>{' | '}</span>
+          <Separator orientation='vertical' />
           <PostFormDialog {...commonTriggerProps} showDeleteForm={true} />
         </div>
       )}
-      <H2 className='text-center text-2xl font-normal'>{post.title}</H2>
+      <H2 className='text-center text-2xl'>{post.title}</H2>
       <div className='flex items-center justify-between italic'>
         <Muted>{post.published ? 'Public' : 'Private'}</Muted>
         <Muted>Last updated at {formatDate(post.createdAt)}</Muted>
