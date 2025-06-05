@@ -53,13 +53,10 @@ export const getResWithXHeaders = (
   return res;
 };
 
-export function signoutAndRedirect(
-  req: NextRequest,
-  redirectRelativeUrl = '/'
-) {
-  return NextResponse.redirect(new URL(redirectRelativeUrl, req.nextUrl), {
+export function signout() {
+  return new NextResponse(null, {
     headers: { 'Set-Cookie': createAuthCookie('', 0) }, // Clear auth cookie
-    status: 303,
+    status: 200,
   });
 }
 

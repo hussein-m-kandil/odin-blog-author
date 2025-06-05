@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
 import {
-  signoutAndRedirect,
-  getResWithXHeaders,
   getSignedInUser,
+  createAuthCookie,
+  getResWithXHeaders,
 } from './lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
 
 const authUrls = ['/signin', '/signup'];
 
@@ -13,7 +13,10 @@ export default async function middleware(req: NextRequest) {
   const isAuthUrl = authUrls.includes(req.nextUrl.pathname);
 
   if (!user && !isAuthUrl) {
-    return signoutAndRedirect(req, '/signin');
+    return NextResponse.redirect(new URL('/signin', req.nextUrl), {
+      headers: { 'Set-Cookie': createAuthCookie('', 0) }, // Clear auth cookie, if exist
+      status: 303,
+    });
   }
 
   if (user && isAuthUrl) {

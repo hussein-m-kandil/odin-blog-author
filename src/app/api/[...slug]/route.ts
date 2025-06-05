@@ -1,9 +1,4 @@
-import {
-  signin,
-  isAuthRes,
-  AUTH_COOKIE_KEY,
-  signoutAndRedirect,
-} from '@/lib/auth';
+import { signin, isAuthRes, AUTH_COOKIE_KEY, signout } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { NextRequest } from 'next/server';
 import logger from '@/lib/logger';
@@ -51,7 +46,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
 
     if (/\/signout$/.test(endpoint)) {
       revalidatePath('/', 'layout');
-      return signoutAndRedirect(req);
+      return signout();
     }
 
     const apiRes = await handleRequest(req, { params });
