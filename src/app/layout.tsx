@@ -2,6 +2,7 @@ import './globals.css';
 import { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
 import { DialogProvider } from '@/contexts/dialog-context/';
+import { Toaster } from '@/components/ui/sonner';
 
 export const metadata: Metadata = {
   title: { template: '%s | Odin Blog Author', default: 'Odin Blog Author' },
@@ -23,6 +24,7 @@ export default async function RootLayout({
           defaultTheme='system'
           disableTransitionOnChange>
           <DialogProvider>{children}</DialogProvider>
+          <Toaster expand visibleToasts={3} richColors closeButton />
         </ThemeProvider>
       </body>
     </html>
