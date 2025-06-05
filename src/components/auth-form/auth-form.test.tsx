@@ -1,18 +1,9 @@
 import { signinFormAttrs, signupFormAttrs } from './auth-form.data';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { FormType } from './auth-form.types';
 import { AuthForm } from './auth-form';
-
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-    back: vi.fn(),
-  }),
-}));
 
 const setup = async (formType: FormType) => {
   const data =
