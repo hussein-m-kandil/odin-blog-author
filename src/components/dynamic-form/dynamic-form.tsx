@@ -18,8 +18,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PasswordInput } from '@/components/password-input';
 import { DynamicFormProps } from './dynamic-form.types';
-import { Loader2 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
@@ -30,6 +30,7 @@ export function DynamicForm({
   formAttrs,
   className,
   onSubmit,
+  children,
   ...formProps
 }: DynamicFormProps) {
   const hookForm = useForm<z.infer<typeof formSchema>>({
@@ -41,16 +42,6 @@ export function DynamicForm({
       ])
     ),
   });
-
-  const { setFocus } = hookForm;
-
-  const getFirstFieldName = React.useCallback(() => {
-    return Object.keys(formAttrs)[0];
-  }, [formAttrs]);
-
-  React.useEffect(() => {
-    setFocus(getFirstFieldName());
-  }, [setFocus, getFirstFieldName]);
 
   const handleSubmit = hookForm.handleSubmit((...args) => {
     return onSubmit(hookForm, ...args);
@@ -68,18 +59,22 @@ export function DynamicForm({
         {...formProps}
         onSubmit={handleSubmit}
         className={cn('space-y-5', className)}>
-        {Object.entries(formAttrs).map(([name, attrs]) => (
+        {Object.entries(formAttrs).map(([name, attrs], i) => (
           <FormField
             key={name}
             control={hookForm.control}
             name={name}
             render={({ field }) => {
               if (attrs.type === 'checkbox') delete field.value;
-              const fieldProps = { ...field, placeholder: attrs.placeholder };
+              const fieldProps = {
+                ...field,
+                autoFocus: i === 0,
+                placeholder: attrs.placeholder,
+              };
               return (
                 <FormItem>
                   {attrs.type === 'checkbox' ? (
-                    <FormItem className='flex flex-row justify-center items-center gap-2'>
+                    <FormItem className='flex flex-row-reverse justify-end gap-2'>
                       <FormControl>
                         <Checkbox
                           {...field}
@@ -119,6 +114,7 @@ export function DynamicForm({
             }}
           />
         ))}
+        {children}
         <Button
           type='submit'
           disabled={
