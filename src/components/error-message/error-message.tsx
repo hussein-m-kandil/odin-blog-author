@@ -6,6 +6,7 @@ export function ErrorMessage({
   children,
   ...props
 }: React.ComponentProps<'p'>) {
+  if (!children) return null;
   return (
     <P {...props} className={cn('text-destructive text-center', className)}>
       {children}
