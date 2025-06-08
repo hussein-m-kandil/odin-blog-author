@@ -17,9 +17,10 @@ function getEndpointFromPathname(pathname: string) {
 async function handleRequest(req: NextRequest) {
   const isMutation = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method);
   try {
+    const search = req.nextUrl.search;
     const endpoint = getEndpointFromPathname(req.nextUrl.pathname);
     const Authorization = req.cookies.get(AUTH_COOKIE_KEY)?.value || '';
-    const apiRes = await fetch(`${apiBaseUrl}${endpoint}`, {
+    const apiRes = await fetch(`${apiBaseUrl}${endpoint}${search}`, {
       headers: { 'Content-Type': 'application/json', Authorization },
       body: isMutation ? await req.text() : undefined,
       method: req.method,

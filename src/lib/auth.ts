@@ -74,12 +74,18 @@ export function signin(authRes: AuthRes, req: NextRequest) {
 export async function authedFetch(pathname: string, init?: RequestInit) {
   const headerStore = await headers();
   const reqInit = init || { headers: {} };
-  const currentUrl = throwFalsyReturnTruthy(
-    headerStore.get('referer') || headerStore.get(URL_HEADER_KEY)
+  const currentUrl = new URL(
+    throwFalsyReturnTruthy(
+      headerStore.get(URL_HEADER_KEY) || headerStore.get('referer')
+    )
   );
   const apiRes = await fetch(
-    new URL(`${PUBLIC_API_BASE_URL}${pathname}`, new URL(currentUrl).origin),
+    new URL(
+      `${PUBLIC_API_BASE_URL}${pathname}${currentUrl.search}`,
+      currentUrl.origin
+    ),
     {
+      cache: 'no-store',
       ...reqInit,
       headers: {
         // Forward HTTP headers (including cookies) from incoming client request
