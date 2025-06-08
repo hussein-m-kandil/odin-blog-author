@@ -1,18 +1,60 @@
 'use client';
 
 import React from 'react';
-import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
+import {
+  DynamicForm,
+  DynamicFormSubmitHandler,
+} from '@/components/dynamic-form';
+import {
+  getResErrorMessageOrThrow,
+  getUnknownErrorMessage,
+  isObject,
+} from '@/lib/utils';
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
-import { DynamicForm, DynamicFormSubmitHandler } from '../dynamic-form';
+import { ErrorMessage } from '@/components/error-message';
+import { Categories } from '@/components/categories';
 import { PostFormProps } from './post-form.types';
+import { Combobox } from '@/components/combobox';
+import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
-import { P } from '../typography/p';
+import { Plus } from 'lucide-react';
 import { Post } from '@/types';
 import { z } from 'zod';
 
+const CATEGORIES_MAX_NUM = 7;
+
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
+  const [allCategories, setAllCategories] = React.useState<string[]>([]);
+  const [categories, setCategories] = React.useState<string[]>(
+    post ? post.categories.map((c) => c.categoryName) : []
+  );
+  const [categoriesError, setCategoriesError] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
+
+  React.useEffect(() => {
+    fetch(`${apiBaseUrl}/posts/categories`)
+      .then((apiRes) => {
+        if (apiRes.ok) return apiRes.json();
+        throw apiRes;
+      })
+      .then((cats: { name: string }[]) => {
+        if (
+          Array.isArray(cats) &&
+          cats.length > 0 &&
+          isObject(cats[0]) &&
+          typeof cats[0].name === 'string'
+        ) {
+          setAllCategories(cats.map((c) => c.name));
+        }
+      })
+      .catch((error) => {
+        getUnknownErrorMessage(error);
+        setErrorMessage('Could not fetch any categories');
+      });
+  }, []);
 
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
@@ -21,12 +63,12 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
     z.infer<typeof postFormSchema>
   > = async (hookForm, values) => {
     try {
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+      const postValues = { ...values, categories };
       const apiRes = await fetch(
         `${apiBaseUrl}/posts${post ? '/' + post.id : ''}`,
         {
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(values),
+          body: JSON.stringify(postValues),
           method: post ? 'PUT' : 'POST',
         }
       );
@@ -59,8 +101,54 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
           post
             ? { idle: 'Update Post', submitting: 'Updating...' }
             : { idle: 'Create Post', submitting: 'Creating...' }
-        }
-      />
+        }>
+        <div>
+          <div className='flex justify-between items-center space-x-2'>
+            <Combobox
+              triggerContent={
+                <>
+                  Add Category
+                  <Plus className='opacity-50' />
+                </>
+              }
+              searchValidator={(value: string) => /^\w*$/.test(value)}
+              onSearch={(value) => {
+                return value
+                  ? allCategories.filter((c) =>
+                      new RegExp(`^${value}`, 'i').test(c)
+                    )
+                  : [];
+              }}
+              onSelect={(category) => {
+                if (categories.length < CATEGORIES_MAX_NUM) {
+                  setCategories((cats) => {
+                    return cats.find(
+                      (c) => c.toUpperCase() === category.toUpperCase()
+                    )
+                      ? cats
+                      : [...cats, category];
+                  });
+                } else {
+                  setCategoriesError(
+                    'You have reached the maximum number of categories'
+                  );
+                }
+              }}
+            />
+            <Categories
+              categories={categories}
+              className='justify-end'
+              onRemove={(name) => {
+                setCategories((cats) => cats.filter((c) => c !== name));
+                setCategoriesError('');
+              }}
+            />
+          </div>
+          <ErrorMessage className='[&:not(:first-child)]:mt-2 mt-2'>
+            {categoriesError}
+          </ErrorMessage>
+        </div>
+      </DynamicForm>
     </>
   );
 }

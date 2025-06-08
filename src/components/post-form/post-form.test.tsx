@@ -1,4 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import logger from '@/lib/logger';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   render,
   screen,
@@ -11,18 +12,19 @@ import { PostForm } from './post-form';
 import { post } from '@/test-utils';
 import { Post } from '@/types';
 
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-    back: vi.fn(),
-  }),
-}));
-
 const onSuccessMock = vi.fn();
 
+const logErrorMock = vi.spyOn(logger, 'error');
 const fetchSpy = vi.spyOn(window, 'fetch');
+
+beforeEach(() => {
+  logErrorMock.mockImplementation(vi.fn());
+  fetchSpy.mockImplementation(() => {
+    return new Promise((resolve) =>
+      setTimeout(() => resolve(Response.json(null, { status: 200 })), 50)
+    );
+  });
+});
 
 afterEach(vi.resetAllMocks);
 
@@ -89,10 +91,10 @@ describe(`<PostForm />`, () => {
   });
 
   it('should handle promise rejection and not call `onSuccess` function', async () => {
+    const { data, user } = await setup(post);
     fetchSpy.mockImplementationOnce(
       () => new Promise((_, reject) => setTimeout(reject, 50))
     );
-    const { data, user } = await setup(post);
     await user.click(screen.getByRole('button', data.submitterOpts));
     expect(
       await screen.findByRole('button', data.submittingOpts)
@@ -106,6 +108,7 @@ describe(`<PostForm />`, () => {
 
   it('should show response error and not call `onSuccess` function', async () => {
     const error = 'Test error';
+    const { data, user } = await setup(post);
     fetchSpy.mockImplementationOnce(
       () =>
         new Promise((resolve) =>
@@ -115,7 +118,6 @@ describe(`<PostForm />`, () => {
           )
         )
     );
-    const { data, user } = await setup(post);
     await user.click(screen.getByRole('button', data.submitterOpts));
     expect(
       await screen.findByRole('button', data.submittingOpts)
@@ -129,6 +131,7 @@ describe(`<PostForm />`, () => {
 
   it('should show unauthorized error and not call `onSuccess` function', async () => {
     const error = 'Test error';
+    const { data, user } = await setup(post);
     fetchSpy.mockImplementationOnce(
       () =>
         new Promise((resolve) =>
@@ -138,7 +141,6 @@ describe(`<PostForm />`, () => {
           )
         )
     );
-    const { data, user } = await setup(post);
     await user.click(screen.getByRole('button', data.submitterOpts));
     expect(onSuccessMock).toHaveBeenCalledTimes(0);
     expect(
@@ -151,13 +153,13 @@ describe(`<PostForm />`, () => {
   });
 
   it('should call `onSuccess` function', async () => {
+    const { data, user } = await setup(post);
     fetchSpy.mockImplementationOnce(
       () =>
         new Promise((resolve) =>
           setTimeout(() => resolve(new Response(null, { status: 204 })), 50)
         )
     );
-    const { data, user } = await setup(post);
     await user.click(screen.getByRole('button', data.submitterOpts));
     expect(onSuccessMock).toHaveBeenCalledTimes(0);
     expect(
