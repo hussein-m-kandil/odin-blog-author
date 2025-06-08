@@ -1,12 +1,13 @@
 import { PostFormDialog } from '@/components/post-form-dialog';
 import { ErrorMessage } from '@/components/error-message';
 import { Muted } from '@/components/typography/muted';
+import { Separator } from '@/components/ui/separator';
+import { Categories } from '@/components/categories';
 import { authedFetch, getUserId } from '@/lib/auth';
 import { Lead } from '@/components/typography/lead';
 import { H2 } from '@/components/typography/h2';
 import { formatDate } from '@/lib/utils';
 import { Post } from '@/types';
-import { Separator } from '@/components/ui/separator';
 
 export default async function BlogPost({
   params,
@@ -35,20 +36,25 @@ export default async function BlogPost({
   };
 
   return (
-    <main className='max-w-2xl mx-auto my-6 px-3'>
+    <main className='max-w-2xl px-3 mx-auto'>
       {userId === post.authorId && (
-        <div className='flex justify-center space-x-4 h-6 mb-6'>
+        <div className='flex justify-center space-x-4 h-6 mt-4'>
           <PostFormDialog {...commonTriggerProps} />
           <Separator orientation='vertical' />
           <PostFormDialog {...commonTriggerProps} showDeleteForm={true} />
         </div>
       )}
-      <H2 className='text-center text-2xl'>{post.title}</H2>
-      <div className='flex items-center justify-between italic'>
-        <Muted>{post.published ? 'Public' : 'Private'}</Muted>
-        <Muted>Last updated at {formatDate(post.createdAt)}</Muted>
+      <div className='mt-2 space-y-12'>
+        <div>
+          <H2 className='text-center text-2xl'>{post.title}</H2>
+          <div className='flex items-center justify-between italic'>
+            <Muted>{post.published ? 'Public' : 'Private'}</Muted>
+            <Muted>Last updated at {formatDate(post.createdAt)}</Muted>
+          </div>
+        </div>
+        <Lead className='text-foreground font-light'>{post.content}</Lead>
+        <Categories categories={post.categories} className='justify-end' />
       </div>
-      <Lead className='mt-6 text-foreground font-light'>{post.content}</Lead>
     </main>
   );
 }
