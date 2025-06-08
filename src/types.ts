@@ -14,7 +14,9 @@ export interface AuthRes {
 }
 
 export interface Category {
-  name: string;
+  id: string;
+  postId: string;
+  categoryName: string;
 }
 
 export interface Vote {

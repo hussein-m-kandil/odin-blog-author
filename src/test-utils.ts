@@ -22,7 +22,13 @@ export const post: Post = {
   id: 'blahblah123post',
   authorId: author.id,
   content: 'Just for testing...',
-  categories: [{ name: 'Software' }],
+  categories: [
+    {
+      id: 'blahblah123category',
+      postId: 'blahblah123post',
+      categoryName: 'Software',
+    },
+  ],
   comments: [
     {
       author,
