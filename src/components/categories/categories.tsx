@@ -3,12 +3,14 @@ import { Category } from '@/components/category';
 import { cn } from '@/lib/utils';
 
 export function Categories({
+  categoryCN,
   categories,
   className,
   onRemove,
 }: React.ComponentProps<'ul'> & {
   categories: string[] | CategoryType[];
   onRemove?: (name: string) => void;
+  categoryCN?: string;
 }) {
   if (!categories || categories.length < 0) return null;
 
@@ -26,7 +28,7 @@ export function Categories({
       )}>
       {strCats.map((c) => (
         <li key={c}>
-          <Category name={c} onRemove={onRemove} />
+          <Category name={c} onRemove={onRemove} className={categoryCN} />
         </li>
       ))}
     </ul>
