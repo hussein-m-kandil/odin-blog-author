@@ -9,17 +9,10 @@ import {
   CardContent,
   CardDescription,
 } from '@/components/ui/card';
-import {
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { BookOpen, EllipsisVertical, Lock, Globe } from 'lucide-react';
+import { OptionsMenu } from '@/components/options-menu';
 import { Muted } from '@/components/typography/muted';
 import { PostFormDialog } from '../post-form-dialog';
+import { BookOpen, Lock, Globe } from 'lucide-react';
 import { Lead } from '@/components/typography/lead';
 import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/utils';
@@ -60,35 +53,26 @@ export function PostCard({ post, isMutable = false }: PostCardProps) {
           </Link>
         </CardDescription>
         <CardAction>
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              aria-label='Open action menu'
-              className='focus-visible:outline-0 text-muted-foreground hover:text-foreground focus-visible:text-foreground'>
-              <EllipsisVertical />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Post Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link
-                  href={postUrl}
-                  className='cursor-default flex w-full items-center gap-2'>
-                  <BookOpen /> Read{' '}
-                  <span className='sr-only'>{post.title}</span>
-                </Link>
-              </DropdownMenuItem>
-              {isMutable && (
-                <>
-                  <DropdownMenuItem>
-                    <PostFormDialog post={post} />
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <PostFormDialog post={post} showDeleteForm={true} />
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <OptionsMenu
+            menuLabel='Post options menu'
+            triggerLabel='Open post options menu'
+            menuItems={[
+              <Link
+                href={postUrl}
+                key={`read-${post.id}`}
+                className='cursor-default flex w-full items-center gap-2'>
+                <BookOpen /> Read <span className='sr-only'>{post.title}</span>
+              </Link>,
+              isMutable && [
+                <PostFormDialog post={post} key={`update-${post.id}`} />,
+                <PostFormDialog
+                  post={post}
+                  showDeleteForm={true}
+                  key={`delete-${post.id}`}
+                />,
+              ],
+            ].flat()}
+          />
         </CardAction>
       </CardHeader>
       <CardContent>

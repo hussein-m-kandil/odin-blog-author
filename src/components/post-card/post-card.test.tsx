@@ -32,20 +32,20 @@ describe('<PostCard />', () => {
         </div>
       </DialogProvider>
     );
-    await user.click(screen.getByRole('button', { name: /action/i }));
-    expect(screen.getByText(/action/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /open/i }));
     expect(
-      screen.getByRole('button', { name: /update|edit/i })
+      screen.getByRole('menuitem', { name: /delete/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('menuitem', { name: /update|edit/i })
     ).toBeInTheDocument();
   });
 
   it('should show action button without mutation actions for an immutable post', async () => {
     const user = userEvent.setup();
     render(<PostCard post={post} isMutable={false} />);
-    await user.click(screen.getByRole('button', { name: /action/i }));
-    expect(screen.getByText(/action/i)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /delete/i })).toBeNull();
-    expect(screen.queryByRole('button', { name: /update|edit/i })).toBeNull();
+    await user.click(screen.getByRole('button', { name: /open/i }));
+    expect(screen.queryByRole('menuitem', { name: /delete/i })).toBeNull();
+    expect(screen.queryByRole('menuitem', { name: /update|edit/i })).toBeNull();
   });
 });
