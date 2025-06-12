@@ -12,7 +12,6 @@ export const URL_HEADER_KEY = 'x-url';
 
 if (!API_BASE_URL || !PUBLIC_API_BASE_URL) {
   logger.error('Public or private API base URL is not defined', {
-    ...process.env,
     API_BASE_URL: API_BASE_URL,
     NEXT_PUBLIC_API_BASE_URL: PUBLIC_API_BASE_URL,
   });
