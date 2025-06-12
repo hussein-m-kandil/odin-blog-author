@@ -1,3 +1,5 @@
+export type ID = string | number;
+
 export interface User {
   id: string;
   isAdmin: boolean;
