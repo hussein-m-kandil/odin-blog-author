@@ -58,7 +58,7 @@ describe('<DynamicForm />', () => {
 
   const onSubmit = vi.fn(handleSubmit);
 
-  afterEach(() => vi.resetAllMocks());
+  afterEach(vi.clearAllMocks);
 
   const getSubmitBtn = (label = 'submit') => {
     return screen.getByRole('button', {

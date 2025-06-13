@@ -14,7 +14,7 @@ const onSuccessMock = vi.fn();
 
 const fetchSpy = vi.spyOn(window, 'fetch');
 
-afterEach(vi.resetAllMocks);
+afterEach(vi.clearAllMocks);
 
 describe('<DeletePostForm />', () => {
   it('should be identified by the post title', () => {
@@ -73,9 +73,6 @@ describe('<DeletePostForm />', () => {
       />
     );
     await user.click(screen.getByRole('button', { name: /delete/i }));
-    expect(
-      await screen.findByRole('button', { name: /deleting/i })
-    ).toBeInTheDocument();
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', { name: /deleting/i })
     );
@@ -105,9 +102,6 @@ describe('<DeletePostForm />', () => {
       />
     );
     await user.click(screen.getByRole('button', { name: /delete/i }));
-    expect(
-      await screen.findByRole('button', { name: /deleting/i })
-    ).toBeInTheDocument();
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', { name: /deleting/i })
     );
@@ -137,14 +131,11 @@ describe('<DeletePostForm />', () => {
       />
     );
     await user.click(screen.getByRole('button', { name: /delete/i }));
-    expect(onCancelMock).toHaveBeenCalledTimes(0);
-    expect(onSuccessMock).toHaveBeenCalledTimes(0);
-    expect(
-      await screen.findByRole('button', { name: /deleting/i })
-    ).toBeInTheDocument();
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', { name: /deleting/i })
     );
+    expect(onCancelMock).toHaveBeenCalledTimes(0);
+    expect(onSuccessMock).toHaveBeenCalledTimes(0);
     expect(await screen.findByText(/unauthorized/i)).toBeInTheDocument();
   });
 

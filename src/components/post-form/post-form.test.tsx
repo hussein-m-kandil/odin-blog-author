@@ -1,5 +1,4 @@
-import logger from '@/lib/logger';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   render,
   screen,
@@ -13,20 +12,15 @@ import { post } from '@/test-utils';
 import { Post } from '@/types';
 
 const onSuccessMock = vi.fn();
+const fetchMock = () => {
+  return new Promise<Response>((resolve) =>
+    setTimeout(() => resolve(Response.json(null, { status: 200 })), 50)
+  );
+};
 
-const logErrorMock = vi.spyOn(logger, 'error');
-const fetchSpy = vi.spyOn(window, 'fetch');
+const fetchSpy = vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
 
-beforeEach(() => {
-  logErrorMock.mockImplementation(vi.fn());
-  fetchSpy.mockImplementation(() => {
-    return new Promise((resolve) =>
-      setTimeout(() => resolve(Response.json(null, { status: 200 })), 50)
-    );
-  });
-});
-
-afterEach(vi.resetAllMocks);
+afterEach(vi.clearAllMocks);
 
 const setup = async (post?: Post) => {
   const data = {
@@ -96,9 +90,6 @@ describe(`<PostForm />`, () => {
       () => new Promise((_, reject) => setTimeout(reject, 50))
     );
     await user.click(screen.getByRole('button', data.submitterOpts));
-    expect(
-      await screen.findByRole('button', data.submittingOpts)
-    ).toBeInTheDocument();
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', data.submittingOpts)
     );
@@ -119,9 +110,6 @@ describe(`<PostForm />`, () => {
         )
     );
     await user.click(screen.getByRole('button', data.submitterOpts));
-    expect(
-      await screen.findByRole('button', data.submittingOpts)
-    ).toBeInTheDocument();
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', data.submittingOpts)
     );
@@ -142,24 +130,15 @@ describe(`<PostForm />`, () => {
         )
     );
     await user.click(screen.getByRole('button', data.submitterOpts));
-    expect(onSuccessMock).toHaveBeenCalledTimes(0);
-    expect(
-      await screen.findByRole('button', data.submittingOpts)
-    ).toBeInTheDocument();
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', data.submittingOpts)
     );
+    expect(onSuccessMock).toHaveBeenCalledTimes(0);
     expect(await screen.findByText(/unauthorized/i)).toBeInTheDocument();
   });
 
   it('should call `onSuccess` function', async () => {
     const { data, user } = await setup(post);
-    fetchSpy.mockImplementationOnce(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(() => resolve(new Response(null, { status: 204 })), 50)
-        )
-    );
     await user.click(screen.getByRole('button', data.submitterOpts));
     expect(onSuccessMock).toHaveBeenCalledTimes(0);
     expect(
