@@ -3,6 +3,9 @@ const log = (
   message?: unknown,
   metadata?: unknown
 ) => {
+  if (process && process.env && process.env.NODE_ENV === 'test') {
+    return; // Ignore logs in the test environment
+  }
   const timestamp = new Date()
     .toISOString()
     .replace('T', '|')
