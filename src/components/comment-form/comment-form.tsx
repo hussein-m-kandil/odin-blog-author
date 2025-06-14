@@ -11,6 +11,20 @@ import { cn } from '@/lib/utils';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
+export interface CommentFormPropsBase
+  extends Omit<React.ComponentProps<'form'>, 'onSubmit'> {
+  onSuccess?: () => void;
+}
+
+export interface CreateCommentFormProps extends CommentFormPropsBase {
+  authorId: ID;
+  postId: ID;
+}
+export interface UpdateCommentFormProps extends CommentFormPropsBase {
+  comment: Comment;
+  onCancel: () => void;
+}
+
 export function CommentForm({
   comment,
   postId,
@@ -18,12 +32,7 @@ export function CommentForm({
   className,
   onSuccess,
   ...formProps
-}: Omit<React.ComponentProps<'form'>, 'onSubmit'> & {
-  onSuccess?: () => void;
-  comment?: Comment;
-  authorId?: ID;
-  postId?: ID;
-}) {
+}: CreateCommentFormProps | UpdateCommentFormProps) {
   if ((!authorId || !postId) && !comment) {
     throw Error(
       'Missing either a `comment` prop or `postId` & `authorId` props'
@@ -88,21 +97,34 @@ export function CommentForm({
           'resize-none min-h-17 h-17'
         )}
       />
-      <Button
-        type='submit'
-        variant='outline'
-        className={cn(
-          'focus-visible:ring-0 focus-visible:underline underline-offset-2',
-          'h-auto text-md rounded-l-none border-l-0'
-        )}>
-        {submitting ? (
-          <>
-            <Loader2 className='animate-spin' /> Commenting
-          </>
-        ) : (
-          'Comment'
+      <span className='flex'>
+        {comment && (
+          <Button
+            type='button'
+            variant='outline'
+            className={cn(
+              'focus-visible:ring-0 focus-visible:underline underline-offset-2',
+              'h-auto text-md rounded-none border-x-0'
+            )}>
+            Cancel
+          </Button>
         )}
-      </Button>
+        <Button
+          type='submit'
+          variant='outline'
+          className={cn(
+            'focus-visible:ring-0 focus-visible:underline underline-offset-2',
+            'h-auto text-md rounded-l-none border-l-0'
+          )}>
+          {submitting ? (
+            <>
+              <Loader2 className='animate-spin' /> Commenting
+            </>
+          ) : (
+            'Comment'
+          )}
+        </Button>
+      </span>
     </form>
   );
 }

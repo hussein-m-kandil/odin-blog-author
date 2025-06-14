@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Comment } from './comment';
 import { post } from '@/test-utils';
@@ -59,5 +59,13 @@ describe('<Comments />', () => {
     await user.click(screen.getByRole('button', { name: optsRegex }));
     expect(screen.getByRole('button', { name: /delete/i })).toBeVisible();
     expect(screen.queryByRole('button', { name: /update/i })).toBeNull();
+  });
+
+  it('should show update comment form on update, and hide it after update', async () => {
+    const user = userEvent.setup();
+    render(<Comment {...props} currentUserId={authorId} />);
+    await user.click(screen.getByRole('button', { name: optsRegex }));
+    await user.click(screen.getByRole('button', { name: /update/i }));
+    expect(screen.getByRole('form', { name: /update/i })).toBeInTheDocument();
   });
 });

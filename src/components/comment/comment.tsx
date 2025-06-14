@@ -3,6 +3,7 @@
 import React from 'react';
 import { OptionsMenu } from '@/components/options-menu';
 import { Comment as CommentType, ID, Post } from '@/types';
+import { CommentForm } from '@/components/comment-form';
 import { cn } from '@/lib/utils';
 
 export function Comment({
@@ -16,7 +17,14 @@ export function Comment({
   currentUserId?: ID;
   post: Post;
 }) {
-  return (
+  const [state, setState] = React.useState<'idle' | 'updating' | 'deleting'>(
+    'idle'
+  );
+
+  return state === 'updating' ? (
+    // TODO: Add cancel button
+    <CommentForm comment={comment} onSuccess={() => setState('idle')} />
+  ) : (
     <div
       {...props}
       className={cn(
@@ -33,13 +41,17 @@ export function Comment({
           menuItems={
             currentUserId === comment.authorId ? (
               [
-                <button type='button' key={`update-${comment.id}`}>
+                <button
+                  type='button'
+                  key={`update-${comment.id}`}
+                  onClick={() => setState('updating')}>
                   Update
                 </button>,
                 <button
                   type='button'
+                  className='text-destructive'
                   key={`delete-${comment.id}`}
-                  className='text-destructive'>
+                  onClick={() => setState('deleting')}>
                   Delete
                 </button>,
               ]
