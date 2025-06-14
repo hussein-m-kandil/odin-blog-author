@@ -1,39 +1,34 @@
 import React from 'react';
-import { Post } from '@/types';
-import { useRouter } from 'next/navigation';
 import { P } from '@/components/typography/p';
 import { Button } from '@/components/ui/button';
+import { ErrorMessage } from '@/components/error-message';
 import { Loader2, PanelLeftClose, Trash2 } from 'lucide-react';
 import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
 
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
-
-export function DeletePostForm({
-  post,
+export function DeleteForm({
+  subject,
+  delReqFn,
   onCancel,
   onSuccess,
   ...formProps
-}: React.ComponentProps<'form'> & {
-  post: Post;
-  onSuccess: () => void;
+}: Omit<React.ComponentProps<'form'>, 'onSubmit'> & {
   onCancel: React.MouseEventHandler<HTMLButtonElement>;
+  delReqFn: () => Promise<Response> | Response;
+  onSuccess: () => void;
+  subject: string;
 }) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const [submitting, setSubmitting] = React.useState(false);
-  const router = useRouter();
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
-      setSubmitting(true);
-      const apiRes = await fetch(`${apiBaseUrl}/posts/${post.id}`, {
-        method: 'DELETE',
-      });
-      if (apiRes.ok) {
+      const delRes = await delReqFn();
+      if (delRes.ok) {
         onSuccess();
-        router.replace('/blog');
       } else {
-        setErrorMessage(await getResErrorMessageOrThrow(apiRes));
+        setErrorMessage(await getResErrorMessageOrThrow(delRes));
       }
     } catch (error) {
       setErrorMessage(getUnknownErrorMessage(error));
@@ -46,32 +41,25 @@ export function DeletePostForm({
     <form
       {...formProps}
       onSubmit={handleSubmit}
-      aria-label={`Delete confirmation form for ${post.title}`}>
-      {errorMessage && (
-        <P className='text-destructive text-sm text-center'>{errorMessage}</P>
-      )}
+      aria-label={`Delete confirmation form for ${subject}`}>
+      <ErrorMessage>{errorMessage}</ErrorMessage>
       <P>
-        Do you really want to delete &quot;
-        <span className='font-bold'>{`${post.title.slice(0, 21)}${
-          post.title.length > 24 ? '...' : ''
-        }`}</span>
-        &quot;?
+        Do you really want to delete
+        <span className='font-bold'>{` "${
+          subject.length > 24 ? subject.slice(0, 21) + '...' : subject
+        }"`}</span>
+        ?
       </P>
       <div className='flex justify-end gap-4 mt-5'>
         <Button
           type='reset'
           variant='outline'
           onClick={onCancel}
-          disabled={submitting}
-          aria-description={`Cancel the deletion of ${post.title}`}>
+          disabled={submitting}>
           <PanelLeftClose />
           Cancel
         </Button>
-        <Button
-          type='submit'
-          variant='destructive'
-          disabled={submitting}
-          aria-description={`Delete ${post.title}`}>
+        <Button type='submit' variant='destructive' disabled={submitting}>
           {submitting ? (
             <>
               <Loader2 className='animate-spin' /> Deleting
@@ -87,4 +75,4 @@ export function DeletePostForm({
   );
 }
 
-export default DeletePostForm;
+export default DeleteForm;

@@ -3,11 +3,14 @@
 import React from 'react';
 import { Post } from '@/types';
 import { cn } from '@/lib/utils';
-import { PostForm } from '../post-form';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { DeletePostForm } from '../delete-post-form';
+import { PostForm } from '@/components/post-form';
+import { DeleteForm } from '@/components/delete-form';
 import { PenSquare, Trash2, Edit } from 'lucide-react';
 import { useDialog } from '@/contexts/dialog-context/';
+
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export function PostFormDialog({
   showDeleteForm = false,
@@ -23,6 +26,7 @@ export function PostFormDialog({
   if (!toDelete && showDeleteForm) throw new Error('Missing a post to delete!');
 
   const { showDialog, hideDialog } = useDialog();
+  const router = useRouter();
 
   const title = post
     ? showDeleteForm
@@ -39,11 +43,19 @@ export function PostFormDialog({
         ? 'You are deleting a post now! This action cannot be undone.'
         : `You can ${title.toLowerCase()} here. Click "${verb.toLowerCase()}" when you're done.`,
       body: toDelete ? (
-        <DeletePostForm
-          post={post}
+        <DeleteForm
           method='dialog'
+          subject={post.title}
           onCancel={hideDialog}
-          onSuccess={hideDialog}
+          onSuccess={() => {
+            hideDialog();
+            router.replace('/blog');
+          }}
+          delReqFn={() =>
+            fetch(`${apiBaseUrl}/posts/${post.id}`, {
+              method: 'DELETE',
+            })
+          }
         />
       ) : (
         <PostForm post={post} onSuccess={hideDialog} aria-label={title} />
