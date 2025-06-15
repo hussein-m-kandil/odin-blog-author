@@ -1,5 +1,7 @@
 import { User, Post } from '@/types';
 
+export const delay = (fn: () => void, ms = 100) => setTimeout(fn, ms);
+
 export const dates = {
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
