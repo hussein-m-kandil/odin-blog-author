@@ -108,7 +108,7 @@ export async function getCurrentPathname() {
 }
 
 export async function getUserId() {
-  return throwFalsyReturnTruthy((await headers()).get(USER_ID_HEADER_KEY));
+  return (await headers()).get(USER_ID_HEADER_KEY);
 }
 
 export function isAuthRes(resData: unknown): resData is AuthRes {
