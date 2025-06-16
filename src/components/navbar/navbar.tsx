@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
-import { H1 } from '@/components/typography/h1';
 import { getUnknownErrorMessage } from '@/lib/utils';
 import { ModeToggle } from '@/components/mode-toggle';
 import { usePathname, useRouter } from 'next/navigation';
@@ -38,10 +37,10 @@ export function Navbar({ user = null }: { user?: User | null }) {
   };
 
   return (
-    <nav className='flex flex-col sm:flex-row items-center justify-between gap-2 p-3 shadow-sm shadow-secondary'>
-      <H1 className='text-3xl font-normal'>
+    <nav className='flex flex-col sm:flex-row items-center justify-between gap-4 p-4 shadow-sm shadow-secondary'>
+      <div className='text-3xl font-normal'>
         <Link href='/'>Odin Blog Author</Link>
-      </H1>
+      </div>
       <div className='flex items-center gap-2'>
         {user ? (
           <>
