@@ -15,20 +15,27 @@ import { PostFormDialog } from '../post-form-dialog';
 import { BookOpen, Lock, Globe } from 'lucide-react';
 import { Lead } from '@/components/typography/lead';
 import { Button } from '@/components/ui/button';
-import { formatDate } from '@/lib/utils';
+import { cn, formatDate } from '@/lib/utils';
 import { Post } from '@/types';
 import Link from 'next/link';
 
-interface PostCardProps {
+interface PostCardProps extends React.ComponentProps<'div'> {
   isMutable: boolean;
   post: Post;
 }
 
-export function PostCard({ post, isMutable = false }: PostCardProps) {
+export function PostCard({
+  isMutable = false,
+  className,
+  post,
+  ...props
+}: PostCardProps) {
   const postUrl = `/blog/${post.id}`;
 
   return (
-    <Card>
+    <Card
+      {...props}
+      className={cn('aspect-square flex-col justify-between', className)}>
       <CardHeader>
         <CardTitle
           title={post.title}
@@ -49,7 +56,7 @@ export function PostCard({ post, isMutable = false }: PostCardProps) {
             </span>
           )}{' '}
           <Link href={`/users/${post.authorId}`} className='italic'>
-            By {post.author.username}
+            By @{post.author.username}
           </Link>
         </CardDescription>
         <CardAction>
@@ -75,7 +82,7 @@ export function PostCard({ post, isMutable = false }: PostCardProps) {
           />
         </CardAction>
       </CardHeader>
-      <CardContent>
+      <CardContent className='mt-auto'>
         <Lead className='line-clamp-3 font-light'>{post.content}</Lead>
       </CardContent>
       <CardFooter className='flex items-center justify-between'>
