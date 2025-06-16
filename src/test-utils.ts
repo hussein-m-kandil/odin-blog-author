@@ -1,6 +1,15 @@
 import { User, Post } from '@/types';
+import { vi } from 'vitest';
 
 export const delay = (fn: () => void, ms = 100) => setTimeout(fn, ms);
+
+export const mockDialogContext = () => {
+  return vi.mock('@/contexts/dialog-context', () => {
+    return {
+      useDialog: vi.fn(() => ({ showDialog: vi.fn(), hideDialog: vi.fn() })),
+    };
+  });
+};
 
 export const dates = {
   createdAt: new Date().toISOString(),
