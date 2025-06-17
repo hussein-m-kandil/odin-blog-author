@@ -7,6 +7,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function abbreviateFullName(fullname: string) {
+  const names = fullname.split(' ');
+  const abbrev = `${names[0][0]}${
+    names.length > 1 ? names[names.length - 1][0] : ''
+  }`.toUpperCase();
+  return abbrev;
+}
+
 export function formatDate(date: Date | string) {
   const dateObj = date instanceof Date ? date : new Date(date);
   return dateObj.toLocaleDateString('en-US', {
