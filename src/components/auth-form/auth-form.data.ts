@@ -18,12 +18,6 @@ export const signinFormAttrs: DynamicFormAttrs = {
   },
 };
 
-export const signinFormSchema = z.object(
-  Object.fromEntries(
-    Object.entries(signinFormAttrs).map(([name, attrs]) => [name, attrs.schema])
-  )
-);
-
 export const signupFormAttrs: DynamicFormAttrs = {
   username: {
     type: 'text',
@@ -69,16 +63,18 @@ export const signupFormAttrs: DynamicFormAttrs = {
   },
 };
 
-export const signupFormSchema = z
-  .object(
-    Object.fromEntries(
-      Object.entries(signupFormAttrs).map(([name, attrs]) => [
-        name,
-        attrs.schema,
-      ])
-    )
-  )
-  .refine(({ password, confirm }) => password === confirm, {
+export const updateUserFormAttrs = Object.fromEntries(
+  Object.entries(signupFormAttrs).map(([name, attrs]) => [
+    name,
+    {
+      ...attrs,
+      schema: attrs.schema.or(z.literal('').optional()),
+    },
+  ])
+);
+
+export const refineSignupSchema = (schema: z.ZodSchema) =>
+  schema.refine(({ password, confirm }) => password === confirm, {
     message: 'Passwords does not match',
     path: ['confirm'],
   });

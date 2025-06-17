@@ -3,14 +3,15 @@
 import React from 'react';
 import {
   signinFormAttrs,
-  signinFormSchema,
   signupFormAttrs,
-  signupFormSchema,
+  refineSignupSchema,
+  updateUserFormAttrs,
 } from './auth-form.data';
 import {
   DynamicForm,
-  DynamicFormProps,
   DynamicFormSubmitHandler,
+  injectDefaultValuesInDynamicFormAttrs as injectDefaults,
+  transformDynamicFormAttrsIntoSchema as createSchema,
 } from '@/components/dynamic-form';
 import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
 import { ErrorMessage } from '@/components/error-message';
@@ -19,38 +20,72 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-export function AuthForm({ formLabelId, formType }: AuthFormProps) {
+export function AuthForm({ formLabelId, formType, user }: AuthFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
 
-  const isSignupForm = formType === 'signup';
+  const formData =
+    formType === 'signin'
+      ? {
+          props: {
+            formAttrs: signinFormAttrs,
+            formSchema: createSchema(signinFormAttrs),
+            submitterLabel: { idle: 'Sign in', submitting: 'Signing in...' },
+          },
+          showToast: (username: string) =>
+            toast.success(`Hello, @${username}!`, {
+              description: `You have signed in successfully`,
+            }),
+          endpoint: '/auth/signin',
+          method: 'POST',
+          name: 'user',
+        }
+      : user
+      ? {
+          props: {
+            formAttrs: injectDefaults(updateUserFormAttrs, user),
+            formSchema: refineSignupSchema(createSchema(updateUserFormAttrs)),
+            submitterLabel: { idle: 'Update', submitting: 'Updating...' },
+          },
+          showToast: (username: string) =>
+            toast.success(`@${username}'s profile updated`, {
+              description: 'Your profile is updated successfully',
+            }),
+          endpoint: `/users/${user.id}`,
+          method: 'PUT',
+          name: user.username,
+        }
+      : {
+          props: {
+            formAttrs: signupFormAttrs,
+            formSchema: refineSignupSchema(createSchema(signupFormAttrs)),
+            submitterLabel: { idle: 'Sign up', submitting: 'Signing up...' },
+          },
+          showToast: (username: string) =>
+            toast.success(`Hello, @${username}!`, {
+              description: `You have signed up successfully`,
+            }),
+          endpoint: '/users',
+          method: 'POST',
+          name: 'user',
+        };
 
   const handleSubmit: DynamicFormSubmitHandler<
-    z.infer<typeof signinFormSchema>
+    z.infer<typeof formData.props.formSchema>
   > = async (hookForm, values) => {
     try {
-      const endpoint = isSignupForm ? '/users' : '/auth/signin';
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-      const toastId = toast.loading(
-        `Signing ${isSignupForm ? 'up' : 'in'}...`,
-        { dismissible: true }
-      );
-      const apiRes = await fetch(`${apiBaseUrl}${endpoint}`, {
+      const apiRes = await fetch(`${apiBaseUrl}${formData.endpoint}`, {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
-        method: 'POST',
+        method: formData.method,
       });
-      toast.dismiss(toastId);
       if (apiRes.ok) {
         // This block is just a fallback: the API route handler should redirect the user
         hookForm.reset();
         setErrorMessage('');
         router.replace('/');
-        toast.success(`Hello, ${values.username}!`, {
-          description: `You have signed ${
-            isSignupForm ? 'up' : 'in'
-          } successfully`,
-        });
+        formData.showToast(values.username || formData.name);
       } else {
         setErrorMessage(await getResErrorMessageOrThrow(apiRes, hookForm));
       }
@@ -59,31 +94,15 @@ export function AuthForm({ formLabelId, formType }: AuthFormProps) {
     }
   };
 
-  const commonFormProps: Partial<DynamicFormProps> = {
-    'aria-labelledby': formLabelId,
-    submitterClassName: 'w-full',
-  };
-
   return (
     <div className='px-4 max-w-md mx-auto mt-6'>
       <ErrorMessage>{errorMessage}</ErrorMessage>
-      {isSignupForm ? (
-        <DynamicForm
-          {...commonFormProps}
-          onSubmit={handleSubmit}
-          formAttrs={signupFormAttrs}
-          formSchema={signupFormSchema}
-          submitterLabel={{ idle: 'Sign up', submitting: 'Signing up...' }}
-        />
-      ) : (
-        <DynamicForm
-          {...commonFormProps}
-          onSubmit={handleSubmit}
-          formAttrs={signinFormAttrs}
-          formSchema={signinFormSchema}
-          submitterLabel={{ idle: 'Sign in', submitting: 'Signing in...' }}
-        />
-      )}
+      <DynamicForm
+        aria-labelledby={formLabelId}
+        submitterClassName='w-full'
+        onSubmit={handleSubmit}
+        {...formData.props}
+      />
     </div>
   );
 }
