@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import React from 'react';
 import {
   signinFormAttrs,
@@ -14,17 +13,15 @@ import {
   DynamicFormSubmitHandler,
 } from '@/components/dynamic-form';
 import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
+import { ErrorMessage } from '@/components/error-message';
 import { AuthFormProps } from './auth-form.types';
-import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
-import { H2 } from '../typography/h2';
-import { z } from 'zod';
 import { toast } from 'sonner';
+import { z } from 'zod';
 
-export function AuthForm({ formType }: AuthFormProps) {
+export function AuthForm({ formLabelId, formType }: AuthFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
-  const id = React.useId();
 
   const isSignupForm = formType === 'signup';
 
@@ -62,63 +59,31 @@ export function AuthForm({ formType }: AuthFormProps) {
     }
   };
 
-  const titleId = `${id}-title`;
-  const toggleQuestionSuffix = 'have an account?';
   const commonFormProps: Partial<DynamicFormProps> = {
-    'aria-labelledby': titleId,
+    'aria-labelledby': formLabelId,
     submitterClassName: 'w-full',
   };
 
-  let key, title, authFormJSX, togglerHref, togglerText, toggleQuestion;
-  if (isSignupForm) {
-    toggleQuestion = `Already ${toggleQuestionSuffix}`;
-    togglerHref = '/signin';
-    togglerText = 'Sign in';
-    key = `${id}-signup`;
-    title = 'Sign Up';
-    authFormJSX = (
-      <DynamicForm
-        {...commonFormProps}
-        formSchema={signupFormSchema}
-        formAttrs={signupFormAttrs}
-        onSubmit={handleSubmit}
-        submitterLabel={{ idle: 'Sign up', submitting: 'Signing up...' }}
-      />
-    );
-  } else {
-    toggleQuestion = `Don't ${toggleQuestionSuffix}`;
-    togglerHref = '/signup';
-    togglerText = 'Sign up';
-    key = `${id}-signin`;
-    title = 'Sign In';
-    authFormJSX = (
-      <DynamicForm
-        {...commonFormProps}
-        formSchema={signinFormSchema}
-        formAttrs={signinFormAttrs}
-        onSubmit={handleSubmit}
-        submitterLabel={{ idle: 'Sign in', submitting: 'Signing in...' }}
-      />
-    );
-  }
-
   return (
-    <div className='px-4 max-w-md mx-auto mt-6' key={key}>
-      <H2 id={titleId} className='font-normal text-2xl text-center mb-6'>
-        {title}
-      </H2>
-      {errorMessage && (
-        <P className='text-destructive text-sm text-center mt-0 mb-6'>
-          {errorMessage}
-        </P>
+    <div className='px-4 max-w-md mx-auto mt-6'>
+      <ErrorMessage>{errorMessage}</ErrorMessage>
+      {isSignupForm ? (
+        <DynamicForm
+          {...commonFormProps}
+          onSubmit={handleSubmit}
+          formAttrs={signupFormAttrs}
+          formSchema={signupFormSchema}
+          submitterLabel={{ idle: 'Sign up', submitting: 'Signing up...' }}
+        />
+      ) : (
+        <DynamicForm
+          {...commonFormProps}
+          onSubmit={handleSubmit}
+          formAttrs={signinFormAttrs}
+          formSchema={signinFormSchema}
+          submitterLabel={{ idle: 'Sign in', submitting: 'Signing in...' }}
+        />
       )}
-      {authFormJSX}
-      <P className='text-center'>
-        {toggleQuestion}{' '}
-        <Link href={togglerHref} className='p-0'>
-          {togglerText}
-        </Link>
-      </P>
     </div>
   );
 }

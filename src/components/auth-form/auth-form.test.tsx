@@ -11,26 +11,23 @@ const setup = async (formType: FormType) => {
       ? {
           submitterOpts: { name: /(sign ?up)|(submit)/i },
           entries: Object.entries(signupFormAttrs),
-          headingOpts: { name: /sign ?up/i },
+          formLabelId: 'signup',
         }
       : {
           submitterOpts: { name: /(sign ?in)|(submit)/i },
           entries: Object.entries(signinFormAttrs),
-          headingOpts: { name: /sign ?in/i },
+          formLabelId: 'signin',
         };
   const user = userEvent.setup();
-  const renderResult = render(<AuthForm formType={formType} />);
+  const renderResult = render(
+    <AuthForm formType={formType} formLabelId={data.formLabelId} />
+  );
   return { data, user, ...renderResult };
-};
-
-const assertHeadingExists = async (formType: FormType) => {
-  const { data } = await setup(formType);
-  expect(screen.getByRole('heading', data.headingOpts)).toBeInTheDocument();
 };
 
 const assertFormAndInputExists = async (formType: FormType) => {
   const { data } = await setup(formType);
-  const form = screen.getByRole('form', data.headingOpts);
+  const form = screen.getByRole('form');
   expect(form).toBeInTheDocument();
   for (const [inpName, attrs] of data.entries) {
     const inp = screen.getByLabelText(attrs.label) as HTMLInputElement;
@@ -57,10 +54,6 @@ const assertNotSubmitWithEmptyFields = async (formType: FormType) => {
 describe(`<AuthForm />`, () => {
   for (const formType of ['signin', 'signup'] as FormType[]) {
     describe(formType, () => {
-      it('should have descriptive heading', async () => {
-        await assertHeadingExists(formType);
-      });
-
       it('should render a form with inputs', async () => {
         await assertFormAndInputExists(formType);
       });

@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { P } from '@/components/typography/p';
 import { H1 } from '@/components/typography/h1';
-import { AuthForm } from '@/components/auth-form';
-import { FormType } from '../auth-form/auth-form.types';
+import { AuthForm, FormType } from '@/components/auth-form';
 
 export type PageType = FormType;
 

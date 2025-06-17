@@ -8,7 +8,7 @@ export default async function AuthLayout({
   return (
     <>
       <Navbar />
-      <main>{children}</main>
+      {children}
     </>
   );
 }

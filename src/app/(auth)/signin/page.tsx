@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { AuthForm } from '@/components/auth-form';
+import { AuthPage } from '@/components/auth-page';
 
 export const metadata: Metadata = {
   description: 'Sign in to your Odin Blog Author account.',
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Signin() {
-  return <AuthForm formType='signin' />;
+  return <AuthPage pageType='signin' />;
 }
