@@ -29,6 +29,7 @@ export function AuthForm({
   className,
   formType,
   user,
+  onSuccess,
 }: AuthFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
@@ -57,11 +58,11 @@ export function AuthForm({
             submitterLabel: { idle: 'Update', submitting: 'Updating...' },
           },
           showToast: (username: string) =>
-            toast.success(`@${username}'s profile updated`, {
+            toast.success(`@${username} updated`, {
               description: 'Your profile is updated successfully',
             }),
           endpoint: `/users/${user.id}`,
-          method: 'PUT',
+          method: 'PATCH',
           name: user.username,
         }
       : {
@@ -90,10 +91,10 @@ export function AuthForm({
         method: formData.method,
       });
       if (apiRes.ok) {
-        // This block is just a fallback: the API route handler should redirect the user
         hookForm.reset();
         setErrorMessage('');
-        router.replace('/');
+        if (onSuccess) onSuccess();
+        else router.replace('/');
         formData.showToast(values.username || formData.name);
       } else {
         setErrorMessage(await getResErrorMessageOrThrow(apiRes, hookForm));

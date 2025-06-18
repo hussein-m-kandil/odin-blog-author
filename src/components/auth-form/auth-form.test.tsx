@@ -1,23 +1,42 @@
-import { injectDefaultValuesInDynamicFormAttrs as injectDefaults } from '@/components/dynamic-form';
 import {
   signinFormAttrs,
   signupFormAttrs,
   updateUserFormAttrs,
 } from './auth-form.data';
+import { injectDefaultValuesInDynamicFormAttrs as injectDefaults } from '@/components/dynamic-form';
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AuthFormProps, FormType } from './auth-form.types';
 import { userEvent } from '@testing-library/user-event';
 import { author, delay } from '@/test-utils';
-import { AuthForm } from './auth-form';
 
-const fetchSpy = vi.spyOn(window, 'fetch').mockImplementation(() => {
-  return new Promise((resolve) =>
-    delay(() => resolve(new Response(null, { status: 204 })))
-  );
-});
+const fetchMock = vi.spyOn(window, 'fetch').mockImplementation(
+  vi.fn(() => {
+    return new Promise<Response>((resolve) =>
+      delay(() => resolve(new Response(null, { status: 204 })))
+    );
+  })
+);
+
+const onSuccess = vi.fn();
+const routerMethodMock = vi.fn();
+
+vi.unmock('next/navigation'); // This will be hoisted to unmock the test setup mock
+
+vi.doMock('next/navigation', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('next/navigation')>()),
+  useRouter: () => ({
+    prefetch: routerMethodMock,
+    replace: routerMethodMock,
+    back: routerMethodMock,
+    push: routerMethodMock,
+  }),
+}));
+
+const { AuthForm } = await import('./auth-form');
 
 afterEach(vi.clearAllMocks);
+afterAll(() => vi.doUnmock('next/navigation'));
 
 const setup = async (props: AuthFormProps) => {
   const data =
@@ -82,6 +101,7 @@ describe(`<AuthForm />`, () => {
     formLabelId: 'test-update-user-form',
     formType: 'signup',
     user: author,
+    onSuccess,
   };
 
   it('should display the given user data in the form', async () => {
@@ -100,16 +120,33 @@ describe(`<AuthForm />`, () => {
       }
     }
     await user.click(screen.getByRole('button', data.submitterOpts));
-    await waitFor(() => expect(fetchSpy).toHaveBeenCalledOnce());
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
   });
 
   it('should send `PUT` request on submit, and add the given-user id in the URL', async () => {
     const { data, user } = await setup(updateUserFormProps);
     await user.click(screen.getByRole('button', data.submitterOpts));
-    await waitFor(() => expect(fetchSpy).toHaveBeenCalledOnce());
-    const reqInit = fetchSpy.mock.calls[0][1] as RequestInit;
-    const submitUrl = fetchSpy.mock.calls[0][0] as string;
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    const reqInit = fetchMock.mock.calls[0][1] as RequestInit;
+    const submitUrl = fetchMock.mock.calls[0][0] as string;
     expect(submitUrl).toMatch(new RegExp(author.id));
-    expect(reqInit.method).toBe('PUT');
+    expect(reqInit.method).toBe('PATCH');
+  });
+
+  it('should call the given `onSuccess` and not redirect the user', async () => {
+    const { data, user } = await setup(updateUserFormProps);
+    await user.click(screen.getByRole('button', data.submitterOpts));
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledOnce());
+    expect(routerMethodMock).not.toHaveBeenCalled();
+  });
+
+  it('should redirect the user if not given an `onSuccess`', async () => {
+    const { data, user } = await setup({
+      ...updateUserFormProps,
+      onSuccess: undefined,
+    });
+    await user.click(screen.getByRole('button', data.submitterOpts));
+    await waitFor(() => expect(routerMethodMock).toHaveBeenCalledOnce());
+    expect(routerMethodMock).toHaveBeenCalledOnce();
   });
 });
