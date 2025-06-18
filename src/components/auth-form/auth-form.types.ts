@@ -6,4 +6,5 @@ export interface AuthFormProps {
   formLabelId: string;
   formType: FormType;
   user?: User | null;
+  className?: string;
 }

@@ -13,14 +13,23 @@ import {
   injectDefaultValuesInDynamicFormAttrs as injectDefaults,
   transformDynamicFormAttrsIntoSchema as createSchema,
 } from '@/components/dynamic-form';
-import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
+import {
+  cn,
+  getResErrorMessageOrThrow,
+  getUnknownErrorMessage,
+} from '@/lib/utils';
 import { ErrorMessage } from '@/components/error-message';
 import { AuthFormProps } from './auth-form.types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-export function AuthForm({ formLabelId, formType, user }: AuthFormProps) {
+export function AuthForm({
+  formLabelId,
+  className,
+  formType,
+  user,
+}: AuthFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
 
@@ -95,7 +104,7 @@ export function AuthForm({ formLabelId, formType, user }: AuthFormProps) {
   };
 
   return (
-    <div className='px-4 max-w-md mx-auto mt-6'>
+    <div className={cn('px-4 max-w-md mx-auto mt-6', className)}>
       <ErrorMessage>{errorMessage}</ErrorMessage>
       <DynamicForm
         aria-labelledby={formLabelId}

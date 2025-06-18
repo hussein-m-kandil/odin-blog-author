@@ -69,6 +69,12 @@ describe(`<AuthForm />`, () => {
           expect(inp.ariaInvalid).toBe('true');
         }
       });
+
+      it('should have the given class on the form container', async () => {
+        const className = 'test-class';
+        const { container } = await setup({ ...props, className });
+        expect(container.firstElementChild).toHaveClass(className);
+      });
     });
   }
 
