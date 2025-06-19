@@ -32,13 +32,14 @@ export function OptionsMenu({
       <DropdownMenuTrigger
         aria-label={triggerLabel || 'Open options menu'}
         className={cn(
-          'focus-visible:outline-0 text-muted-foreground hover:text-foreground focus-visible:text-foreground',
+          'focus-visible:outline-0 hover:text-foreground focus-visible:text-foreground',
+          'w-4 text-muted-foreground',
           triggerCN
         )}>
         <EllipsisVertical />
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className={menuCN}
+        className={cn('*:w-full *:text-start', menuCN)}
         aria-label={menuLabel || 'Options menu'}>
         {items.map(
           (i, index) =>
