@@ -76,8 +76,6 @@ export function Comment({
         currentUserId === comment.authorId) && (
         <OptionsMenu
           menuLabel='Comment options menu'
-          menuCN='*:w-full *:text-start'
-          triggerCN='w-4 overflow-hidden'
           triggerLabel='Open comment options menu'
           menuItems={
             currentUserId === comment.authorId ? (
