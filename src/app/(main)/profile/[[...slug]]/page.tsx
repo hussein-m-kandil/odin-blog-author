@@ -4,10 +4,19 @@ import { UserProfile } from '@/components/user-profile';
 import { H2 } from '@/components/typography/h2';
 import { redirect } from 'next/navigation';
 import { Blogs } from '@/components/blogs';
-import { Post } from '@/types';
+import { Post, User } from '@/types';
 
-export default async function Profile() {
-  const user = await getSignedInUser();
+export default async function Profile({
+  params,
+}: {
+  params: Promise<{ slug?: string[] }>;
+}) {
+  const userId = (await params).slug?.[0];
+
+  // TODO: Replace `authedFetch` with the normal `fetch`, after remove the API restriction on getting the users
+  const user = userId
+    ? ((await (await authedFetch(`/users/${userId}`)).json()) as User)
+    : await getSignedInUser();
   if (!user) return redirect('/signin');
 
   const postsRes = await authedFetch(`/users/${user.id}/posts`);
