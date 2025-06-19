@@ -1,7 +1,9 @@
 import { render, screen } from '@testing-library/react';
+import { mockDialogContext, post } from '@/test-utils';
 import { describe, expect, it } from 'vitest';
 import { Blogs } from './blogs';
-import { post } from '@/test-utils';
+
+mockDialogContext();
 
 const posts = [post, { ...post, id: 'test-post-2', title: 'Test Post #2' }];
 
