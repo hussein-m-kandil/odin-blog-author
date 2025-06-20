@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { getUnknownErrorMessage } from '@/lib/utils';
 import { ModeToggle } from '@/components/mode-toggle';
 import { usePathname, useRouter } from 'next/navigation';
-import { PostFormDialog } from '@/components/post-form-dialog';
+import { CreatePostDialog } from '@/components/create-post-dialog';
 
 export function Navbar({ user = null }: { user?: User | null }) {
   const pathname = usePathname();
@@ -44,7 +44,7 @@ export function Navbar({ user = null }: { user?: User | null }) {
       <div className='flex items-center gap-2'>
         {user ? (
           <>
-            <PostFormDialog />
+            <CreatePostDialog />
             <Button type='button' {...btnCommonProps} onClick={handleSignout}>
               Sign out
             </Button>
