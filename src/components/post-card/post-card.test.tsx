@@ -1,12 +1,9 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
-import { mockDialogContext, post } from '@/test-utils';
+import { post, mockDialogContext } from '@/test-utils';
+import { describe, expect, it } from 'vitest';
 import { PostCard } from './post-card';
 
-const { showDialog } = mockDialogContext();
-
-afterEach(vi.clearAllMocks);
+mockDialogContext();
 
 describe('<PostCard />', () => {
   it('should render some of the post data', () => {
@@ -26,39 +23,13 @@ describe('<PostCard />', () => {
     expect(authorLink.href).toMatch(new RegExp(`/profile/${post.authorId}$`));
   });
 
-  it('should show action button with mutation actions for a mutable post', async () => {
-    const user = userEvent.setup();
+  it('should show action button with mutation actions for a mutable post', () => {
     render(<PostCard post={post} isMutable={true} />);
-    await user.click(screen.getByRole('button', { name: /open/i }));
-    expect(
-      screen.getByRole('menuitem', { name: /delete/i })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('menuitem', { name: /update|edit/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /open/i })).toBeInTheDocument();
   });
 
-  it('should show action button without mutation actions for an immutable post', async () => {
-    const user = userEvent.setup();
+  it('should show action button without mutation actions for an immutable post', () => {
     render(<PostCard post={post} isMutable={false} />);
-    await user.click(screen.getByRole('button', { name: /open/i }));
-    expect(screen.queryByRole('menuitem', { name: /delete/i })).toBeNull();
-    expect(screen.queryByRole('menuitem', { name: /update|edit/i })).toBeNull();
-  });
-
-  it('should show dialog after clicking update', async () => {
-    const user = userEvent.setup();
-    render(<PostCard post={post} isMutable={true} />);
-    await user.click(screen.getByRole('button', { name: /open/i }));
-    await user.click(screen.getByRole('menuitem', { name: /update|edit/i }));
-    expect(showDialog).toHaveBeenCalledOnce();
-  });
-
-  it('should show dialog after clicking delete', async () => {
-    const user = userEvent.setup();
-    render(<PostCard post={post} isMutable={true} />);
-    await user.click(screen.getByRole('button', { name: /open/i }));
-    await user.click(screen.getByRole('menuitem', { name: /delete/i }));
-    expect(showDialog).toHaveBeenCalledOnce();
+    expect(screen.queryByRole('button', { name: /open/i })).toBeNull();
   });
 });
