@@ -11,12 +11,12 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { PostOptionsMenu } from '@/components/post-options-menu';
+import { FormattedDate } from '@/components/formatted-date';
 import { PrivacyIcon } from '@/components/privacy-icon';
-import { Muted } from '@/components/typography/muted';
-import { Lead } from '@/components/typography/lead';
+import { Muted, Lead } from '@/components/typography/';
 import { Button } from '@/components/ui/button';
-import { cn, formatDate } from '@/lib/utils';
 import { BookOpen } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Post } from '@/types';
 
 interface PostCardProps extends React.ComponentProps<'div'> {
@@ -59,8 +59,11 @@ export function PostCard({
         <Lead className='line-clamp-3 font-light'>{post.content}</Lead>
       </CardContent>
       <CardFooter className='flex items-center justify-between'>
-        <Muted className='italic'>
-          Last updated at {formatDate(post.updatedAt)}
+        <Muted>
+          <FormattedDate
+            createdAt={post.createdAt}
+            updatedAt={post.updatedAt}
+          />
         </Muted>
         <Button type='button' variant={'outline'} asChild>
           <Link
