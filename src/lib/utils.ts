@@ -1,8 +1,7 @@
-import { twMerge } from 'tailwind-merge';
-import { formatDistance } from 'date-fns';
-import { clsx, type ClassValue } from 'clsx';
-import { UseFormReturn } from 'react-hook-form';
 import logger from './logger';
+import { UseFormReturn } from 'react-hook-form';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,10 +13,6 @@ export function abbreviateFullName(fullname: string) {
     names.length > 1 ? names[names.length - 1][0] : ''
   }`.toUpperCase();
   return abbrev;
-}
-
-export function formatDate(date: Date | string) {
-  return formatDistance(date, new Date(), { addSuffix: true });
 }
 
 export const isObject = (x: unknown): x is Record<string, unknown> => {
