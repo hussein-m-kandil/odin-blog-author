@@ -1,4 +1,5 @@
 import { twMerge } from 'tailwind-merge';
+import { formatDistance } from 'date-fns';
 import { clsx, type ClassValue } from 'clsx';
 import { UseFormReturn } from 'react-hook-form';
 import logger from './logger';
@@ -16,12 +17,7 @@ export function abbreviateFullName(fullname: string) {
 }
 
 export function formatDate(date: Date | string) {
-  const dateObj = date instanceof Date ? date : new Date(date);
-  return dateObj.toLocaleDateString('en-US', {
-    year: 'numeric',
-    day: 'numeric',
-    month: 'long',
-  });
+  return formatDistance(date, new Date(), { addSuffix: true });
 }
 
 export const isObject = (x: unknown): x is Record<string, unknown> => {
