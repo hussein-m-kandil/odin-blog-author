@@ -11,11 +11,12 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 import { PostOptionsMenu } from '@/components/post-options-menu';
+import { PrivacyIcon } from '@/components/privacy-icon';
 import { Muted } from '@/components/typography/muted';
-import { BookOpen, Lock, Globe } from 'lucide-react';
 import { Lead } from '@/components/typography/lead';
 import { Button } from '@/components/ui/button';
 import { cn, formatDate } from '@/lib/utils';
+import { BookOpen } from 'lucide-react';
 import { Post } from '@/types';
 
 interface PostCardProps extends React.ComponentProps<'div'> {
@@ -40,18 +41,7 @@ export function PostCard({
           title={post.title}
           className='hover:underline truncate outline-ring-50 dark:outline-foreground outline-offset-3 has-focus-visible:outline-2'>
           <Link href={postUrl}>
-            <span>
-              {post.published ? (
-                <span title='Public' aria-label='Public'>
-                  <Globe className='inline' size={14} />
-                </span>
-              ) : (
-                <span title='Private' aria-label='Private'>
-                  <Lock className='inline' size={14} />
-                </span>
-              )}
-            </span>
-            {` ${post.title}`}
+            <PrivacyIcon isPublic={post.published} /> <span>{post.title}</span>
           </Link>
         </CardTitle>
         <CardDescription>
