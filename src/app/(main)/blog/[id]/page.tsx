@@ -1,15 +1,12 @@
-import { PostFormDialog } from '@/components/post-form-dialog';
+import { PostOptionsMenu } from '@/components/post-options-menu';
+import { H1, H2, Muted, Lead } from '@/components/typography/';
+import { FormattedDate } from '@/components/formatted-date';
 import { BlogComments } from '@/components/blog-comments';
 import { ErrorMessage } from '@/components/error-message';
+import { PrivacyIcon } from '@/components/privacy-icon';
 import { Comment as CommentType, Post } from '@/types';
-import { Muted } from '@/components/typography/muted';
-import { Separator } from '@/components/ui/separator';
 import { Categories } from '@/components/categories';
 import { authedFetch, getUserId } from '@/lib/auth';
-import { Lead } from '@/components/typography/lead';
-import { H2 } from '@/components/typography/h2';
-import { H3 } from '@/components/typography/h3';
-import { formatDate } from '@/lib/utils';
 
 export default async function BlogPost({
   params,
@@ -36,35 +33,45 @@ export default async function BlogPost({
 
   if (!post || !comments) return errMsg;
 
-  const commonTriggerProps = {
-    className: 'w-auto align-middle cursor-pointer',
-    post,
-  };
+  const titleId = `title-${post.id}`;
 
   return (
-    <main className='max-w-2xl mx-auto'>
-      {userId === post.authorId && (
-        <div className='flex justify-center space-x-4 h-6 mt-4'>
-          <PostFormDialog {...commonTriggerProps} />
-          <Separator orientation='vertical' />
-          <PostFormDialog {...commonTriggerProps} showDeleteForm={true} />
+    <div className='max-w-5xl mx-auto'>
+      <header className='mt-6'>
+        <div className='flex justify-between items-baseline border-b pb-2'>
+          <H1 id={titleId} className='text-3xl'>
+            {post.title}
+          </H1>
+          {userId === post.authorId && <PostOptionsMenu post={post} />}
         </div>
-      )}
-      <div className='my-2 space-y-12'>
-        <div>
-          <H2 className='text-center text-2xl'>{post.title}</H2>
-          <div className='flex items-center justify-between italic'>
-            <Muted>{post.published ? 'Public' : 'Private'}</Muted>
-            <Muted>Last updated at {formatDate(post.createdAt)}</Muted>
-          </div>
-        </div>
-        <Lead className='text-foreground font-light'>{post.content}</Lead>
-        <Categories categories={post.categories} className='justify-end' />
-      </div>
-      <div className='my-4'>
-        <H3 className='text-center text-xl'>Comments</H3>
-        <BlogComments comments={comments} post={post} currentUserId={userId} />
-      </div>
-    </main>
+        <Muted className='flex items-center justify-between'>
+          <FormattedDate
+            createdAt={post.createdAt}
+            updatedAt={post.updatedAt}
+          />
+          <PrivacyIcon isPublic={post.published} />
+        </Muted>
+      </header>
+      <main>
+        <article aria-labelledby={titleId}>
+          <Lead className='text-foreground font-light my-6'>
+            {post.content}
+          </Lead>
+          <Categories categories={post.categories} className='justify-end' />
+          <section className='my-4'>
+            <header>
+              <H2 className='text-center text-xl'>Comments</H2>
+            </header>
+            <main>
+              <BlogComments
+                currentUserId={userId}
+                comments={comments}
+                post={post}
+              />
+            </main>
+          </section>
+        </article>
+      </main>
+    </div>
   );
 }
