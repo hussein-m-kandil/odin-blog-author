@@ -5,7 +5,10 @@ import { DialogProvider } from '@/contexts/dialog-context/';
 import { Toaster } from '@/components/ui/sonner';
 
 export const metadata: Metadata = {
-  title: { template: '%s | Odin Blog Author', default: 'Odin Blog Author' },
+  title: {
+    template: `%s | ${process.env.NEXT_PUBLIC_APP_NAME}`,
+    default: process.env.NEXT_PUBLIC_APP_NAME || '',
+  },
   description:
     'A front-end app for authoring blog posts that I built as part of "The Odin Project - NodeJS" course.',
 };
