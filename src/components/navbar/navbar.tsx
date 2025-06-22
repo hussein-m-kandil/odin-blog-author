@@ -2,20 +2,43 @@
 
 import React from 'react';
 import Link from 'next/link';
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import {
+  Home,
+  LogIn,
+  LogOut,
+  UserPen,
+  UserIcon,
+  PenSquare,
+} from 'lucide-react';
+import { cn, getUnknownErrorMessage } from '@/lib/utils';
+import { useDialog } from '@/contexts/dialog-context/';
+import { UserAvatar } from '@/components/user-avatar';
+import { ModeToggle } from '@/components/mode-toggle';
+import { PostForm } from '@/components/post-form';
+import { Button } from '@/components/ui/button';
+import { Large } from '@/components/typography';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { User } from '@/types';
-import { Button } from '@/components/ui/button';
-import { ModeToggle } from '@/components/mode-toggle';
-import { usePathname, useRouter } from 'next/navigation';
-import { cn, getUnknownErrorMessage } from '@/lib/utils';
-import { CreatePostDialog } from '@/components/create-post-dialog';
+
+function CustomMenuItem({ children }: React.PropsWithChildren) {
+  return <DropdownMenuItem asChild>{children}</DropdownMenuItem>;
+}
 
 export function Navbar({ user = null }: { user?: User | null }) {
   const navContainerRef = React.useRef<HTMLDivElement>(null);
 
   const [yScroll, setYScroll] = React.useState(0);
-  const pathname = usePathname();
+  const { showDialog, hideDialog } = useDialog();
   const router = useRouter();
+  const id = React.useId();
 
   React.useEffect(() => {
     const navContainer = navContainerRef.current;
@@ -63,39 +86,96 @@ export function Navbar({ user = null }: { user?: User | null }) {
     });
   };
 
-  const btnCommonProps: { variant: 'outline' } = {
-    variant: 'outline',
+  const postFormProps = {
+    'aria-labelledby': `create-post-form-${id}`,
+    onSuccess: hideDialog,
+    title: 'Create Post',
+  };
+
+  const showPostFormDialog = () => {
+    showDialog({
+      title: (
+        <span id={postFormProps['aria-labelledby']}>{postFormProps.title}</span>
+      ),
+      description: 'Use the following form to create a new post.',
+      body: <PostForm {...postFormProps} />,
+    });
+  };
+
+  const btnProps: React.ComponentProps<'button'> = {
+    className: 'inline-flex items-center gap-1',
+    type: 'button',
   };
 
   return (
     <div ref={navContainerRef}>
       <nav
         className={cn(
-          'transition-transform duration-700 motion-reduce:transition-none motion-reduce:translate-y-0',
-          'flex flex-col sm:flex-row items-center justify-between gap-4 p-4 shadow-sm shadow-secondary',
-          'top-0 left-0 bottom-auto w-full bg-background/85 backdrop-blur-xs'
+          'top-0 left-0 bottom-auto w-full bg-background/85 backdrop-blur-xs shadow-sm shadow-secondary',
+          'transition-transform duration-700 motion-reduce:transition-none motion-reduce:translate-y-0'
         )}>
-        <div className='text-3xl font-normal'>
-          <Link href='/'>{process.env.NEXT_PUBLIC_APP_NAME}</Link>
-        </div>
-        <div className='flex items-center gap-2'>
-          {user ? (
-            <>
-              <CreatePostDialog />
-              <Button type='button' {...btnCommonProps} onClick={handleSignout}>
-                Sign out
-              </Button>
-            </>
-          ) : (
-            <Button type='button' {...btnCommonProps} asChild>
-              {pathname === '/signin' ? (
-                <Link href='/signup'>Sign up</Link>
-              ) : (
-                <Link href='/signin'>Sign in</Link>
-              )}
-            </Button>
-          )}
-          <ModeToggle />
+        <div className='container p-4 mx-auto flex flex-wrap items-center justify-between max-[350px]:justify-center gap-4'>
+          <Large className='text-2xl'>{process.env.NEXT_PUBLIC_APP_NAME}</Large>
+          <div className='flex items-center gap-2'>
+            <ModeToggle triggerProps={{ className: 'rounded-full' }} />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild aria-label='Open user options'>
+                <Button variant='outline' size='icon' className='rounded-full'>
+                  <UserAvatar user={user} className='size-9' />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align='end'
+                aria-label='User options menu'
+                className='*:w-full *:text-start'>
+                {user ? (
+                  <>
+                    <CustomMenuItem>
+                      <button
+                        {...btnProps}
+                        title={postFormProps.title}
+                        onClick={showPostFormDialog}>
+                        <PenSquare /> New Post
+                      </button>
+                    </CustomMenuItem>
+                    <CustomMenuItem>
+                      <Link href='/profile'>
+                        <UserIcon /> Profile
+                      </Link>
+                    </CustomMenuItem>
+                    <CustomMenuItem>
+                      <Link href='/'>
+                        <Home /> Home
+                      </Link>
+                    </CustomMenuItem>
+                    <DropdownMenuSeparator />
+                    <CustomMenuItem>
+                      <button
+                        {...btnProps}
+                        onClick={handleSignout}
+                        className={cn(btnProps.className, 'text-destructive!')}>
+                        <LogOut /> Sign out
+                      </button>
+                    </CustomMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <CustomMenuItem>
+                      <Link href='/signup'>
+                        <UserPen /> Sign up
+                      </Link>
+                    </CustomMenuItem>
+                    <CustomMenuItem>
+                      <Link href='/signin'>
+                        <LogIn />
+                        Sign in
+                      </Link>
+                    </CustomMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </nav>
     </div>
