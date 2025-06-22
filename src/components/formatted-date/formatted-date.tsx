@@ -20,24 +20,31 @@ export function FormattedDate({
   updatedAt,
   className,
   ...props
-}: React.ComponentProps<'time'> & {
+}: React.ComponentProps<'span'> & {
   createdAt: DateArg<Date>;
   updatedAt?: DateArg<Date>;
 }) {
   return (
-    <time
+    <span
       {...props}
-      dateTime={format(createdAt, FORMAT)}
-      className={cn('flex items-center gap-1 font-normal', className)}>
-      <Clock size={16} aria-label='Creation date' />
-      <span>{formatDate(createdAt)}</span>
+      className={cn('flex flex-wrap items-center gap-1 text-sm', className)}>
+      <time
+        dateTime={format(createdAt, FORMAT)}
+        className='inline-flex items-center'>
+        <Clock
+          className='inline-block me-1'
+          aria-label='Created at'
+          size={16}
+        />{' '}
+        <span>{formatDate(createdAt)}</span>
+      </time>
       {updatedAt &&
         differenceInMilliseconds(updatedAt, createdAt) > 59 * 1000 && (
           <time dateTime={format(updatedAt, FORMAT)}>
             &nbsp;(Updated {formatDate(updatedAt)})
           </time>
         )}
-    </time>
+    </span>
   );
 }
 

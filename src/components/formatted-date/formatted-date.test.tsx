@@ -1,13 +1,16 @@
 import { render, screen } from '@testing-library/react';
-import { describe } from 'node:test';
-import { expect, it } from 'vitest';
 import { FormattedDate } from './formatted-date';
+import { describe, expect, it } from 'vitest';
 
 describe('<FormattedDate />', () => {
   it('should have the given class', () => {
+    const id = 'test-id';
     const className = 'test-class';
-    render(<FormattedDate createdAt={new Date()} className={className} />);
-    expect(screen.getByRole('time')).toHaveClass(className);
+    const { container } = render(
+      <FormattedDate createdAt={new Date()} className={className} id={id} />
+    );
+    expect(container.firstElementChild).toHaveClass(className);
+    expect(container.firstElementChild).toHaveAttribute('id', id);
   });
 
   it('should display the given creation date', () => {
