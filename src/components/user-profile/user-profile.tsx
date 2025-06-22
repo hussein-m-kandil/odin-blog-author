@@ -2,11 +2,10 @@
 
 import React from 'react';
 import { AuthForm, AuthFormProps } from '@/components/auth-form';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/user-avatar';
 import { useDialog } from '@/contexts/dialog-context';
 import { Muted } from '@/components/typography/muted';
 import { Lead } from '@/components/typography/lead';
-import { abbreviateFullName } from '@/lib/utils';
 import { H1 } from '@/components/typography/h1';
 import { useRouter } from 'next/navigation';
 import { Edit3 } from 'lucide-react';
@@ -34,9 +33,7 @@ export function UserProfile({ user }: { user: User }) {
 
   return (
     <>
-      <Avatar className='size-32 text-7xl mx-auto mb-2'>
-        <AvatarFallback>{abbreviateFullName(user.fullname)}</AvatarFallback>
-      </Avatar>
+      <UserAvatar user={user} className='size-32 text-7xl mx-auto mb-2' />
       <H1 className='relative w-fit mx-auto'>
         {user.fullname}
         <button
