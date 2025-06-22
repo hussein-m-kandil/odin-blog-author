@@ -11,17 +11,13 @@ import { EllipsisVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function OptionsMenu({
-  triggerLabel,
-  triggerCN,
-  menuLabel,
+  triggerProps,
+  menuProps,
   menuItems,
-  menuCN,
 }: {
+  menuProps?: React.ComponentProps<typeof DropdownMenuContent>;
   menuItems?: React.ReactNode | React.ReactNode[];
-  triggerLabel?: string;
-  triggerCN?: string;
-  menuLabel?: string;
-  menuCN?: string;
+  triggerProps?: React.ComponentProps<'button'>;
 }) {
   const items = Array.isArray(menuItems) ? menuItems : [menuItems];
 
@@ -30,17 +26,19 @@ export function OptionsMenu({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        aria-label={triggerLabel || 'Open options menu'}
+        {...triggerProps}
+        aria-label={triggerProps?.['aria-label'] || 'Open options menu'}
         className={cn(
           'focus-visible:outline-0 hover:text-foreground focus-visible:text-foreground',
           'w-4 text-muted-foreground',
-          triggerCN
+          triggerProps?.className
         )}>
         <EllipsisVertical />
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className={cn('*:w-full *:text-start', menuCN)}
-        aria-label={menuLabel || 'Options menu'}>
+        {...menuProps}
+        aria-label={menuProps?.['aria-label'] || 'Options menu'}
+        className={cn('*:w-full *:text-start', menuProps?.className)}>
         {items.map(
           (i, index) =>
             (i || i === 0) && (

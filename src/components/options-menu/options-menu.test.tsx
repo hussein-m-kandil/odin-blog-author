@@ -3,9 +3,9 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { OptionsMenu } from './options-menu';
 
-const triggerLabel = 'Open menu';
 const itemsText = ['item 1', 'item 2'];
 const items = itemsText.map((text, i) => <div key={i}>{text}</div>);
+const props = { className: 'test-class', 'aria-label': 'test-label' };
 
 describe('<OptionsMenu />', () => {
   it('should render nothing if not given items', () => {
@@ -24,9 +24,25 @@ describe('<OptionsMenu />', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it('should the trigger have the given props', () => {
+    render(<OptionsMenu triggerProps={props} menuItems={items} />);
+    const trigger = screen.getByRole('button');
+    expect(trigger).toHaveClass(props.className);
+    expect(trigger).toHaveAttribute('aria-label', props['aria-label']);
+  });
+
+  it('should the menu have the given props', async () => {
+    const user = userEvent.setup();
+    render(<OptionsMenu menuProps={props} menuItems={items} />);
+    await user.click(screen.getByRole('button'));
+    const menu = screen.getByRole('menu');
+    expect(menu).toHaveClass(props.className);
+    expect(menu).toHaveAttribute('aria-label', props['aria-label']);
+  });
+
   it('should only the given trigger be visible if not clicked', () => {
-    render(<OptionsMenu triggerLabel={triggerLabel} menuItems={items} />);
-    expect(screen.getByLabelText(triggerLabel)).toBeVisible();
+    render(<OptionsMenu triggerProps={props} menuItems={items} />);
+    expect(screen.getByRole('button')).toBeVisible();
     for (const text of itemsText) {
       expect(screen.queryByText(text)).toBeNull();
     }
@@ -34,15 +50,15 @@ describe('<OptionsMenu />', () => {
 
   it('should the items be visible after clicking the trigger', async () => {
     const user = userEvent.setup();
-    render(<OptionsMenu triggerLabel={triggerLabel} menuItems={items} />);
-    await user.click(screen.getByLabelText(triggerLabel));
+    render(<OptionsMenu triggerProps={props} menuItems={items} />);
+    await user.click(screen.getByRole('button'));
     expect(screen.getByText(itemsText[0])).toBeVisible();
   });
 
   it('should render a menu with single item', async () => {
     const user = userEvent.setup();
-    render(<OptionsMenu triggerLabel={triggerLabel} menuItems={items} />);
-    await user.click(screen.getByLabelText(triggerLabel));
+    render(<OptionsMenu triggerProps={props} menuItems={items} />);
+    await user.click(screen.getByRole('button'));
     for (const text of itemsText) {
       expect(screen.getByText(text)).toBeVisible();
     }
@@ -52,21 +68,9 @@ describe('<OptionsMenu />', () => {
     const user = userEvent.setup();
     const mixedItems = [items[0], '', false, ...items.slice(1), null, -0, +0];
     const truthyItemsCount = items.length + 2; // Should render any 0 in a menu-item element
-    render(<OptionsMenu triggerLabel={triggerLabel} menuItems={mixedItems} />);
-    await user.click(screen.getByLabelText(triggerLabel));
+    render(<OptionsMenu triggerProps={props} menuItems={mixedItems} />);
+    await user.click(screen.getByRole('button'));
     // Use `children` instead of `childNodes`, because all items should be wrapped in a menu-item element
     expect(screen.getByRole('menu').children).toHaveLength(truthyItemsCount);
-  });
-
-  it('should the trigger has the given class', async () => {
-    const htmlClass = 'blah';
-    render(
-      <OptionsMenu
-        triggerLabel={triggerLabel}
-        triggerCN={htmlClass}
-        menuItems={items}
-      />
-    );
-    expect(screen.getByLabelText(triggerLabel)).toHaveClass(htmlClass);
   });
 });

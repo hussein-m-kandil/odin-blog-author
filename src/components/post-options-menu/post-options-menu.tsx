@@ -13,12 +13,13 @@ const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export function PostOptionsMenu({
   post,
-  menuCN,
-  triggerCN,
-}: {
+  menuProps,
+  triggerProps,
+}: Pick<
+  React.ComponentProps<typeof OptionsMenu>,
+  'menuProps' | 'triggerProps'
+> & {
   post: Post;
-  menuCN?: string;
-  triggerCN?: string;
 }) {
   const { showDialog, hideDialog } = useDialog();
   const router = useRouter();
@@ -61,10 +62,8 @@ export function PostOptionsMenu({
 
   return (
     <OptionsMenu
-      menuCN={menuCN}
-      triggerCN={triggerCN}
-      menuLabel='Post options menu'
-      triggerLabel='Open post options menu'
+      menuProps={{ 'aria-label': 'Post options', align: 'end', ...menuProps }}
+      triggerProps={{ 'aria-label': 'Open post options', ...triggerProps }}
       menuItems={[
         <button
           type='button'

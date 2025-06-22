@@ -67,7 +67,7 @@ export function Comment({
     <div
       {...props}
       className={cn(
-        'bg-secondary/50 py-6 px-8 rounded-md border border-input',
+        'bg-secondary/50 p-4 rounded-md border border-input',
         'flex justify-between items-center',
         className
       )}>
@@ -75,8 +75,8 @@ export function Comment({
       {(currentUserId === post.authorId ||
         currentUserId === comment.authorId) && (
         <OptionsMenu
-          menuLabel='Comment options menu'
-          triggerLabel='Open comment options menu'
+          menuProps={{ 'aria-label': 'Comment options menu', align: 'end' }}
+          triggerProps={{ 'aria-label': 'Open comment options menu' }}
           menuItems={
             currentUserId === comment.authorId ? (
               [
