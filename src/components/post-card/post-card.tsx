@@ -63,6 +63,7 @@ export function PostCard({
           <FormattedDate
             createdAt={post.createdAt}
             updatedAt={post.updatedAt}
+            className='max-[480px]:text-xs'
           />
         </Muted>
         <Button type='button' variant={'outline'} asChild>
