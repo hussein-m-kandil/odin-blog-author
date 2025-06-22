@@ -8,6 +8,7 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   bio: string | null;
+  avatar?: string | null;
 }
 
 export interface AuthRes {
