@@ -21,6 +21,7 @@ import { cn, getUnknownErrorMessage } from '@/lib/utils';
 import { useDialog } from '@/contexts/dialog-context/';
 import { UserAvatar } from '@/components/user-avatar';
 import { ModeToggle } from '@/components/mode-toggle';
+import { Separator } from '@/components/ui/separator';
 import { PostForm } from '@/components/post-form';
 import { Button } from '@/components/ui/button';
 import { Large } from '@/components/typography';
@@ -114,10 +115,11 @@ export function Navbar({ user = null }: { user?: User | null }) {
           'top-0 left-0 bottom-auto w-full bg-background/85 backdrop-blur-xs shadow-sm shadow-secondary',
           'transition-transform duration-700 motion-reduce:transition-none motion-reduce:translate-y-0'
         )}>
-        <div className='container p-4 mx-auto flex flex-wrap items-center justify-between max-[350px]:justify-center gap-4'>
+        <div className='container p-4 mx-auto flex flex-wrap items-center justify-between max-[350px]:justify-center gap-y-2 gap-x-4'>
           <Large className='text-2xl'>{process.env.NEXT_PUBLIC_APP_NAME}</Large>
-          <div className='flex items-center gap-2'>
+          <div className='flex items-center gap-2 h-8'>
             <ModeToggle triggerProps={{ className: 'rounded-full' }} />
+            <Separator orientation='vertical' />
             <DropdownMenu>
               <DropdownMenuTrigger asChild aria-label='Open user options'>
                 <Button variant='outline' size='icon' className='rounded-full'>
