@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies, headers } from 'next/headers';
-import { AuthRes, User } from '@/types';
+import { AuthData, AuthRes, User } from '@/types';
 import logger from './logger';
 
 export const PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -10,21 +10,30 @@ export const PATHNAME_HEADER_KEY = 'x-pathname';
 export const USER_ID_HEADER_KEY = 'x-uid';
 export const URL_HEADER_KEY = 'x-url';
 
-if (!API_BASE_URL || !PUBLIC_API_BASE_URL) {
-  logger.error('Public or private API base URL is not defined', {
-    API_BASE_URL: API_BASE_URL,
-    NEXT_PUBLIC_API_BASE_URL: PUBLIC_API_BASE_URL,
-  });
+if (!API_BASE_URL) {
+  throw new Error(
+    'Expect the environment variable `API_BASE_URL` to be defined'
+  );
 }
 
-export async function getSignedInUser(): Promise<User | null> {
+if (!PUBLIC_API_BASE_URL) {
+  throw new Error(
+    'Expect the environment variable `PUBLIC_API_BASE_URL` to be defined'
+  );
+}
+
+export async function getAuthorization(): Promise<string | undefined> {
+  return (await cookies()).get(AUTH_COOKIE_KEY)?.value;
+}
+
+export const getAuthorizedUser = async (
+  Authorization?: string
+): Promise<User | null> => {
   try {
-    const cookieStore = await cookies();
-    const Authorization = cookieStore.get(AUTH_COOKIE_KEY)?.value;
     if (Authorization) {
       const res = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: { 'Content-Type': 'application/json', Authorization },
-        cache: 'no-store',
+        cache: 'no-store', // TODO: Think about Caching this request, in case it is used multiple times in a row
       });
       if (res.ok) return await res.json();
     }
@@ -32,7 +41,19 @@ export async function getSignedInUser(): Promise<User | null> {
     logger.error('Error fetching signed-in user:', error);
   }
   return null;
+};
+
+export async function getSignedInUser(): Promise<User | null> {
+  return getAuthorizedUser(await getAuthorization());
 }
+
+export const getAuthData = async (): Promise<AuthData> => {
+  const data = {} as AuthData;
+  data.backendUrl = API_BASE_URL;
+  data.token = await getAuthorization();
+  data.user = await getAuthorizedUser(data.token);
+  return data;
+};
 
 export function createAuthCookie(value: string, maxAge = 7 * 24 * 60 * 60) {
   const expires = new Date(Date.now() + maxAge * 1000).toUTCString();
