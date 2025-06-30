@@ -3,6 +3,8 @@ import { Metadata } from 'next';
 import { ThemeProvider } from 'next-themes';
 import { DialogProvider } from '@/contexts/dialog-context/';
 import { Toaster } from '@/components/ui/sonner';
+import { AuthProvider } from '@/contexts/auth-context';
+import { getAuthData } from '@/lib/auth';
 
 export const metadata: Metadata = {
   title: {
@@ -18,17 +20,21 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const authData = await getAuthData();
+
   return (
     <html lang='en' suppressHydrationWarning>
       <body>
-        <ThemeProvider
-          enableSystem
-          attribute='class'
-          defaultTheme='system'
-          disableTransitionOnChange>
-          <DialogProvider>{children}</DialogProvider>
-          <Toaster expand visibleToasts={3} richColors closeButton />
-        </ThemeProvider>
+        <AuthProvider initAuthData={authData}>
+          <ThemeProvider
+            enableSystem
+            attribute='class'
+            defaultTheme='system'
+            disableTransitionOnChange>
+            <DialogProvider>{children}</DialogProvider>
+            <Toaster expand visibleToasts={3} richColors closeButton />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
