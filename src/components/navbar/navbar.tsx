@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn, getUnknownErrorMessage } from '@/lib/utils';
 import { useDialog } from '@/contexts/dialog-context/';
+import { useAuthData } from '@/contexts/auth-context';
 import { UserAvatar } from '@/components/user-avatar';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Separator } from '@/components/ui/separator';
@@ -27,14 +28,17 @@ import { Button } from '@/components/ui/button';
 import { Large } from '@/components/typography';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { User } from '@/types';
 
 function CustomMenuItem({ children }: React.PropsWithChildren) {
   return <DropdownMenuItem asChild>{children}</DropdownMenuItem>;
 }
 
-export function Navbar({ user = null }: { user?: User | null }) {
+export function Navbar() {
   const navContainerRef = React.useRef<HTMLDivElement>(null);
+
+  const { authData, setAuthData } = useAuthData();
+
+  const user = authData.user;
 
   const [yScroll, setYScroll] = React.useState(0);
   const { showDialog, hideDialog } = useDialog();
@@ -74,6 +78,7 @@ export function Navbar({ user = null }: { user?: User | null }) {
       loading: 'Signing out...',
       success: (apiRes) => {
         if (!apiRes.ok) return { message: 'Failed to sign you out' };
+        setAuthData({ ...authData, user: null, token: '' });
         router.replace('/signin');
         return {
           message: `Bye${user ? ', ' + user.username : ''}`,
