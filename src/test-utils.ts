@@ -1,4 +1,4 @@
-import { User, Post } from '@/types';
+import { User, Post, AuthData } from '@/types';
 import { vi } from 'vitest';
 
 export const delay = (fn: () => void, ms = 100) => setTimeout(fn, ms);
@@ -16,6 +16,23 @@ export const mockDialogContext = () => {
   return dialogMockedMethods;
 };
 
+export const mockAuthContext = () => {
+  const authMockedMethods = vi.hoisted(() => {
+    const authData = {
+      backendUrl: 'https://new-test.com/api/v1',
+      token: 'new-test-token',
+      user: null,
+    };
+    const setAuthData = vi.fn();
+    const useAuthData = vi.fn(() => ({ authData, setAuthData }));
+    return { useAuthData, setAuthData, authData };
+  });
+  vi.mock('@/contexts/auth-context', () => ({
+    useAuthData: authMockedMethods.useAuthData,
+  }));
+  return authMockedMethods;
+};
+
 export const dates = {
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
@@ -28,6 +45,12 @@ export const author: User = {
   id: 'blahblah123user',
   username: 'nowhere_man',
   fullname: 'Nowhere-Man',
+};
+
+export const initAuthData: AuthData = {
+  backendUrl: 'https://test.com/api/v1',
+  token: 'test-token',
+  user: author,
 };
 
 export const post: Post = {

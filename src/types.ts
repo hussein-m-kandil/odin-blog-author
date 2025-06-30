@@ -16,6 +16,12 @@ export interface AuthRes {
   user: User;
 }
 
+export interface AuthData {
+  backendUrl: string;
+  user?: User | null;
+  token?: string;
+}
+
 export interface Category {
   id: string;
   postId: string;
