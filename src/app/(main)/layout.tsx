@@ -1,8 +1,7 @@
-import { Navbar } from '@/components/navbar';
 import { getSignedInUser } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 
-export default async function RootLayout({
+export default async function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -13,10 +12,5 @@ export default async function RootLayout({
     return redirect('/signin');
   }
 
-  return (
-    <>
-      <Navbar />
-      <div className='container mx-auto px-4'>{children}</div>
-    </>
-  );
+  return <div className='container mx-auto px-4'>{children}</div>;
 }

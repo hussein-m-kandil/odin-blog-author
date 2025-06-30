@@ -1,10 +1,11 @@
 import './globals.css';
-import { Metadata } from 'next';
-import { ThemeProvider } from 'next-themes';
 import { DialogProvider } from '@/contexts/dialog-context/';
-import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/contexts/auth-context';
+import { Toaster } from '@/components/ui/sonner';
+import { Navbar } from '@/components/navbar';
+import { ThemeProvider } from 'next-themes';
 import { getAuthData } from '@/lib/auth';
+import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: {
@@ -31,7 +32,10 @@ export default async function RootLayout({
             attribute='class'
             defaultTheme='system'
             disableTransitionOnChange>
-            <DialogProvider>{children}</DialogProvider>
+            <DialogProvider>
+              <Navbar />
+              {children}
+            </DialogProvider>
             <Toaster expand visibleToasts={3} richColors closeButton />
           </ThemeProvider>
         </AuthProvider>
