@@ -19,8 +19,10 @@ import {
   getUnknownErrorMessage,
 } from '@/lib/utils';
 import { ErrorMessage } from '@/components/error-message';
+import { useAuthData } from '@/contexts/auth-context';
 import { AuthFormProps } from './auth-form.types';
 import { useRouter } from 'next/navigation';
+import { AuthRes } from '@/types';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -33,6 +35,8 @@ export function AuthForm({
 }: AuthFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
+
+  const { authData, setAuthData } = useAuthData();
 
   const formData =
     formType === 'signin'
@@ -91,8 +95,10 @@ export function AuthForm({
         method: formData.method,
       });
       if (apiRes.ok) {
-        hookForm.reset();
+        const authRes = (await apiRes.json()) as AuthRes;
+        setAuthData({ ...authData, ...authRes });
         setErrorMessage('');
+        hookForm.reset();
         if (onSuccess) onSuccess();
         else router.replace('/');
         formData.showToast(values.username || formData.name);

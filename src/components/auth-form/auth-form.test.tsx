@@ -6,14 +6,18 @@ import {
 import { injectDefaultValuesInDynamicFormAttrs as injectDefaults } from '@/components/dynamic-form';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { author, delay, mockAuthContext } from '@/test-utils';
 import { AuthFormProps, FormType } from './auth-form.types';
 import { userEvent } from '@testing-library/user-event';
-import { author, delay } from '@/test-utils';
+import { AuthRes } from '@/types';
+
+mockAuthContext();
 
 const fetchMock = vi.spyOn(window, 'fetch').mockImplementation(
   vi.fn(() => {
+    const authRes: AuthRes = { user: author, token: 'test-token' };
     return new Promise<Response>((resolve) =>
-      delay(() => resolve(new Response(null, { status: 204 })))
+      delay(() => resolve(Response.json(authRes)))
     );
   })
 );

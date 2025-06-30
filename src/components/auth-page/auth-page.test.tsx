@@ -1,6 +1,9 @@
-import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
+import { mockAuthContext } from '@/test-utils';
 import { AuthPage, PageType } from './auth-page';
+import { render, screen } from '@testing-library/react';
+
+mockAuthContext();
 
 describe('<AuthPage />', () => {
   const pageTypes: PageType[] = ['signin', 'signup'];
