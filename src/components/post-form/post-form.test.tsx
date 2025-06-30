@@ -7,9 +7,11 @@ import {
 } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { createPostFormAttrs } from './post-form.data';
+import { mockAuthContext, post } from '@/test-utils';
 import { PostForm } from './post-form';
-import { post } from '@/test-utils';
 import { Post } from '@/types';
+
+mockAuthContext();
 
 const onSuccessMock = vi.fn();
 const fetchMock = () => {

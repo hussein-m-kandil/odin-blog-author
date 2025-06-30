@@ -13,12 +13,13 @@ import {
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
 import { ErrorMessage } from '@/components/error-message';
 import { Categories } from '@/components/categories';
+import { ImageForm } from '@/components/image-form';
 import { PostFormProps } from './post-form.types';
 import { Combobox } from '@/components/combobox';
 import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
-import { Post } from '@/types';
+import { Image, Post } from '@/types';
 import { z } from 'zod';
 
 const CATEGORIES_MAX_NUM = 7;
@@ -32,6 +33,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   );
   const [categoriesError, setCategoriesError] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
+  const [image, setImage] = React.useState<Image | null>(null);
   const router = useRouter();
 
   React.useEffect(() => {
@@ -91,6 +93,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
       {errorMessage && (
         <P className='text-destructive text-sm text-center'>{errorMessage}</P>
       )}
+      <ImageForm image={image} onSuccess={(img) => setImage(img)} />
       <DynamicForm
         {...formProps}
         formAttrs={postFormAttrs}

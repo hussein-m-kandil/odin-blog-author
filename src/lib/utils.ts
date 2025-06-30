@@ -1,10 +1,22 @@
 import logger from './logger';
 import { UseFormReturn } from 'react-hook-form';
+import { ImageLoaderProps, ImageLoader } from 'next/image';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export function loadSupabaseImg({
+  src,
+  width,
+  quality,
+}: ImageLoaderProps): ReturnType<ImageLoader> {
+  const url = new URL(src);
+  url.searchParams.set('width', width.toString());
+  url.searchParams.set('quality', (quality || 75).toString());
+  return url.toString();
 }
 
 export function abbreviateFullName(fullname: string) {
