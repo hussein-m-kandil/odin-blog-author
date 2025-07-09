@@ -22,6 +22,24 @@ export interface AuthData {
   token?: string;
 }
 
+export interface Image {
+  id: string;
+  src: string;
+  alt: string;
+  owner: User;
+  info: string;
+  size: number;
+  xPos: number;
+  yPos: number;
+  scale: number;
+  width: number;
+  height: number;
+  ownerId: string;
+  mimetype: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Category {
   id: string;
   postId: string;
