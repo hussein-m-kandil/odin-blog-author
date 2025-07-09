@@ -11,21 +11,22 @@ import {
   isObject,
 } from '@/lib/utils';
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
+import { PostFormProps, NewPostInput } from './post-form.types';
 import { ErrorMessage } from '@/components/error-message';
 import { Categories } from '@/components/categories';
-import { PostFormProps } from './post-form.types';
+import { ImageForm } from '@/components/image-form';
 import { Combobox } from '@/components/combobox';
 import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
-import { Post } from '@/types';
-import { z } from 'zod';
+import { Image, Post } from '@/types';
 
 const CATEGORIES_MAX_NUM = 7;
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
+  const [image, setImage] = React.useState<Image | null>(post?.image || null);
   const [allCategories, setAllCategories] = React.useState<string[]>([]);
   const [categories, setCategories] = React.useState<string[]>(
     post ? post.categories.map((c) => c.categoryName) : []
@@ -59,11 +60,16 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
 
-  const handleCreatePost: DynamicFormSubmitHandler<
-    z.infer<typeof postFormSchema>
-  > = async (hookForm, values) => {
+  const handleCreatePost: DynamicFormSubmitHandler<NewPostInput> = async (
+    hookForm,
+    values
+  ) => {
     try {
-      const postValues = { ...values, categories };
+      const postValues: NewPostInput & {
+        categories: string[];
+        image?: string;
+      } = { ...values, categories };
+      if (image) postValues.image = image.id;
       const apiRes = await fetch(
         `${apiBaseUrl}/posts${post ? '/' + post.id : ''}`,
         {
@@ -91,6 +97,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
       {errorMessage && (
         <P className='text-destructive text-sm text-center'>{errorMessage}</P>
       )}
+      <ImageForm image={image} onSuccess={(img) => setImage(img)} />
       <DynamicForm
         {...formProps}
         formAttrs={postFormAttrs}
@@ -103,7 +110,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
             : { idle: 'Create Post', submitting: 'Creating...' }
         }>
         <div>
-          <div className='flex justify-between items-center space-x-2'>
+          <div className='flex justify-between items-baseline space-x-2'>
             <Combobox
               triggerContent={
                 <>
