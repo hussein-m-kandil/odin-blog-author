@@ -73,6 +73,7 @@ export const image: Image = {
 export const post: Post = {
   author,
   ...dates,
+  image: image,
   published: true,
   title: 'Test Post',
   id: 'blahblah123post',
