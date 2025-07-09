@@ -1,4 +1,4 @@
-import { User, Post, AuthData } from '@/types';
+import { User, Post, Image, AuthData } from '@/types';
 import { vi } from 'vitest';
 
 export const delay = (fn: () => void, ms = 100) => setTimeout(fn, ms);
@@ -51,6 +51,23 @@ export const initAuthData: AuthData = {
   backendUrl: 'https://test.com/api/v1',
   token: 'test-token',
   user: author,
+};
+
+export const image: Image = {
+  ...dates,
+  ownerId: author.id,
+  owner: { ...author },
+  id: 'blahblah123image',
+  src: 'https://example.com/test-image.jpg',
+  mimetype: 'image/jpeg',
+  alt: 'Test image',
+  size: 750000,
+  height: 1080,
+  width: 1920,
+  scale: 1.0,
+  xPos: 0,
+  yPos: 0,
+  info: '',
 };
 
 export const post: Post = {
