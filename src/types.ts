@@ -74,6 +74,7 @@ export interface Post {
   published: boolean;
   categories: Category[];
   comments: Comment[];
+  image: Image | null;
   votes: Vote[];
   author: User;
 }
