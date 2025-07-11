@@ -121,7 +121,9 @@ export function Navbar() {
           'transition-transform duration-700 motion-reduce:transition-none motion-reduce:translate-y-0'
         )}>
         <div className='container p-4 mx-auto flex flex-wrap items-center justify-between max-[350px]:justify-center gap-y-2 gap-x-4'>
-          <Large className='text-2xl'>{process.env.NEXT_PUBLIC_APP_NAME}</Large>
+          <Large className='text-2xl'>
+            <Link href='/'>{process.env.NEXT_PUBLIC_APP_NAME}</Link>
+          </Large>
           <div className='flex items-center gap-2 h-8'>
             <ModeToggle triggerProps={{ className: 'rounded-full' }} />
             <Separator orientation='vertical' />
