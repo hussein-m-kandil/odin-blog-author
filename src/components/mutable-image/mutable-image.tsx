@@ -37,12 +37,13 @@ export function MutableImage({
         <>
           <Image
             fill
+            priority
             tabIndex={0}
             ref={imgRef}
             alt={image.alt || ''}
             loader={loadSupabaseImg}
             onLoad={() => setLoading(false)}
-            src={`${image.src}?now=${Date.now()}`} // Force the browser to refetch it, in case of update under the same source url
+            src={`${image.src}${mutation ? '?now=' + Date.now() : ''}`} // Force the browser to refetch it, if under mutation
             className={cn(loading && 'absolute opacity-0 -z-50')}
             sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
             style={{
