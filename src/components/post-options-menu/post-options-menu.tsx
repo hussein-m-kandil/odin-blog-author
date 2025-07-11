@@ -47,7 +47,7 @@ export function PostOptionsMenu({
       subject: post.title,
       onCancel: hideDialog,
       'aria-labelledby': `delete-post-form-${id}`,
-      onSuccess: () => (hideDialog(), router.replace('/blog')),
+      onSuccess: () => (hideDialog(), router.replace('/')),
       delReqFn: () => fetch(`${apiBaseUrl}/posts/${post.id}`, reqInit),
     };
 

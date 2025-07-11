@@ -42,7 +42,7 @@ export function Category({
     </div>
   ) : (
     <Button {...categoryProps} asChild>
-      <Link href={`/blog?categories=${encodeURIComponent(name.toLowerCase())}`}>
+      <Link href={`/?categories=${encodeURIComponent(name.toLowerCase())}`}>
         {name}
       </Link>
     </Button>

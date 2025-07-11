@@ -39,7 +39,7 @@ export function Comment({
           onCancel={hideDialog}
           onSuccess={() => {
             hideDialog();
-            router.replace(`/blog/${comment.postId}`, { scroll: false });
+            router.replace(`/${comment.postId}`, { scroll: false });
             toast.success('Comment Deleted', {
               description: 'You have deleted a comment successfully',
             });

@@ -70,7 +70,7 @@ export function CommentForm({
       if (!apiRes.ok) throw apiRes;
       setErrMsg('');
       setContent('');
-      router.replace(`/blog/${updating ? comment.postId : postId}`, {
+      router.replace(`/${updating ? comment.postId : postId}`, {
         scroll: false,
       });
       toast.success(updating ? 'Comment Updated' : 'New Comment Added', {

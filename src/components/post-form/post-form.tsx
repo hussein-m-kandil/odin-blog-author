@@ -83,7 +83,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         setErrorMessage('');
         onSuccess?.();
         const postData = post || ((await apiRes.json()) as Post);
-        router.push(`/blog${postData && postData.id ? '/' + postData.id : ''}`);
+        router.push(`/${postData && postData.id ? postData.id : ''}`);
       } else {
         setErrorMessage(await getResErrorMessageOrThrow(apiRes, hookForm));
       }

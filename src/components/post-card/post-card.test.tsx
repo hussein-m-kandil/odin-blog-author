@@ -15,7 +15,7 @@ describe('<PostCard />', () => {
     }) as HTMLAnchorElement[];
     expect(readLinks.length).toBeTruthy();
     for (const readLink of readLinks) {
-      expect(readLink.href).toMatch(new RegExp(`/blog/${post.id}$`));
+      expect(readLink.href).toMatch(new RegExp(`/${post.id}$`));
     }
     const authorLink = screen.getByRole('link', {
       name: new RegExp(`${post.author.username}|${post.author.fullname}`, 'i'),

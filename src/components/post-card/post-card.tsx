@@ -31,7 +31,7 @@ export function PostCard({
   post,
   ...props
 }: PostCardProps) {
-  const postUrl = `/blog/${post.id}`;
+  const postUrl = `/${post.id}`;
 
   return (
     <Card
