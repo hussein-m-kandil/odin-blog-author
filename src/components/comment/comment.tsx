@@ -1,14 +1,18 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { Muted, P } from '@/components/typography';
 import { useDialog } from '@/contexts/dialog-context';
 import { DeleteForm } from '@/components/delete-form';
+import { UserAvatar } from '@/components/user-avatar';
 import { OptionsMenu } from '@/components/options-menu';
 import { CommentForm } from '@/components/comment-form';
 import { Comment as CommentType, ID, Post } from '@/types';
+import { FormattedDate } from '@/components/formatted-date';
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -23,6 +27,7 @@ export function Comment({
   comment: CommentType;
   post: Post;
 }) {
+  const [hideContent, setHideContent] = React.useState(true);
   const [updating, setUpdating] = React.useState(false);
   const router = useRouter();
 
@@ -57,6 +62,12 @@ export function Comment({
 
   const exitUpdate = () => setUpdating(false);
 
+  const isCurrentUserCommentAuthor = currentUserId === comment.authorId;
+  const isCurrentUserPostAuthor = currentUserId === post.authorId;
+  const authorProfileUrl = `/profile${
+    isCurrentUserCommentAuthor ? '' : '/' + comment.authorId
+  }`;
+
   return updating ? (
     <CommentForm
       onSuccess={exitUpdate}
@@ -68,17 +79,38 @@ export function Comment({
       {...props}
       className={cn(
         'bg-secondary/50 p-4 rounded-md border border-input',
-        'flex justify-between items-center',
+        'flex justify-between items-center gap-2',
         className
       )}>
-      {comment.content}
-      {(currentUserId === post.authorId ||
-        currentUserId === comment.authorId) && (
+      <Link href={authorProfileUrl}>
+        <UserAvatar user={comment.author} className='size-12 text-lg' />
+      </Link>
+      <div className='grow font-light'>
+        <P className='text-foreground italic'>
+          <button
+            type='button'
+            className={cn(
+              'text-start cursor-pointer',
+              hideContent && 'line-clamp-1'
+            )}
+            onClick={() => setHideContent(!hideContent)}>
+            {comment.content}
+          </button>
+        </P>
+        <Muted className='flex justify-between items-end border-t pt-1 mt-1 *:text-xs'>
+          <Link href={authorProfileUrl}>@{comment.author.username}</Link>
+          <FormattedDate
+            createdAt={comment.createdAt}
+            updatedAt={comment.updatedAt}
+          />
+        </Muted>
+      </div>
+      {(isCurrentUserPostAuthor || isCurrentUserCommentAuthor) && (
         <OptionsMenu
           menuProps={{ 'aria-label': 'Comment options menu', align: 'end' }}
           triggerProps={{ 'aria-label': 'Open comment options menu' }}
           menuItems={
-            currentUserId === comment.authorId ? (
+            isCurrentUserCommentAuthor ? (
               [
                 <button
                   type='button'
