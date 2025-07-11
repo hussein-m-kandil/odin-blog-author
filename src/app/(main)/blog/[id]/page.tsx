@@ -7,6 +7,7 @@ import { PrivacyIcon } from '@/components/privacy-icon';
 import { Comment as CommentType, Post } from '@/types';
 import { Categories } from '@/components/categories';
 import { authedFetch, getUserId } from '@/lib/auth';
+import { MutableImage } from '@/components/mutable-image';
 
 export default async function BlogPost({
   params,
@@ -44,7 +45,7 @@ export default async function BlogPost({
           </H1>
           {userId === post.authorId && <PostOptionsMenu post={post} />}
         </div>
-        <Muted className='flex items-center justify-between'>
+        <Muted className='flex items-baseline justify-between mt-1'>
           <FormattedDate
             createdAt={post.createdAt}
             updatedAt={post.updatedAt}
@@ -54,7 +55,8 @@ export default async function BlogPost({
       </header>
       <main>
         <article aria-labelledby={titleId}>
-          <Lead className='text-foreground font-light my-6'>
+          <MutableImage image={post.image} className='my-6' />
+          <Lead className='text-foreground font-light mb-6'>
             {post.content}
           </Lead>
           <Categories categories={post.categories} className='justify-end' />
