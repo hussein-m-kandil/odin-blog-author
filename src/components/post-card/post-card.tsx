@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { PostOptionsMenu } from '@/components/post-options-menu';
 import { FormattedDate } from '@/components/formatted-date';
+import { MutableImage } from '@/components/mutable-image';
 import { PrivacyIcon } from '@/components/privacy-icon';
 import { Muted, Lead } from '@/components/typography/';
 import { Button } from '@/components/ui/button';
@@ -56,6 +57,7 @@ export function PostCard({
         )}
       </CardHeader>
       <CardContent className='mt-auto'>
+        <MutableImage image={post.image} />
         <Lead className='line-clamp-3 font-light'>{post.content}</Lead>
       </CardContent>
       <CardFooter className='flex items-center justify-between'>
