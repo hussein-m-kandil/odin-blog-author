@@ -1,10 +1,11 @@
 import './globals.css';
+import { getAuthData, getCurrentPathname } from '@/lib/auth';
 import { DialogProvider } from '@/contexts/dialog-context/';
 import { AuthProvider } from '@/contexts/auth-context';
 import { Toaster } from '@/components/ui/sonner';
 import { Navbar } from '@/components/navbar';
 import { ThemeProvider } from 'next-themes';
-import { getAuthData } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -21,7 +22,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = await getCurrentPathname();
   const authData = await getAuthData();
+
+  if (!authData.user && !/\/sign(in|up)/.test(pathname)) {
+    return redirect('/signin');
+  }
 
   return (
     <html lang='en' suppressHydrationWarning>
@@ -34,7 +40,7 @@ export default async function RootLayout({
             disableTransitionOnChange>
             <DialogProvider>
               <Navbar />
-              {children}
+              <div className='container mx-auto px-4'>{children}</div>
             </DialogProvider>
             <Toaster expand visibleToasts={3} richColors closeButton />
           </ThemeProvider>
