@@ -31,7 +31,7 @@ export default async function Profile({
       </header>
       <main>
         {posts ? (
-          <Blogs posts={posts} headline={postsHeadline} />
+          <Blogs user={user} posts={posts} headline={postsHeadline} />
         ) : (
           <ErrorMessage>Could not get your blog posts</ErrorMessage>
         )}
