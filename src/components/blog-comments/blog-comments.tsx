@@ -42,7 +42,7 @@ export function BlogComments({
       {comments.length < 1 ? (
         <Muted className='text-center'>There are no comments</Muted>
       ) : (
-        <ul aria-label='Comments' className='space-y-1'>
+        <ul aria-label='Comments' className='space-y-2'>
           {comments.map((c) => (
             <li key={c.id}>
               <Comment comment={c} post={post} currentUserId={currentUserId} />
