@@ -118,7 +118,8 @@ export function Navbar() {
       <nav
         className={cn(
           'top-0 left-0 bottom-auto w-full bg-background/85 backdrop-blur-xs shadow-sm shadow-secondary',
-          'transition-transform duration-700 motion-reduce:transition-none motion-reduce:translate-y-0'
+          'transition-transform duration-700 motion-reduce:transition-none motion-reduce:translate-y-0',
+          'z-50'
         )}>
         <div className='container p-4 mx-auto flex flex-wrap items-center justify-between max-[350px]:justify-center gap-y-2 gap-x-4'>
           <Large className='text-2xl'>
