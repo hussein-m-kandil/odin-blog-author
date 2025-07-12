@@ -1,13 +1,11 @@
 import { ErrorMessage } from '@/components/error-message';
-import { authedFetch, getUserId } from '@/lib/auth';
 import { H1 } from '@/components/typography/h1';
 import { Blogs } from '@/components/blogs';
+import { authedFetch } from '@/lib/auth';
 import { Post } from '@/types';
 
 export default async function Blog() {
-  const userId = await getUserId();
-
-  const apiRes = await authedFetch(`/users/${userId}/posts`);
+  const apiRes = await authedFetch('/posts');
 
   if (!apiRes.ok) {
     return <ErrorMessage>Sorry, we could not get any posts</ErrorMessage>;
