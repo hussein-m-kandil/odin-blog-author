@@ -36,7 +36,7 @@ export function PostCard({
   return (
     <Card
       {...props}
-      className={cn('aspect-square flex-col justify-between', className)}>
+      className={cn('flex-col justify-between gap-4', className)}>
       <CardHeader>
         <CardTitle
           title={post.title}
@@ -45,8 +45,8 @@ export function PostCard({
             <PrivacyIcon isPublic={post.published} /> <span>{post.title}</span>
           </Link>
         </CardTitle>
-        <CardDescription>
-          <Link href={`/profile/${post.authorId}`} className='italic'>
+        <CardDescription className='italic truncate'>
+          <Link href={`/profile/${post.authorId}`}>
             @{post.author.username}
           </Link>
         </CardDescription>
@@ -56,9 +56,11 @@ export function PostCard({
           </CardAction>
         )}
       </CardHeader>
-      <CardContent className='mt-auto'>
+      <CardContent className='mt-auto p-0'>
         <MutableImage image={post.image} />
-        <Lead className='line-clamp-3 font-light'>{post.content}</Lead>
+        <Lead className='line-clamp-3 font-light text-lg px-6'>
+          {post.content}
+        </Lead>
       </CardContent>
       <CardFooter className='flex items-center justify-between'>
         <Muted>
