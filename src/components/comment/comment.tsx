@@ -79,7 +79,7 @@ export function Comment({
       {...props}
       className={cn(
         'bg-secondary/50 p-4 rounded-md border border-input',
-        'flex justify-between items-center gap-2',
+        'relative flex justify-between items-center gap-2',
         className
       )}>
       <Link href={authorProfileUrl}>
@@ -98,7 +98,9 @@ export function Comment({
           </button>
         </P>
         <Muted className='flex justify-between items-end border-t pt-1 mt-1 *:text-xs'>
-          <Link href={authorProfileUrl}>@{comment.author.username}</Link>
+          <Link href={authorProfileUrl} className='w-28 truncate'>
+            @{comment.author.username}
+          </Link>
           <FormattedDate
             createdAt={comment.createdAt}
             updatedAt={comment.updatedAt}
@@ -108,7 +110,10 @@ export function Comment({
       {(isCurrentUserPostAuthor || isCurrentUserCommentAuthor) && (
         <OptionsMenu
           menuProps={{ 'aria-label': 'Comment options menu', align: 'end' }}
-          triggerProps={{ 'aria-label': 'Open comment options menu' }}
+          triggerProps={{
+            'aria-label': 'Open comment options menu',
+            className: 'absolute top-3 right-3',
+          }}
           menuItems={
             isCurrentUserCommentAuthor ? (
               [
