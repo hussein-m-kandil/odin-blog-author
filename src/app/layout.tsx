@@ -1,11 +1,8 @@
 import './globals.css';
 import { getAuthData, getCurrentPathname } from '@/lib/auth';
-import { DialogProvider } from '@/contexts/dialog-context/';
-import { AuthProvider } from '@/contexts/auth-context';
-import { Toaster } from '@/components/ui/sonner';
 import { Navbar } from '@/components/navbar';
-import { ThemeProvider } from 'next-themes';
 import { redirect } from 'next/navigation';
+import { Providers } from './providers';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -32,19 +29,10 @@ export default async function RootLayout({
   return (
     <html lang='en' suppressHydrationWarning>
       <body>
-        <AuthProvider initAuthData={authData}>
-          <ThemeProvider
-            enableSystem
-            attribute='class'
-            defaultTheme='system'
-            disableTransitionOnChange>
-            <DialogProvider>
-              <Navbar />
-              <div className='container mx-auto px-4'>{children}</div>
-            </DialogProvider>
-            <Toaster expand visibleToasts={3} richColors closeButton />
-          </ThemeProvider>
-        </AuthProvider>
+        <Providers authData={authData}>
+          <Navbar />
+          <div className='container mx-auto px-4'>{children}</div>
+        </Providers>
       </body>
     </html>
   );
