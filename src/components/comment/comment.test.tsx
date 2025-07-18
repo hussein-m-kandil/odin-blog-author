@@ -21,8 +21,8 @@ describe('<Comments />', () => {
 
   it('should have the given class', async () => {
     const htmlClass = 'blah';
-    render(<Comment {...props} className={htmlClass} />);
-    expect(screen.getByText(comment.content)).toHaveClass(htmlClass);
+    const { container } = render(<Comment {...props} className={htmlClass} />);
+    expect(container.firstElementChild).toHaveClass(htmlClass);
   });
 
   it('should not render comment options menu if not given the current user id', async () => {

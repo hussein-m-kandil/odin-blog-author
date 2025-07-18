@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
-import { Muted, P } from '@/components/typography';
+import { Muted } from '@/components/typography';
 import { useDialog } from '@/contexts/dialog-context';
 import { DeleteForm } from '@/components/delete-form';
 import { UserAvatar } from '@/components/user-avatar';
@@ -27,7 +27,7 @@ export function Comment({
   comment: CommentType;
   post: Post;
 }) {
-  const [hideContent, setHideContent] = React.useState(true);
+  const [truncContent, setHideContent] = React.useState(true);
   const [updating, setUpdating] = React.useState(false);
   const router = useRouter();
 
@@ -86,17 +86,17 @@ export function Comment({
         <UserAvatar user={comment.author} className='size-12 text-lg' />
       </Link>
       <div className='grow font-light'>
-        <P className='text-foreground italic'>
+        <div className='text-foreground italic'>
           <button
             type='button'
             className={cn(
               'text-start cursor-pointer',
-              hideContent && 'line-clamp-1'
+              truncContent && 'line-clamp-1'
             )}
-            onClick={() => setHideContent(!hideContent)}>
+            onClick={() => setHideContent(!truncContent)}>
             {comment.content}
           </button>
-        </P>
+        </div>
         <Muted className='flex justify-between items-end border-t pt-1 mt-1 *:text-xs'>
           <Link href={authorProfileUrl} className='w-28 truncate'>
             @{comment.author.username}
