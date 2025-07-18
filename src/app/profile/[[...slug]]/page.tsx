@@ -1,40 +1,57 @@
-import { authedFetch, getSignedInUser } from '@/lib/auth';
-import { ErrorMessage } from '@/components/error-message';
+import {
+  dehydrate,
+  QueryClient,
+  HydrationBoundary,
+} from '@tanstack/react-query';
 import { UserProfile } from '@/components/user-profile';
-import { H2 } from '@/components/typography/h2';
+import { API_BASE_URL, getAuthData } from '@/lib/auth';
+import { Header } from '@/components/header';
 import { redirect } from 'next/navigation';
-import { Blogs } from '@/components/blogs';
-import { Post, User } from '@/types';
+import { Posts } from '@/components/posts';
+import { User } from '@/types';
 
 export default async function Profile({
   params,
 }: {
   params: Promise<{ slug?: string[] }>;
 }) {
-  const userId = (await params).slug?.[0];
+  const profileId = (await params).slug?.[0];
 
-  // TODO: Replace `authedFetch` with the normal `fetch`, after remove the API restriction on getting the users
-  const user = userId
-    ? ((await (await authedFetch(`/users/${userId}`)).json()) as User)
-    : await getSignedInUser();
+  const { token, user: signedInUser } = await getAuthData();
+
+  // TODO: Use react-query for this too
+  const user = profileId
+    ? ((await (
+        await fetch(`${API_BASE_URL}/users/${profileId}`, {
+          headers: { Authorization: token || '' },
+        })
+      ).json()) as User)
+    : signedInUser;
+
   if (!user) return redirect('/signin');
 
-  const postsRes = await authedFetch(`/users/${user.id}/posts`);
-  const posts = postsRes.ok ? ((await postsRes.json()) as Post[]) : null;
+  const postsUrl = `${API_BASE_URL}/users/${user.id}/posts`;
 
-  const postsHeadline = <H2 className='text-center'>Blog Posts</H2>;
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ['posts', postsUrl, token],
+    queryFn: async () => {
+      return (
+        await fetch(postsUrl, { headers: { Authorization: token || '' } })
+      ).json();
+    },
+  });
 
   return (
     <>
-      <header className='max-w-sm mx-auto my-8 text-center'>
+      <Header>
         <UserProfile user={user} />
-      </header>
+      </Header>
       <main>
-        {posts ? (
-          <Blogs user={user} posts={posts} headline={postsHeadline} />
-        ) : (
-          <ErrorMessage>Could not get your blog posts</ErrorMessage>
-        )}
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          <Posts postsUrl={postsUrl} />
+        </HydrationBoundary>
       </main>
     </>
   );

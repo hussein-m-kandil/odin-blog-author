@@ -1,27 +1,46 @@
-import { ErrorMessage } from '@/components/error-message';
-import { H1 } from '@/components/typography/h1';
-import { Blogs } from '@/components/blogs';
-import { authedFetch, getSignedInUser } from '@/lib/auth';
-import { Post } from '@/types';
+import {
+  dehydrate,
+  QueryClient,
+  HydrationBoundary,
+} from '@tanstack/react-query';
+import { API_BASE_URL, getAuthData, URL_HEADER_KEY } from '@/lib/auth';
+import { H1 } from '@/components/typography/';
+import { Header } from '@/components/header';
+import { Posts } from '@/components/posts';
+import { headers } from 'next/headers';
 
-export default async function Blog() {
-  const user = await getSignedInUser();
+export default async function Home() {
+  const { token } = await getAuthData();
 
-  const apiRes = await authedFetch('/posts');
+  const headerStore = await headers();
 
-  if (!apiRes.ok) {
-    return <ErrorMessage>Sorry, we could not get any posts</ErrorMessage>;
-  }
+  const currentUrl =
+    headerStore.get(URL_HEADER_KEY) || headerStore.get('referer');
+  const postsUrl = `${API_BASE_URL}/posts${
+    currentUrl ? new URL(currentUrl).search : ''
+  }`;
 
-  const posts: Post[] = await apiRes.json();
+  const queryClient = new QueryClient();
 
-  const postsHeadline = (
-    <H1 className='text-center mt-8 border-b pb-3'>Blog Posts</H1>
-  );
+  await queryClient.prefetchQuery({
+    queryKey: ['posts', postsUrl, token],
+    queryFn: async () => {
+      return (
+        await fetch(postsUrl, { headers: { Authorization: token || '' } })
+      ).json();
+    },
+  });
 
   return (
-    <main>
-      <Blogs user={user} posts={posts} headline={postsHeadline} />
-    </main>
+    <>
+      <Header>
+        <H1>{process.env.NEXT_PUBLIC_APP_NAME || 'Home Page'}</H1>
+      </Header>
+      <main>
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          <Posts postsUrl={postsUrl} />
+        </HydrationBoundary>
+      </main>
+    </>
   );
 }
