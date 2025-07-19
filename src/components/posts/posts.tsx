@@ -4,6 +4,7 @@ import React from 'react';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
+import { InView } from 'react-intersection-observer';
 import { PostCard } from '@/components/post-card';
 import { H2, P } from '@/components/typography/';
 import { Button } from '@/components/ui/button';
@@ -85,7 +86,10 @@ export function Posts({
         ))}
       </div>
       {hasNextPage && (
-        <div className='text-center'>
+        <InView
+          as='div'
+          className='text-center'
+          onChange={(inView) => inView && fetchNextIfYouCan()}>
           <Button
             type='button'
             variant='link'
@@ -97,7 +101,7 @@ export function Posts({
               'Load More'
             )}
           </Button>
-        </div>
+        </InView>
       )}
     </div>
   );
