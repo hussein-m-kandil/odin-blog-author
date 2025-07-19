@@ -34,13 +34,15 @@ export default async function Profile({
 
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
+  await queryClient.prefetchInfiniteQuery({
     queryKey: ['posts', postsUrl, token],
     queryFn: async () => {
-      return (
-        await fetch(postsUrl, { headers: { Authorization: token || '' } })
-      ).json();
+      const res = await fetch(postsUrl, {
+        headers: { Authorization: token || '' },
+      });
+      return res.json();
     },
+    initialPageParam: 0,
   });
 
   return (
