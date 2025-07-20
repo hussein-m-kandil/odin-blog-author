@@ -2,13 +2,12 @@
 
 import React from 'react';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
+import { PostCard, PostCardSkeleton } from '@/components/post-card';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
 import { InView } from 'react-intersection-observer';
-import { PostCard } from '@/components/post-card';
 import { H2, P } from '@/components/typography/';
 import { Button } from '@/components/ui/button';
-import { Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Post } from '@/types';
 
@@ -54,10 +53,9 @@ export function Posts({
 
   const isFetchDisabled = !hasNextPage || isFetching;
 
-  if (status === 'pending') {
-    // TODO: Change this into something cool like a skeleton
-    return <P className='text-center'>Loading...</P>;
-  }
+  const loader = <PostCardSkeleton />;
+
+  if (status === 'pending') return loader;
 
   if (status === 'error') {
     return <ErrorMessage>Sorry, we could not get any posts</ErrorMessage>;
@@ -84,8 +82,9 @@ export function Posts({
             ))}
           </React.Fragment>
         ))}
+        {isFetchingNextPage && loader}
       </div>
-      {hasNextPage && (
+      {!isFetchingNextPage && hasNextPage && (
         <InView
           as='div'
           className='text-center'
@@ -95,11 +94,7 @@ export function Posts({
             variant='link'
             onClick={fetchNextIfYouCan}
             disabled={isFetchDisabled}>
-            {isFetchingNextPage ? (
-              <Loader className='animate-spin' />
-            ) : (
-              'Load More'
-            )}
+            Load More
           </Button>
         </InView>
       )}
