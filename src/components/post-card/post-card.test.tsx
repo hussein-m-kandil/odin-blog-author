@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { post, mockDialogContext } from '@/test-utils';
 import { describe, expect, it } from 'vitest';
 import { PostCard } from './post-card';
+import PostCardSkeleton from './post-card.skeleton';
 
 mockDialogContext();
 
@@ -31,5 +32,13 @@ describe('<PostCard />', () => {
   it('should show action button without mutation actions for an immutable post', () => {
     render(<PostCard post={post} isMutable={false} />);
     expect(screen.queryByRole('button', { name: /open/i })).toBeNull();
+  });
+});
+
+describe('<PostCardSkeleton />', () => {
+  it('should have the given className', () => {
+    const className = 'test-class';
+    const { container } = render(<PostCardSkeleton className={className} />);
+    expect(container.firstElementChild).toHaveClass(className);
   });
 });
