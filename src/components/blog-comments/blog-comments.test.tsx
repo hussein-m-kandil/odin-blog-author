@@ -6,6 +6,7 @@ import { Comment } from '@/types';
 
 const comments: Comment[] = [1, 2, 3].map((n) => ({
   author,
+  order: n,
   id: `comment-${n}`,
   authorId: author.id,
   content: `Test Comment #${n}`,

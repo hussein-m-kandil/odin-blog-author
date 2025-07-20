@@ -2,6 +2,7 @@ export type ID = string | number;
 
 export interface User {
   id: string;
+  order: number;
   isAdmin: boolean;
   username: string;
   fullname: string;
@@ -31,6 +32,7 @@ export interface Image {
   size: number;
   xPos: number;
   yPos: number;
+  order: number;
   scale: number;
   width: number;
   height: number;
@@ -49,6 +51,7 @@ export interface Category {
 export interface Vote {
   id: string;
   user: User;
+  order: number;
   userId: string;
   postId: string;
   isUpvote: boolean;
@@ -56,6 +59,7 @@ export interface Vote {
 
 export interface Comment {
   id: string;
+  order: number;
   author: User;
   postId: string;
   content: string;
@@ -66,6 +70,7 @@ export interface Comment {
 
 export interface Post {
   id: string;
+  order: number;
   title: string;
   content: string;
   authorId: string;

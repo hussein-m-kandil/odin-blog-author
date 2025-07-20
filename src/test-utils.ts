@@ -40,6 +40,7 @@ export const dates = {
 
 export const author: User = {
   ...dates,
+  order: 1,
   bio: null,
   isAdmin: false,
   id: 'blahblah123user',
@@ -55,6 +56,7 @@ export const initAuthData: AuthData = {
 
 export const image: Image = {
   ...dates,
+  order: 1,
   ownerId: author.id,
   owner: { ...author },
   id: 'blahblah123image',
@@ -73,6 +75,7 @@ export const image: Image = {
 export const post: Post = {
   author,
   ...dates,
+  order: 1,
   image: image,
   published: true,
   title: 'Test Post',
@@ -90,6 +93,7 @@ export const post: Post = {
     {
       author,
       ...dates,
+      order: 1,
       authorId: author.id,
       content: 'Test comment',
       id: 'blahblah123comment',
@@ -98,6 +102,7 @@ export const post: Post = {
   ],
   votes: [
     {
+      order: 1,
       user: author,
       isUpvote: true,
       userId: author.id,
