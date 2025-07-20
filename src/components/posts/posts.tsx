@@ -43,9 +43,8 @@ export function Posts({
       return res.json();
     },
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages, lastPageParam) => {
-      if (lastPage.length === 0) return null;
-      return lastPageParam + lastPage.length;
+    getNextPageParam: (lastPage) => {
+      if (lastPage.length > 0) return lastPage.at(-1)?.order;
     },
   });
 
