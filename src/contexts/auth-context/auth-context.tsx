@@ -1,27 +1,46 @@
 'use client';
 
 import React from 'react';
-import { AuthData } from '@/types';
+import { AuthData, InitAuthData } from '@/types';
 
-export interface AuthContextValue {
-  setAuthData: (data: AuthData) => void;
+export type AuthContextValue = {
+  setAuthData: (data: InitAuthData) => void;
   authData: AuthData;
-}
+};
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
+
+const createAuthFetch = (authToken?: string): typeof fetch => {
+  if (!authToken) return fetch;
+  return (url, init) => {
+    const reqInit: RequestInit = init || {};
+    const headers: HeadersInit = { Authorization: authToken };
+    reqInit.headers = reqInit.headers
+      ? { ...headers, ...reqInit.headers }
+      : headers;
+    return fetch(url, reqInit);
+  };
+};
+
+const extendInitData = (data: InitAuthData) => {
+  return { ...data, authFetch: createAuthFetch(data.token) };
+};
 
 export function AuthProvider({
   initAuthData: initData,
   children,
 }: Readonly<{
   children: React.ReactNode;
-  initAuthData: AuthData;
+  initAuthData: InitAuthData;
 }>) {
-  const [authData, setAuthData] = React.useState<AuthData>(initData);
+  const [data, setData] = React.useState<AuthData>(extendInitData(initData));
 
-  return (
-    <AuthContext value={{ authData, setAuthData }}>{children}</AuthContext>
-  );
+  const contextValue: AuthContextValue = {
+    setAuthData: (data) => setData(extendInitData(data)),
+    authData: data,
+  };
+
+  return <AuthContext value={contextValue}>{children}</AuthContext>;
 }
 
 export function useAuthData() {

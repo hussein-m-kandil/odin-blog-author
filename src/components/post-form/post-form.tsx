@@ -20,10 +20,9 @@ import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 import { Image, Post } from '@/types';
+import { useAuthData } from '@/contexts/auth-context';
 
 const CATEGORIES_MAX_NUM = 7;
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const [image, setImage] = React.useState<Image | null>(post?.image || null);
@@ -35,8 +34,14 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
 
+  const {
+    authData: { backendUrl, token },
+  } = useAuthData();
+
   React.useEffect(() => {
-    fetch(`${apiBaseUrl}/posts/categories`)
+    fetch(`${backendUrl}/posts/categories`, {
+      headers: { Authorization: token || '' },
+    })
       .then((apiRes) => {
         if (apiRes.ok) return apiRes.json();
         throw apiRes;
@@ -71,7 +76,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
       } = { ...values, categories };
       if (image) postValues.image = image.id;
       const apiRes = await fetch(
-        `${apiBaseUrl}/posts${post ? '/' + post.id : ''}`,
+        `${backendUrl}/posts${post ? '/' + post.id : ''}`,
         {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(postValues),

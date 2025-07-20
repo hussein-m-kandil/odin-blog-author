@@ -1,17 +1,17 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider, useAuthData } from './auth-context';
 import { userEvent } from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
 import { initAuthData } from '@/test-utils';
-import { AuthData } from '@/types';
+import { InitAuthData } from '@/types';
 
-const newAuthData: AuthData = {
+const newAuthData: InitAuthData = {
   backendUrl: 'https://new-test.com/api/v1',
   token: 'new-test-token',
   user: null,
 };
 
-const assertAuthDataDisplayed = (data: AuthData) => {
+const assertAuthDataDisplayed = (data: InitAuthData) => {
   const { token, user, backendUrl } = data;
   expect(screen.getByText(backendUrl)).toBeInTheDocument();
   if (token) expect(screen.getByText(token)).toBeInTheDocument();
@@ -28,9 +28,19 @@ function AuthConsumer() {
       <button type='button' onClick={() => setAuthData(newAuthData)}>
         change data
       </button>
+      <button
+        type='button'
+        onClick={() => authData.authFetch(authData.backendUrl)}>
+        fetch
+      </button>
     </div>
   );
 }
+
+const fetchMock = vi.fn();
+vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
+
+afterEach(vi.clearAllMocks);
 
 function AuthWrapper(
   props: Omit<React.ComponentProps<typeof AuthProvider>, 'children'>
@@ -68,5 +78,25 @@ describe('AuthContext', () => {
     render(<AuthWrapper initAuthData={initAuthData} />);
     await user.click(screen.getByRole('button', { name: /change/i }));
     assertAuthDataDisplayed(newAuthData);
+  });
+
+  it('should `authFetch` send an authorized request', async () => {
+    const user = userEvent.setup();
+    render(<AuthWrapper initAuthData={initAuthData} />);
+    await user.click(screen.getByRole('button', { name: /fetch/i }));
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock.mock.calls[0][1]).toEqual({
+      headers: { Authorization: initAuthData.token },
+    });
+  });
+
+  it('should `authFetch` send an unauthorized request', async () => {
+    const user = userEvent.setup();
+    render(
+      <AuthWrapper initAuthData={{ ...initAuthData, token: undefined }} />
+    );
+    await user.click(screen.getByRole('button', { name: /fetch/i }));
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock.mock.calls[0][1]).toBeUndefined();
   });
 });

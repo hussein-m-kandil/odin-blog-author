@@ -17,10 +17,14 @@ export interface AuthRes {
   user: User;
 }
 
-export interface AuthData {
+export interface InitAuthData {
   backendUrl: string;
   user?: User | null;
   token?: string;
+}
+
+export interface AuthData extends InitAuthData {
+  authFetch: typeof fetch;
 }
 
 export interface Image {

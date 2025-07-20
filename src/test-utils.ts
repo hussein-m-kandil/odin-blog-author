@@ -1,4 +1,4 @@
-import { User, Post, Image, AuthData } from '@/types';
+import { User, Post, Image, InitAuthData } from '@/types';
 import { vi } from 'vitest';
 
 export const delay = (fn: () => void, ms = 100) => setTimeout(fn, ms);
@@ -19,6 +19,7 @@ export const mockDialogContext = () => {
 export const mockAuthContext = () => {
   const authMockedMethods = vi.hoisted(() => {
     const authData = {
+      authFetch: window.fetch, // This won't work,
       backendUrl: 'https://new-test.com/api/v1',
       token: 'new-test-token',
       user: null,
@@ -30,6 +31,11 @@ export const mockAuthContext = () => {
   vi.mock('@/contexts/auth-context', () => ({
     useAuthData: authMockedMethods.useAuthData,
   }));
+  const { authData, setAuthData, useAuthData } = authMockedMethods;
+  useAuthData.mockImplementation(() => {
+    // because the hoisted code executes before the environment itself
+    return { setAuthData, authData: { ...authData, authFetch: window.fetch } };
+  });
   return authMockedMethods;
 };
 
@@ -48,7 +54,7 @@ export const author: User = {
   fullname: 'Nowhere-Man',
 };
 
-export const initAuthData: AuthData = {
+export const initAuthData: InitAuthData = {
   backendUrl: 'https://test.com/api/v1',
   token: 'test-token',
   user: author,
