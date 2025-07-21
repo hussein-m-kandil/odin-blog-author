@@ -13,11 +13,20 @@ import { AuthData } from '@/types';
 
 function makeQueryClient() {
   return new QueryClient({
-    defaultOptions: { queries: { staleTime: 60 * 1000 } },
+    defaultOptions: {
+      queries: {
+        refetchOnReconnect: true,
+        refetchOnWindowFocus: true,
+        refetchIntervalInBackground: false,
+        refetchInterval: 5 * 60 * 1000,
+        staleTime: 1 * 60 * 1000,
+        gcTime: 5 * 60 * 1000,
+      },
+    },
   });
 }
 
-let browserQueryClient: QueryClient | undefined = undefined;
+let browserQueryClient: QueryClient | undefined;
 
 function getQueryClient() {
   if (isServer) return makeQueryClient();
