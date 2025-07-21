@@ -1,14 +1,23 @@
+import PostCardSkeleton from './post-card.skeleton';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { post, mockDialogContext } from '@/test-utils';
 import { describe, expect, it } from 'vitest';
 import { PostCard } from './post-card';
-import PostCardSkeleton from './post-card.skeleton';
 
 mockDialogContext();
 
+const PostCardWrapper = (props: React.ComponentProps<typeof PostCard>) => {
+  return (
+    <QueryClientProvider client={new QueryClient()}>
+      <PostCard {...props} />
+    </QueryClientProvider>
+  );
+};
+
 describe('<PostCard />', () => {
   it('should render some of the post data', () => {
-    render(<PostCard post={post} isMutable={false} />);
+    render(<PostCardWrapper post={post} isMutable={false} />);
     expect(screen.getByText(post.title)).toBeInTheDocument();
     expect(screen.getByText(post.content)).toBeInTheDocument();
     const readLinks = screen.getAllByRole('link', {
@@ -25,12 +34,12 @@ describe('<PostCard />', () => {
   });
 
   it('should show action button with mutation actions for a mutable post', () => {
-    render(<PostCard post={post} isMutable={true} />);
+    render(<PostCardWrapper post={post} isMutable={true} />);
     expect(screen.getByRole('button', { name: /open/i })).toBeInTheDocument();
   });
 
   it('should show action button without mutation actions for an immutable post', () => {
-    render(<PostCard post={post} isMutable={false} />);
+    render(<PostCardWrapper post={post} isMutable={false} />);
     expect(screen.queryByRole('button', { name: /open/i })).toBeNull();
   });
 });

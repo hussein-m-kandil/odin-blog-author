@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { OptionsMenu } from '@/components/options-menu';
+import { useQueryClient } from '@tanstack/react-query';
 import { useDialog } from '@/contexts/dialog-context';
 import { DeleteForm } from '@/components/delete-form';
 import { PostForm } from '@/components/post-form';
@@ -22,6 +23,7 @@ export function PostOptionsMenu({
   post: Post;
 }) {
   const { showDialog, hideDialog } = useDialog();
+  const queryClient = useQueryClient();
   const router = useRouter();
   const id = React.useId();
 
@@ -47,7 +49,11 @@ export function PostOptionsMenu({
       subject: post.title,
       onCancel: hideDialog,
       'aria-labelledby': `delete-post-form-${id}`,
-      onSuccess: () => (hideDialog(), router.replace('/')),
+      onSuccess: () => {
+        hideDialog();
+        router.replace('/');
+        return queryClient.invalidateQueries({ queryKey: ['posts'] });
+      },
       delReqFn: () => fetch(`${apiBaseUrl}/posts/${post.id}`, reqInit),
     };
 
