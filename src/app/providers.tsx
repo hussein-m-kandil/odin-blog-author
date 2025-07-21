@@ -35,20 +35,18 @@ export function Providers({
   const queryClient = getQueryClient();
 
   return (
-    <AuthProvider initAuthData={authData}>
-      <ThemeProvider
-        enableSystem
-        attribute='class'
-        defaultTheme='system'
-        disableTransitionOnChange>
-        <DialogProvider>
-          <QueryClientProvider client={queryClient}>
-            {children}
-          </QueryClientProvider>
-        </DialogProvider>
-        <Toaster expand visibleToasts={3} richColors closeButton />
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider
+      enableSystem
+      attribute='class'
+      defaultTheme='system'
+      disableTransitionOnChange>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider initAuthData={authData}>
+          <DialogProvider>{children}</DialogProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+      <Toaster expand visibleToasts={3} richColors closeButton />
+    </ThemeProvider>
   );
 }
 
