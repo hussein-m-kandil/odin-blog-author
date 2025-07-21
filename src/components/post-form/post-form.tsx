@@ -35,13 +35,11 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const router = useRouter();
 
   const {
-    authData: { backendUrl, token },
+    authData: { backendUrl, authFetch },
   } = useAuthData();
 
   React.useEffect(() => {
-    fetch(`${backendUrl}/posts/categories`, {
-      headers: { Authorization: token || '' },
-    })
+    authFetch(`${backendUrl}/posts/categories`)
       .then((apiRes) => {
         if (apiRes.ok) return apiRes.json();
         throw apiRes;
@@ -60,7 +58,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         getUnknownErrorMessage(error);
         setErrorMessage('Could not fetch any categories');
       });
-  }, []);
+  }, [backendUrl, authFetch]);
 
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
@@ -75,7 +73,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         image?: string;
       } = { ...values, categories };
       if (image) postValues.image = image.id;
-      const apiRes = await fetch(
+      const apiRes = await authFetch(
         `${backendUrl}/posts${post ? '/' + post.id : ''}`,
         {
           headers: { 'Content-Type': 'application/json' },
