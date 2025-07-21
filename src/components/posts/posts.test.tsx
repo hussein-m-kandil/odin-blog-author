@@ -1,10 +1,11 @@
+import { post, delay, mockAuthContext, mockDialogContext } from '@/test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
-import { delay, mockDialogContext, post } from '@/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Posts } from './posts';
 
 mockDialogContext();
+mockAuthContext();
 
 const postsUrl = 'https://example.com/';
 

@@ -19,7 +19,7 @@ export function Posts({
   postsUrl: URL | string;
 }) {
   const {
-    authData: { user, token },
+    authData: { user, authFetch },
   } = useAuthData();
 
   const {
@@ -36,10 +36,10 @@ export function Posts({
     readonly unknown[],
     number
   >({
-    queryKey: ['posts', postsUrl, token],
+    queryKey: ['posts', postsUrl, authFetch],
     queryFn: async ({ pageParam }) => {
       const url = `${postsUrl}${pageParam === 0 ? '' : '?cursor=' + pageParam}`;
-      const res = await fetch(url, { headers: { Authorization: token || '' } });
+      const res = await authFetch(url);
       return res.json();
     },
     initialPageParam: 0,
