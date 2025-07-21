@@ -2,33 +2,38 @@
 
 import React from 'react';
 import {
+  isObject,
+  getUnknownErrorMessage,
+  getResErrorMessageOrThrow,
+} from '@/lib/utils';
+import {
   DynamicForm,
   DynamicFormSubmitHandler,
 } from '@/components/dynamic-form';
-import {
-  getResErrorMessageOrThrow,
-  getUnknownErrorMessage,
-  isObject,
-} from '@/lib/utils';
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PostFormProps, NewPostInput } from './post-form.types';
 import { ErrorMessage } from '@/components/error-message';
+import { useAuthData } from '@/contexts/auth-context';
 import { Categories } from '@/components/categories';
 import { ImageForm } from '@/components/image-form';
 import { Combobox } from '@/components/combobox';
 import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
-import { Plus } from 'lucide-react';
 import { Image, Post } from '@/types';
-import { useAuthData } from '@/contexts/auth-context';
+import { Plus } from 'lucide-react';
 
 const CATEGORIES_MAX_NUM = 7;
 
 export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
-  const [image, setImage] = React.useState<Image | null>(post?.image || null);
+  const isUpdate = !!post;
+
+  const [image, setImage] = React.useState<Image | null>(
+    isUpdate ? post.image : null
+  );
   const [allCategories, setAllCategories] = React.useState<string[]>([]);
   const [categories, setCategories] = React.useState<string[]>(
-    post ? post.categories.map((c) => c.categoryName) : []
+    isUpdate ? post.categories.map((c) => c.categoryName) : []
   );
   const [categoriesError, setCategoriesError] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
@@ -63,37 +68,49 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
 
-  const handleCreatePost: DynamicFormSubmitHandler<NewPostInput> = async (
-    hookForm,
-    values
-  ) => {
-    try {
-      const postValues: NewPostInput & {
-        categories: string[];
-        image?: string;
-      } = { ...values, categories };
-      if (image) postValues.image = image.id;
-      const apiRes = await authFetch(
-        `${backendUrl}/posts${post ? '/' + post.id : ''}`,
-        {
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(postValues),
-          method: post ? 'PUT' : 'POST',
-        }
-      );
-      if (apiRes.ok) {
-        hookForm.reset();
-        setErrorMessage('');
-        onSuccess?.();
-        const postData = post || ((await apiRes.json()) as Post);
-        router.push(`/${postData && postData.id ? postData.id : ''}`);
+  const queryClient = useQueryClient();
+
+  const upsertPostMutation = useMutation<
+    Post,
+    Error | Response,
+    Parameters<DynamicFormSubmitHandler<NewPostInput>>
+  >({
+    mutationFn: async (submitArgs) => {
+      const formValues = submitArgs[1];
+      const reqInit: RequestInit = {
+        body: JSON.stringify({ ...formValues, categories, image: image?.id }),
+        headers: { 'Content-Type': 'application/json' },
+      };
+      let res: Response;
+      if (isUpdate) {
+        reqInit.method = 'PUT';
+        res = await authFetch(`${backendUrl}/posts/${post.id}`, reqInit);
       } else {
-        setErrorMessage(await getResErrorMessageOrThrow(apiRes, hookForm));
+        reqInit.method = 'POST';
+        res = await authFetch(`${backendUrl}/posts`, reqInit);
       }
-    } catch (error) {
-      setErrorMessage(getUnknownErrorMessage(error));
-    }
-  };
+      if (!res.ok) throw res;
+      return res.json();
+    },
+    onSuccess: (resPost, [hookForm]) => {
+      setErrorMessage('');
+      hookForm.reset();
+      onSuccess?.();
+      router.push(`/${resPost && resPost.id ? resPost.id : ''}`);
+      return queryClient.invalidateQueries({ queryKey: ['posts'] });
+    },
+    onError: async (resError, [hookForm]) => {
+      try {
+        if (resError instanceof Response) {
+          setErrorMessage(await getResErrorMessageOrThrow(resError, hookForm));
+        } else {
+          throw resError;
+        }
+      } catch (error) {
+        setErrorMessage(getUnknownErrorMessage(error));
+      }
+    },
+  });
 
   return (
     <>
@@ -105,12 +122,17 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         {...formProps}
         formAttrs={postFormAttrs}
         formSchema={postFormSchema}
-        onSubmit={handleCreatePost}
         submitterClassName='w-full'
         submitterLabel={
-          post
+          isUpdate
             ? { idle: 'Update Post', submitting: 'Updating...' }
             : { idle: 'Create Post', submitting: 'Creating...' }
+        }
+        onSubmit={(...args) =>
+          new Promise((resolve) => {
+            // This way the `DynamicForm` can monitor the submitting period
+            upsertPostMutation.mutate(args, { onSettled: resolve });
+          })
         }>
         <div>
           <div className='flex justify-between items-baseline space-x-2'>

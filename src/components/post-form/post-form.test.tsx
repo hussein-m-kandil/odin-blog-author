@@ -1,10 +1,12 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import React from 'react';
 import {
   render,
   screen,
   waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
 import { createPostFormAttrs } from './post-form.data';
 import { mockAuthContext, post } from '@/test-utils';
@@ -24,6 +26,15 @@ const fetchSpy = vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
 
 afterEach(vi.clearAllMocks);
 
+const PostFormWrapper = (props: React.ComponentProps<typeof PostForm>) => {
+  const queryClient = new QueryClient();
+  return (
+    <QueryClientProvider client={queryClient}>
+      <PostForm {...props} />
+    </QueryClientProvider>
+  );
+};
+
 const setup = async (post?: Post) => {
   const data = {
     submittingOpts: { name: post ? /updating/i : /creating/i },
@@ -33,7 +44,7 @@ const setup = async (post?: Post) => {
   };
   const user = userEvent.setup();
   const renderResult = render(
-    <PostForm
+    <PostFormWrapper
       post={post}
       aria-label={data.formOpts.name}
       onSuccess={onSuccessMock}
