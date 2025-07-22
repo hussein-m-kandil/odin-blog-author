@@ -1,4 +1,4 @@
-import { User, Post, Image, InitAuthData } from '@/types';
+import { User, Post, Image, InitAuthData, AuthData } from '@/types';
 import { vi } from 'vitest';
 
 export const delay = (fn: () => void, ms = 100) => setTimeout(fn, ms);
@@ -18,7 +18,7 @@ export const mockDialogContext = () => {
 
 export const mockAuthContext = () => {
   const authMockedMethods = vi.hoisted(() => {
-    const authData = {
+    const authData: AuthData = {
       authFetch: window.fetch, // This won't work,
       backendUrl: 'https://new-test.com/api/v1',
       token: 'new-test-token',
