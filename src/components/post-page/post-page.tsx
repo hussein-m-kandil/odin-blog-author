@@ -18,8 +18,10 @@ import { Post } from '@/types';
 export function PostPage({
   className,
   postUrl,
+  postId,
   ...props
 }: React.ComponentProps<'div'> & {
+  postId: Post['id'];
   postUrl: string | URL;
 }) {
   const {
@@ -27,7 +29,7 @@ export function PostPage({
   } = useAuthData();
 
   const { data: post, status } = useQuery<Post>({
-    queryKey: ['post', postUrl],
+    queryKey: ['post', postId, postUrl],
     queryFn: async () => (await authFetch(postUrl)).json(),
   });
 

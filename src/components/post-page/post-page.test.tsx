@@ -9,7 +9,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PostPage } from './post-page';
 
 const PostPageWrapper = (
-  props: Omit<React.ComponentProps<typeof PostPage>, 'postUrl'>
+  props: Omit<React.ComponentProps<typeof PostPage>, 'postUrl' | 'postId'>
 ) => {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, staleTime: 'static' } },
@@ -17,7 +17,7 @@ const PostPageWrapper = (
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PostPage postUrl={'https://example.com'} {...props} />
+      <PostPage postUrl={'https://example.com'} postId={post.id} {...props} />
     </QueryClientProvider>
   );
 };

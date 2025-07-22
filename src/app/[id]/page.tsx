@@ -32,7 +32,7 @@ export default async function BlogPost({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <PostPage postUrl={url} />
+      <PostPage postUrl={url} postId={postId} />
     </HydrationBoundary>
   );
 }
