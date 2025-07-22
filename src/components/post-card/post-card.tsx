@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/card';
 import { PostOptionsMenu } from '@/components/post-options-menu';
 import { FormattedDate } from '@/components/formatted-date';
+import { UsernameLink } from '@/components/username-link';
 import { MutableImage } from '@/components/mutable-image';
 import { PrivacyIcon } from '@/components/privacy-icon';
 import { Muted, Lead } from '@/components/typography/';
@@ -46,9 +47,7 @@ export function PostCard({
           </Link>
         </CardTitle>
         <CardDescription className='italic truncate'>
-          <Link href={`/profile/${post.authorId}`}>
-            @{post.author.username}
-          </Link>
+          <UsernameLink user={post.author} />
         </CardDescription>
         {isMutable && (
           <CardAction>
