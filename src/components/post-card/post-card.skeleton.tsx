@@ -13,6 +13,8 @@ export function PostCardSkeleton({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
+  props['aria-label'] = props['aria-label'] || 'Loading a post';
+
   return (
     <Card
       {...props}

@@ -47,7 +47,7 @@ describe('<PostCard />', () => {
 describe('<PostCardSkeleton />', () => {
   it('should have the given className', () => {
     const className = 'test-class';
-    const { container } = render(<PostCardSkeleton className={className} />);
-    expect(container.firstElementChild).toHaveClass(className);
+    render(<PostCardSkeleton className={className} />);
+    expect(screen.getByLabelText(/loading .* post/i)).toHaveClass(className);
   });
 });
