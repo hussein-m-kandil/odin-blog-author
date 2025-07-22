@@ -93,11 +93,18 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
       return res.json();
     },
     onSuccess: (resPost, [hookForm]) => {
-      setErrorMessage('');
       hookForm.reset();
+      setErrorMessage('');
+      queryClient.invalidateQueries({
+        predicate: ({ queryKey }) => {
+          return (
+            queryKey[0] === 'posts' ||
+            (isUpdate && queryKey[0] === 'post' && queryKey[1] === post.id)
+          );
+        },
+      });
       onSuccess?.();
       router.push(`/${resPost && resPost.id ? resPost.id : ''}`);
-      return queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
     onError: async (resError, [hookForm]) => {
       try {
