@@ -11,6 +11,7 @@ import { DeleteForm } from '@/components/delete-form';
 import { UserAvatar } from '@/components/user-avatar';
 import { OptionsMenu } from '@/components/options-menu';
 import { CommentForm } from '@/components/comment-form';
+import { UsernameLink } from '@/components/username-link';
 import { Comment as CommentType, ID, Post } from '@/types';
 import { FormattedDate } from '@/components/formatted-date';
 
@@ -64,9 +65,6 @@ export function Comment({
 
   const isCurrentUserCommentAuthor = currentUserId === comment.authorId;
   const isCurrentUserPostAuthor = currentUserId === post.authorId;
-  const authorProfileUrl = `/profile${
-    isCurrentUserCommentAuthor ? '' : '/' + comment.authorId
-  }`;
 
   return updating ? (
     <CommentForm
@@ -82,7 +80,10 @@ export function Comment({
         'relative flex justify-between items-center gap-2',
         className
       )}>
-      <Link href={authorProfileUrl}>
+      <Link
+        href={`/profile${
+          isCurrentUserCommentAuthor ? '' : '/' + comment.authorId
+        }`}>
         <UserAvatar user={comment.author} className='size-12 text-lg' />
       </Link>
       <div className='grow font-light'>
@@ -98,9 +99,7 @@ export function Comment({
           </button>
         </div>
         <Muted className='flex justify-between items-end border-t pt-1 mt-1 *:text-xs'>
-          <Link href={authorProfileUrl} className='w-28 truncate'>
-            @{comment.author.username}
-          </Link>
+          <UsernameLink user={comment.author} className='w-28 truncate' />
           <FormattedDate
             createdAt={comment.createdAt}
             updatedAt={comment.updatedAt}
