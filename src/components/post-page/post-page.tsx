@@ -6,6 +6,7 @@ import { FormattedDate } from '@/components/formatted-date';
 import { BlogComments } from '@/components/blog-comments';
 import { MutableImage } from '@/components/mutable-image';
 import { ErrorMessage } from '@/components/error-message';
+import { UsernameLink } from '@/components/username-link';
 import { PrivacyIcon } from '@/components/privacy-icon';
 import { useAuthData } from '@/contexts/auth-context';
 import { Categories } from '@/components/categories';
@@ -58,12 +59,11 @@ export function PostPage({
               {user?.id === post.authorId && <PostOptionsMenu post={post} />}
             </div>
             <div className='flex items-baseline justify-between mt-1'>
-              <div className='flex'>
-                <Muted>
-                  <PrivacyIcon isPublic={post.published} />
-                  <span>@{post.author.username}</span>
-                </Muted>
-              </div>
+              <Muted className='flex'>
+                <PrivacyIcon isPublic={post.published} />
+                &nbsp;
+                <UsernameLink user={post.author} prefix='By ' />
+              </Muted>
               <Muted>
                 <FormattedDate
                   createdAt={post.createdAt}
