@@ -3,7 +3,7 @@
 import { PostOptionsMenu } from '@/components/post-options-menu';
 import { H1, H2, Lead, Muted } from '@/components/typography';
 import { FormattedDate } from '@/components/formatted-date';
-import { BlogComments } from '@/components/blog-comments';
+import { Comments } from '@/components/comments';
 import { MutableImage } from '@/components/mutable-image';
 import { ErrorMessage } from '@/components/error-message';
 import { UsernameLink } from '@/components/username-link';
@@ -88,7 +88,7 @@ export function PostPage({
                   <H2 className='text-center text-xl'>Comments</H2>
                 </header>
                 <main>
-                  <BlogComments
+                  <Comments
                     currentUserId={userId}
                     comments={post.comments}
                     post={post}

@@ -1,7 +1,7 @@
 import { post, author, dates, mockDialogContext } from '@/test-utils';
-import { BlogCommentsSkeleton } from './blog-comments.skeleton';
+import { CommentsSkeleton } from './comments.skeleton';
 import { render, screen } from '@testing-library/react';
-import { BlogComments } from './blog-comments';
+import { Comments } from './comments';
 import { describe, expect, it } from 'vitest';
 import { Comment } from '@/types';
 
@@ -21,19 +21,19 @@ const props = { post, comments, currentUserId };
 
 mockDialogContext();
 
-describe('<BlogComments />', () => {
+describe('<Comments />', () => {
   it('should not render new comment form if not given the current user id', () => {
-    render(<BlogComments post={post} comments={comments} />);
+    render(<Comments post={post} comments={comments} />);
     expect(screen.queryByRole('form', { name: /comment/i })).toBeNull();
   });
 
   it('should render new comment form if given the current user id', () => {
-    render(<BlogComments {...props} />);
+    render(<Comments {...props} />);
     expect(screen.getByRole('form', { name: /comment/i })).toBeInTheDocument();
   });
 
   it('should render the given list of comments', () => {
-    render(<BlogComments {...props} />);
+    render(<Comments {...props} />);
     const commentList = screen.getByRole('list', { name: /comments/i });
     expect(commentList).toBeInTheDocument();
     expect(commentList.children).toHaveLength(comments.length);
@@ -44,17 +44,15 @@ describe('<BlogComments />', () => {
 
   it('should have the give class', () => {
     const htmlClass = 'test-class';
-    const { container } = render(
-      <BlogComments {...props} className={htmlClass} />
-    );
+    const { container } = render(<Comments {...props} className={htmlClass} />);
     expect(container.firstElementChild).toHaveClass(htmlClass);
   });
 });
 
-describe('<BlogCommentsSkeleton />', () => {
+describe('<CommentsSkeleton />', () => {
   it('should have the given className', () => {
     const className = 'test-class';
-    render(<BlogCommentsSkeleton className={className} />);
+    render(<CommentsSkeleton className={className} />);
     expect(screen.getByLabelText(/loading .* post comments/i)).toHaveClass(
       className
     );

@@ -1,6 +1,6 @@
 import { Skeleton } from '../ui/skeleton';
 
-export function BlogCommentsSkeleton({
+export function CommentsSkeleton({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
@@ -18,4 +18,4 @@ export function BlogCommentsSkeleton({
   );
 }
 
-export default BlogCommentsSkeleton;
+export default CommentsSkeleton;

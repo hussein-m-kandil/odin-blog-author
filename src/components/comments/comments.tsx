@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Comment as CommentType, Post, ID } from '@/types';
 import { CommentForm } from '@/components/comment-form';
 import { Muted } from '@/components/typography/muted';
 import { Comment } from '@/components/comment';
 
-export function BlogComments({
+export function Comments({
   currentUserId,
   comments,
   post,
@@ -26,7 +26,7 @@ export function BlogComments({
     }
   };
 
-  useEffect(() => {
+  React.useEffect(() => {
     const currentLastId = comments.at(-1)?.id;
     if (lastIdRef.current !== currentLastId) {
       lastIdRef.current = currentLastId;
@@ -54,4 +54,4 @@ export function BlogComments({
   );
 }
 
-export default BlogComments;
+export default Comments;
