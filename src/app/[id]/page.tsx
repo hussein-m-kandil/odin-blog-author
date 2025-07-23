@@ -1,12 +1,12 @@
-import { getAuthData } from '@/lib/auth';
-import { PostPage } from '@/components/post-page';
 import {
   dehydrate,
-  HydrationBoundary,
   QueryClient,
+  HydrationBoundary,
 } from '@tanstack/react-query';
+import { PostPage } from '@/components/post-page';
+import { getAuthData } from '@/lib/auth';
 
-export default async function BlogPost({
+export default async function Post({
   params,
 }: {
   params: Promise<{ id: string }>;
