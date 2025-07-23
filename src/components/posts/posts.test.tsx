@@ -35,7 +35,7 @@ vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
 
 afterEach(vi.clearAllMocks);
 
-describe('<Blogs />', () => {
+describe('<Posts />', () => {
   it('should have the given class', async () => {
     const className = 'test-class';
     const { container } = render(<PostsWrapper className={className} />);
