@@ -8,14 +8,14 @@ export const createPostFormAttrs = (post?: Post): DynamicFormAttrs => {
       type: 'text',
       defaultValue: post ? post.title : '',
       label: 'Title',
-      placeholder: 'Awesome Blog Post',
+      placeholder: 'Awesome Post',
       schema: z.string().trim().min(1, { message: 'Post title is required' }),
     },
     content: {
       type: 'textarea',
       defaultValue: post ? post.content : '',
       label: 'Body',
-      placeholder: 'This blog post is about...',
+      placeholder: 'This post is about...',
       schema: z.string().trim().min(1, { message: 'Post body is required' }),
     },
     published: {
