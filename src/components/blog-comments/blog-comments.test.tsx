@@ -1,5 +1,6 @@
-import { render, screen } from '@testing-library/react';
 import { post, author, dates, mockDialogContext } from '@/test-utils';
+import { BlogCommentsSkeleton } from './blog-comments.skeleton';
+import { render, screen } from '@testing-library/react';
 import { BlogComments } from './blog-comments';
 import { describe, expect, it } from 'vitest';
 import { Comment } from '@/types';
@@ -47,5 +48,15 @@ describe('<BlogComments />', () => {
       <BlogComments {...props} className={htmlClass} />
     );
     expect(container.firstElementChild).toHaveClass(htmlClass);
+  });
+});
+
+describe('<BlogCommentsSkeleton />', () => {
+  it('should have the given className', () => {
+    const className = 'test-class';
+    render(<BlogCommentsSkeleton className={className} />);
+    expect(screen.getByLabelText(/loading .* post comments/i)).toHaveClass(
+      className
+    );
   });
 });
