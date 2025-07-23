@@ -6,7 +6,10 @@ import {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { delay, post, mockAuthContext, author } from '@/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { PostPageSkeleton } from './post-page.skeleton';
 import { PostPage } from './post-page';
+
+const loaderRegex = /loading .* post page/i;
 
 const PostPageWrapper = (
   props: Omit<React.ComponentProps<typeof PostPage>, 'postUrl' | 'postId'>
@@ -42,7 +45,7 @@ afterEach(() => {
 describe('<PostPage />', () => {
   it('should show loader', () => {
     render(<PostPageWrapper />);
-    expect(screen.getByLabelText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(loaderRegex)).toBeInTheDocument();
   });
 
   it('should show error message on error', async () => {
@@ -50,7 +53,7 @@ describe('<PostPage />', () => {
       throw Error('Test Error');
     });
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.getByText(/could(n't| not) .* post/i)).toBeInTheDocument();
   });
 
@@ -62,21 +65,21 @@ describe('<PostPage />', () => {
         )
     );
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.getByText(/could(n't| not) .* post/i)).toBeInTheDocument();
   });
 
   it('should have the given className on loading', () => {
     const className = 'test-class';
     const { container } = render(<PostPageWrapper className={className} />);
-    expect(screen.getByLabelText(/loading/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(loaderRegex)).toBeInTheDocument();
     expect(container.firstElementChild).toHaveClass(className);
   });
 
   it('should have the given className on loading successful', async () => {
     const className = 'test-class';
     const { container } = render(<PostPageWrapper className={className} />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(container.firstElementChild).toHaveClass(className);
   });
 
@@ -89,13 +92,13 @@ describe('<PostPage />', () => {
     );
     const className = 'test-class';
     const { container } = render(<PostPageWrapper className={className} />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(container.firstElementChild).toHaveClass(className);
   });
 
   it('should display a heading with the posts title', async () => {
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(
       screen.getByRole('heading', { name: post.title })
     ).toBeInTheDocument();
@@ -103,13 +106,13 @@ describe('<PostPage />', () => {
 
   it('should display post content', async () => {
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.getByText(post.content)).toBeInTheDocument();
   });
 
   it('should display a heading for the comments ', async () => {
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(
       screen.getByRole('heading', { name: /comments/i })
     ).toBeInTheDocument();
@@ -117,7 +120,7 @@ describe('<PostPage />', () => {
 
   it('should display the post comments', async () => {
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     for (const comment of post.comments) {
       expect(screen.getByText(comment.content)).toBeInTheDocument();
     }
@@ -125,7 +128,7 @@ describe('<PostPage />', () => {
 
   it('should display the post categories', async () => {
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     for (const { categoryName } of post.categories) {
       expect(screen.getByText(categoryName)).toBeInTheDocument();
     }
@@ -137,7 +140,7 @@ describe('<PostPage />', () => {
       setAuthData,
     }));
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(
       screen.getByRole('button', { name: /post options/i })
     ).toBeInTheDocument();
@@ -149,7 +152,7 @@ describe('<PostPage />', () => {
       setAuthData,
     }));
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.queryByRole('button', { name: /post options/i })).toBeNull();
   });
 
@@ -159,13 +162,13 @@ describe('<PostPage />', () => {
       setAuthData,
     }));
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.queryByRole('button', { name: /post options/i })).toBeNull();
   });
 
   it('should display the post author name', async () => {
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.getAllByText(new RegExp(post.author.username))).toHaveLength(
       post.comments.filter((c) => c.author.username === post.author.username)
         .length + 1
@@ -174,7 +177,7 @@ describe('<PostPage />', () => {
 
   it('should display the post image', async () => {
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect((screen.getByRole('img') as HTMLImageElement).src).toMatch(
       new RegExp(post.image?.src as string)
     );
@@ -188,7 +191,15 @@ describe('<PostPage />', () => {
         )
     );
     render(<PostPageWrapper />);
-    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.queryByRole('img')).toBeNull();
+  });
+});
+
+describe('<PostPageSkeleton />', () => {
+  it('should have the given className', () => {
+    const className = 'test-class';
+    render(<PostPageSkeleton className={className} />);
+    expect(screen.getByLabelText(loaderRegex)).toHaveClass(className);
   });
 });

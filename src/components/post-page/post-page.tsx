@@ -7,11 +7,11 @@ import { BlogComments } from '@/components/blog-comments';
 import { MutableImage } from '@/components/mutable-image';
 import { ErrorMessage } from '@/components/error-message';
 import { UsernameLink } from '@/components/username-link';
+import { PostPageSkeleton } from './post-page.skeleton';
 import { PrivacyIcon } from '@/components/privacy-icon';
 import { useAuthData } from '@/contexts/auth-context';
 import { Categories } from '@/components/categories';
 import { useQuery } from '@tanstack/react-query';
-import { Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Post } from '@/types';
 
@@ -44,18 +44,15 @@ export function PostPage({
             Sorry, we could not get the post data
           </ErrorMessage>
         </div>
-      ) : status === 'pending' ? ( // TODO: Replace this with a skeleton
+      ) : status === 'pending' ? (
         <div className={className}>
-          <Loader
-            aria-label='Loading'
-            className='absolute top-1/2 left-1/2 -translate-1/2 animate-spin'
-          />
+          <PostPageSkeleton />
         </div>
       ) : (
         <>
           <header className='mt-6'>
             <div className='flex justify-between items-baseline border-b pb-2'>
-              <H1 id={titleId} className='text-3xl'>
+              <H1 id={titleId} className='text-3xl text-center'>
                 {post.title}
               </H1>
               {user?.id === post.authorId && <PostOptionsMenu post={post} />}
@@ -76,7 +73,9 @@ export function PostPage({
           </header>
           <main>
             <article aria-labelledby={titleId}>
-              <MutableImage image={post.image} className='my-6' />
+              {post.image && (
+                <MutableImage image={post.image} className='my-6' />
+              )}
               <Lead className='text-foreground font-light mb-6'>
                 {post.content}
               </Lead>
