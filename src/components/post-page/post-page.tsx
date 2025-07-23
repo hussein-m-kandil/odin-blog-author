@@ -34,7 +34,6 @@ export function PostPage({
   });
 
   const titleId = `title-${post?.id}`;
-  const userId = user?.id;
 
   return (
     <div {...props} className={cn('max-w-5xl mx-auto', className)}>
@@ -88,11 +87,7 @@ export function PostPage({
                   <H2 className='text-center text-xl'>Comments</H2>
                 </header>
                 <main>
-                  <Comments
-                    currentUserId={userId}
-                    comments={post.comments}
-                    post={post}
-                  />
+                  <Comments initialComments={post.comments} post={post} />
                 </main>
               </section>
             </article>

@@ -23,7 +23,7 @@ mockDialogContext();
 
 describe('<Comments />', () => {
   it('should not render new comment form if not given the current user id', () => {
-    render(<Comments post={post} comments={comments} />);
+    render(<Comments post={post} initialComments={comments} />);
     expect(screen.queryByRole('form', { name: /comment/i })).toBeNull();
   });
 
