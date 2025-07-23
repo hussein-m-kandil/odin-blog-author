@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { MutableImageSkeleton } from './mutable-image.skeleton';
 import { ImageToolkit } from '@/components/image-toolkit';
 import { MutableImageProps } from './mutable-image.types';
 import { cn, loadSupabaseImg } from '@/lib/utils';
-import { ImageIcon } from 'lucide-react';
 
 export function MutableImage({
   image,
@@ -17,24 +17,23 @@ export function MutableImage({
 
   const imgRef = React.useRef<HTMLImageElement>(null);
 
+  if (!image && !props['aria-label']) props['aria-label'] = 'Image placeholder';
+
   return (
-    <div
-      {...props}
-      className={cn(
-        'relative w-full aspect-video my-2 bg-muted-foreground text-background overflow-hidden',
-        className
-      )}>
+    <>
       {(!image || loading) && (
-        <ImageIcon
-          aria-label='Image placeholder icon'
-          className={cn(
-            'absolute top-1/2 left-1/2 -translate-1/2 w-1/3 h-1/3 text-muted',
-            loading && 'animate-pulse'
-          )}
+        <MutableImageSkeleton
+          {...props}
+          className={cn(!image && 'animate-none', className)}
         />
       )}
       {image && (
-        <>
+        <div
+          {...props}
+          className={cn(
+            'relative w-full aspect-video my-2 bg-muted-foreground text-background overflow-hidden',
+            className
+          )}>
           <Image
             fill
             priority
@@ -59,9 +58,9 @@ export function MutableImage({
               image={image}
             />
           )}
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 }
 

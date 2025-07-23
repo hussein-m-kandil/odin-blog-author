@@ -1,6 +1,7 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { MutableImageSkeleton } from './mutable-image.skeleton';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import { MutableImage } from './mutable-image';
 import { image } from '@/test-utils';
 
@@ -38,17 +39,24 @@ const { src, alt, xPos, yPos } = image;
 afterEach(vi.clearAllMocks);
 
 describe('<MutableImage />', () => {
-  it('should the container have the give className', () => {
+  it('should the container have the given className', () => {
     const className = 'test-class';
     const { container } = render(<MutableImage {...{ ...props, className }} />);
     expect(container.firstElementChild).toHaveClass(className);
   });
 
-  it('should display the image placeholder the image is loaded', () => {
+  it('should display the image loader while loading the image', () => {
     render(<MutableImage {...props} />);
-    expect(
-      screen.getByLabelText(/(image.*icon)|(icon.*image)/i)
-    ).toBeInTheDocument();
+    const loader = screen.getByLabelText(/loading.* image/i);
+    expect(loader).toBeInTheDocument();
+    expect(loader).toHaveClass('animate-pulse');
+  });
+
+  it('should display the image placeholder if not given an image', () => {
+    render(<MutableImage {...{ ...props, image: null }} />);
+    const placeholder = screen.getByLabelText(/image placeholder/i);
+    expect(placeholder).toBeInTheDocument();
+    expect(placeholder).toHaveClass('animate-none');
   });
 
   it('should display the given image', async () => {
@@ -84,5 +92,13 @@ describe('<MutableImage />', () => {
     await expect(() => screen.findByRole('img')).rejects.toThrowError();
     expect(screen.queryByRole('button', { name: /delete/i })).toBeNull();
     expect(screen.queryByRole('button', { name: /position/i })).toBeNull();
+  });
+});
+
+describe('<MutableImageSkeleton />', () => {
+  it('should have the given className', () => {
+    const className = 'test-class';
+    render(<MutableImageSkeleton className={className} />);
+    expect(screen.getByLabelText(/loading.* image/i)).toHaveClass(className);
   });
 });
