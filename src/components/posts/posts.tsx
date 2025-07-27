@@ -6,19 +6,12 @@ import { PostCard, PostCardSkeleton } from '@/components/post-card';
 import { useAuthData } from '@/contexts/auth-context';
 import { QueryError } from '@/components/query-error';
 import { InView } from 'react-intersection-observer';
-import { H2, P } from '@/components/typography/';
 import { Button } from '@/components/ui/button';
+import { P } from '@/components/typography/';
 import { Loader } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { Post } from '@/types';
 
-export function Posts({
-  postsUrl,
-  className,
-  ...containerProps
-}: React.ComponentProps<'div'> & {
-  postsUrl: URL | string;
-}) {
+export function Posts({ postsUrl }: { postsUrl: URL | string }) {
   const {
     authData: { user, authFetch },
   } = useAuthData();
@@ -59,10 +52,7 @@ export function Posts({
   const isFetchDisabled = !hasNextPage || isFetching || isFetchingNextPage;
 
   return (
-    <div
-      {...containerProps}
-      className={cn('max-w-9xl mx-auto my-8 space-y-8', className)}>
-      <H2 className='text-center'>Posts</H2>
+    <>
       <div className='flex flex-wrap justify-center grow gap-8 px-4 *:sm:max-w-xl *:lg:max-w-md'>
         {isPending ? (
           Array.from({ length: 3 }).map((_, i) => <PostCardSkeleton key={i} />)
@@ -110,7 +100,7 @@ export function Posts({
           </InView>
         )
       )}
-    </div>
+    </>
   );
 }
 

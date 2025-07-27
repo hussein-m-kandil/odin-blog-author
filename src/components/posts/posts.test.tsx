@@ -36,13 +36,6 @@ vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
 afterEach(vi.clearAllMocks);
 
 describe('<Posts />', () => {
-  it('should have the given class', async () => {
-    const className = 'test-class';
-    const { container } = render(<PostsWrapper className={className} />);
-    await waitFor(() => screen.getAllByRole('link', { name: /read/i }));
-    expect(container.getElementsByClassName(className)).toHaveLength(1);
-  });
-
   it('should call fetch with given url', () => {
     render(<PostsWrapper />);
     expect((fetchMock.mock.calls[0] as URL[])[0].href).toStrictEqual(postsUrl);
