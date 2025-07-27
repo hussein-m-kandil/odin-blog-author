@@ -25,7 +25,7 @@ export default async function Profile({
 
   if (!user) return redirect('/signin');
 
-  const postsUrl = `${API_BASE_URL}/users/${user.id}/posts`;
+  const postsUrl = `${API_BASE_URL}/posts?author=${user.id}`;
 
   return (
     <>
