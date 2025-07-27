@@ -1,51 +1,108 @@
-import { post, author, dates, mockDialogContext } from '@/test-utils';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { post, mockAuthContext, mockDialogContext, delay } from '@/test-utils';
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import { CommentsSkeleton } from './comments.skeleton';
-import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { Comments } from './comments';
-import { describe, expect, it } from 'vitest';
-import { Comment } from '@/types';
+import userEvent from '@testing-library/user-event';
 
-const comments: Comment[] = [1, 2, 3].map((n) => ({
-  author,
-  order: n,
-  id: `comment-${n}`,
-  authorId: author.id,
-  content: `Test Comment #${n}`,
-  postId: post.id,
-  ...dates,
-}));
+const initialComments = post.comments.slice(0, 3);
+const restComments = post.comments.slice(3);
 
-const currentUserId = 'user-7';
-
-const props = { post, comments, currentUserId };
+const props = { post, initialComments };
 
 mockDialogContext();
 
+const fetchMock = vi.fn(
+  () =>
+    new Promise<Response>((resolve) =>
+      delay(() => resolve(Response.json(restComments)))
+    )
+);
+vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
+
+const { authData: oldAuthData, useAuthData, setAuthData } = mockAuthContext();
+const authData = { ...oldAuthData, authFetch: window.fetch, user: post.author };
+useAuthData.mockImplementation(() => ({ authData, setAuthData }));
+
+const CommentsWrapper = (props: React.ComponentProps<typeof Comments>) => {
+  const queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+  });
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Comments {...props} />
+    </QueryClientProvider>
+  );
+};
+
 describe('<Comments />', () => {
-  it('should not render new comment form if not given the current user id', () => {
-    render(<Comments post={post} comments={comments} />);
+  it('should have the given class', () => {
+    const htmlClass = 'test-class';
+    const { container } = render(
+      <CommentsWrapper {...props} className={htmlClass} />
+    );
+    expect(container.firstElementChild).toHaveClass(htmlClass);
+  });
+
+  it('should not render new comment form if there is NOT a signed-in user', () => {
+    useAuthData.mockImplementationOnce(() => ({
+      authData: { ...authData, user: null },
+      setAuthData,
+    }));
+    render(<CommentsWrapper post={post} initialComments={initialComments} />);
     expect(screen.queryByRole('form', { name: /comment/i })).toBeNull();
   });
 
-  it('should render new comment form if given the current user id', () => {
-    render(<Comments {...props} />);
+  it('should render new comment form if there is a signed-in user', () => {
+    render(<CommentsWrapper {...props} />);
     expect(screen.getByRole('form', { name: /comment/i })).toBeInTheDocument();
   });
 
+  it('should display no comments message', () => {
+    render(<CommentsWrapper {...{ ...props, initialComments: [] }} />);
+    expect(screen.getByText(/no comments/i)).toBeInTheDocument();
+  });
+
   it('should render the given list of comments', () => {
-    render(<Comments {...props} />);
+    render(<CommentsWrapper {...props} />);
     const commentList = screen.getByRole('list', { name: /comments/i });
     expect(commentList).toBeInTheDocument();
-    expect(commentList.children).toHaveLength(comments.length);
-    for (const comment of comments) {
+    expect(commentList.children).toHaveLength(initialComments.length);
+    for (const comment of initialComments) {
       expect(screen.getByText(comment.content)).toBeInTheDocument();
     }
   });
 
-  it('should have the give class', () => {
-    const htmlClass = 'test-class';
-    const { container } = render(<Comments {...props} className={htmlClass} />);
-    expect(container.firstElementChild).toHaveClass(htmlClass);
+  it('should render more comments after clicking load-more button', async () => {
+    const user = userEvent.setup();
+    render(<CommentsWrapper {...props} />);
+    await user.click(screen.getByRole('button', { name: /more/i }));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    const commentList = screen.getByRole('list', { name: /comments/i });
+    expect(commentList).toBeInTheDocument();
+    expect(commentList.children).toHaveLength(post.comments.length);
+    for (const comment of restComments) {
+      expect(screen.getByText(comment.content)).toBeInTheDocument();
+    }
+  });
+
+  it('should display load-more error and retry button', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockImplementationOnce(
+      () =>
+        new Promise<Response>((reject) =>
+          delay(() => reject(Response.json(null, { status: 404 })))
+        )
+    );
+    render(<CommentsWrapper {...props} />);
+    await user.click(screen.getByRole('button', { name: /more/i }));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i));
+    expect(screen.getByText(/.could(n't| not)/i)).toBeInTheDocument();
   });
 });
 
