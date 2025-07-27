@@ -49,7 +49,7 @@ export const author: User = {
   order: 1,
   bio: null,
   isAdmin: false,
-  id: 'blahblah123user',
+  id: crypto.randomUUID(),
   username: 'nowhere_man',
   fullname: 'Nowhere-Man',
 };
@@ -65,7 +65,7 @@ export const image: Image = {
   order: 1,
   ownerId: author.id,
   owner: { ...author },
-  id: 'blahblah123image',
+  id: crypto.randomUUID(),
   src: 'https://example.com/test-image.jpg',
   mimetype: 'image/jpeg',
   alt: 'Test image',
@@ -78,6 +78,8 @@ export const image: Image = {
   info: '',
 };
 
+const postId = crypto.randomUUID();
+
 export const post: Post = {
   author,
   ...dates,
@@ -85,35 +87,32 @@ export const post: Post = {
   image: image,
   published: true,
   title: 'Test Post',
-  id: 'blahblah123post',
+  id: postId,
   authorId: author.id,
   content: 'Just for testing...',
   categories: [
     {
-      id: 'blahblah123category',
-      postId: 'blahblah123post',
+      postId,
+      id: crypto.randomUUID(),
       categoryName: 'Software',
     },
   ],
-  comments: [
-    {
-      author,
-      ...dates,
-      order: 1,
-      authorId: author.id,
-      content: 'Test comment',
-      id: 'blahblah123comment',
-      postId: 'blahblah123post',
-    },
-  ],
-  votes: [
-    {
-      order: 1,
-      user: author,
-      isUpvote: true,
-      userId: author.id,
-      id: 'blahblah123vote',
-      postId: 'blahblah123post',
-    },
-  ],
+  comments: Array.from({ length: 5 }).map((_, i) => ({
+    ...dates,
+    author,
+    postId,
+    order: i + 1,
+    id: crypto.randomUUID(),
+    content: `Test comment #${i + 1}`,
+    authorId: !i ? author.id : crypto.randomUUID(),
+  })),
+  votes: Array.from({ length: 5 }).map((_, i) => ({
+    postId,
+    user: author,
+    order: i + 1,
+    isUpvote: true,
+    userId: crypto.randomUUID(),
+    id: !i ? author.id : crypto.randomUUID(),
+  })),
+  _count: { comments: 5, votes: 5 },
 };
