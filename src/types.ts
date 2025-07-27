@@ -86,4 +86,5 @@ export interface Post {
   image: Image | null;
   votes: Vote[];
   author: User;
+  _count: { comments: number; votes: number };
 }
