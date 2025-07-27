@@ -45,7 +45,7 @@ describe('<Posts />', () => {
 
   it('should call fetch with given url', () => {
     render(<PostsWrapper />);
-    expect((fetchMock.mock.calls[0] as unknown[])[0]).toStrictEqual(postsUrl);
+    expect((fetchMock.mock.calls[0] as URL[])[0].href).toStrictEqual(postsUrl);
   });
 
   it('should display all the given posts', async () => {
@@ -81,9 +81,7 @@ describe('<Posts />', () => {
     });
     render(<PostsWrapper />);
     await waitFor(() =>
-      expect(
-        screen.getByText(/could(n't| not) get.* posts/i)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/could(n't| not).*posts/i)).toBeInTheDocument()
     );
   });
 
@@ -96,9 +94,7 @@ describe('<Posts />', () => {
     );
     render(<PostsWrapper />);
     await waitFor(() =>
-      expect(
-        screen.getByText(/could(n't| not) get.* posts/i)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/could(n't| not).*posts/i)).toBeInTheDocument()
     );
   });
 });
