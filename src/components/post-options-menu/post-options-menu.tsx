@@ -5,12 +5,11 @@ import { OptionsMenu } from '@/components/options-menu';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDialog } from '@/contexts/dialog-context';
 import { DeleteForm } from '@/components/delete-form';
+import { useAuthData } from '@/contexts/auth-context';
 import { PostForm } from '@/components/post-form';
 import { useRouter } from 'next/navigation';
 import { Edit, Trash2 } from 'lucide-react';
 import { Post } from '@/types';
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export function PostOptionsMenu({
   post,
@@ -22,6 +21,9 @@ export function PostOptionsMenu({
 > & {
   post: Post;
 }) {
+  const {
+    authData: { authAxios },
+  } = useAuthData();
   const { showDialog, hideDialog } = useDialog();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -42,8 +44,6 @@ export function PostOptionsMenu({
   };
 
   const showDeleteForm = () => {
-    const reqInit = { method: 'DELETE' };
-
     const formProps = {
       method: 'dialog',
       subject: post.title,
@@ -54,7 +54,7 @@ export function PostOptionsMenu({
         router.replace('/');
         return queryClient.invalidateQueries({ queryKey: ['posts'] });
       },
-      delReqFn: () => fetch(`${apiBaseUrl}/posts/${post.id}`, reqInit),
+      delReqFn: () => authAxios.delete(`/posts/${post.id}`),
     };
 
     showDialog({

@@ -2,15 +2,11 @@
 
 import React from 'react';
 import {
-  isObject,
-  getUnknownErrorMessage,
-  getResErrorMessageOrThrow,
-} from '@/lib/utils';
-import {
   DynamicForm,
   DynamicFormSubmitHandler,
 } from '@/components/dynamic-form';
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
+import { parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PostFormProps, NewPostInput } from './post-form.types';
 import { ErrorMessage } from '@/components/error-message';
@@ -18,9 +14,9 @@ import { useAuthData } from '@/contexts/auth-context';
 import { Categories } from '@/components/categories';
 import { ImageForm } from '@/components/image-form';
 import { Combobox } from '@/components/combobox';
+import { Category, Image, Post } from '@/types';
 import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
-import { Image, Post } from '@/types';
 import { Plus } from 'lucide-react';
 
 const CATEGORIES_MAX_NUM = 7;
@@ -40,30 +36,20 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const router = useRouter();
 
   const {
-    authData: { backendUrl, authFetch },
+    authData: { backendUrl, authAxios },
   } = useAuthData();
 
   React.useEffect(() => {
-    authFetch(`${backendUrl}/posts/categories`)
-      .then((apiRes) => {
-        if (apiRes.ok) return apiRes.json();
-        throw apiRes;
-      })
-      .then((cats: { name: string }[]) => {
-        if (
-          Array.isArray(cats) &&
-          cats.length > 0 &&
-          isObject(cats[0]) &&
-          typeof cats[0].name === 'string'
-        ) {
-          setAllCategories(cats.map((c) => c.name));
-        }
+    authAxios
+      .get<Category[]>('/posts/categories')
+      .then(({ data: cats }) => {
+        setAllCategories(cats.map((c) => c.name));
       })
       .catch((error) => {
         getUnknownErrorMessage(error);
-        setErrorMessage('Could not fetch any categories');
+        setErrorMessage('Could not load the categories');
       });
-  }, [backendUrl, authFetch]);
+  }, [authAxios]);
 
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
@@ -77,20 +63,11 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   >({
     mutationFn: async (submitArgs) => {
       const formValues = submitArgs[1];
-      const reqInit: RequestInit = {
-        body: JSON.stringify({ ...formValues, categories, image: image?.id }),
-        headers: { 'Content-Type': 'application/json' },
-      };
-      let res: Response;
-      if (isUpdate) {
-        reqInit.method = 'PUT';
-        res = await authFetch(`${backendUrl}/posts/${post.id}`, reqInit);
-      } else {
-        reqInit.method = 'POST';
-        res = await authFetch(`${backendUrl}/posts`, reqInit);
-      }
-      if (!res.ok) throw res;
-      return res.json();
+      const body = { ...formValues, categories, image: image?.id };
+      const { data } = await (isUpdate
+        ? authAxios.put<Post>(`${backendUrl}/posts/${post.id}`, body)
+        : authAxios.post<Post>(`${backendUrl}/posts`, body));
+      return data;
     },
     onSuccess: (resPost, [hookForm]) => {
       hookForm.reset();
@@ -106,16 +83,11 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
       onSuccess?.();
       router.push(`/${resPost && resPost.id ? resPost.id : ''}`);
     },
-    onError: async (resError, [hookForm]) => {
-      try {
-        if (resError instanceof Response) {
-          setErrorMessage(await getResErrorMessageOrThrow(resError, hookForm));
-        } else {
-          throw resError;
-        }
-      } catch (error) {
-        setErrorMessage(getUnknownErrorMessage(error));
-      }
+    onError: async (error, [hookForm]) => {
+      setErrorMessage(
+        parseAxiosAPIError(error, hookForm).message ||
+          getUnknownErrorMessage(error)
+      );
     },
   });
 
@@ -179,8 +151,8 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
             <Categories
               categories={categories}
               className='justify-end'
-              onRemove={(name) => {
-                setCategories((cats) => cats.filter((c) => c !== name));
+              onRemove={(catToDel) => {
+                setCategories((cats) => cats.filter((c) => c !== catToDel));
                 setCategoriesError('');
               }}
             />

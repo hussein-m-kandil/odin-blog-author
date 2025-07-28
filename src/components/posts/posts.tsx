@@ -11,9 +11,9 @@ import { P } from '@/components/typography/';
 import { Loader } from 'lucide-react';
 import { Post } from '@/types';
 
-export function Posts({ postsUrl }: { postsUrl: URL | string }) {
+export function Posts({ postsUrl }: { postsUrl: string }) {
   const {
-    authData: { user, authFetch },
+    authData: { user, authAxios },
   } = useAuthData();
 
   const {
@@ -33,13 +33,13 @@ export function Posts({ postsUrl }: { postsUrl: URL | string }) {
     readonly unknown[],
     number
   >({
-    queryKey: ['posts', postsUrl, authFetch],
+    queryKey: ['posts', postsUrl, authAxios],
     queryFn: async ({ pageParam }) => {
-      const url = !(postsUrl instanceof URL) ? new URL(postsUrl) : postsUrl;
-      if (pageParam) url.searchParams.set('cursor', pageParam.toString());
-      const res = await authFetch(url);
-      if (res.ok) return res.json();
-      throw res;
+      const url = new URL(postsUrl);
+      if (pageParam) {
+        url.searchParams.set('cursor', pageParam.toString());
+      }
+      return (await authAxios.get(url.href)).data;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {

@@ -4,6 +4,9 @@ import {
   resetIntersectionMocking,
 } from 'react-intersection-observer/test-utils';
 import { vi, beforeAll, beforeEach, afterEach } from 'vitest';
+import { axiosMock } from './__mocks__/axios';
+
+vi.mock('axios');
 
 const nextRouterMock = vi.hoisted(() => ({
   push: vi.fn(),
@@ -11,37 +14,37 @@ const nextRouterMock = vi.hoisted(() => ({
   prefetch: vi.fn(),
   back: vi.fn(),
 }));
-
 vi.mock('next/navigation', async (importOriginal) => ({
   ...(await importOriginal<typeof import('next/navigation')>()),
   useRouter: () => nextRouterMock,
 }));
 
-const observeMock = vi.fn();
-const unobserveMock = vi.fn();
-const disconnectMock = vi.fn();
+const observe = vi.fn();
+const unobserve = vi.fn();
+const disconnect = vi.fn();
+const takeRecords = vi.fn();
 
 beforeAll(() => {
-  global.ResizeObserver = class ResizeObserver {
-    constructor() {
-      this.observe = this.observe.bind(this);
-      this.unobserve = this.unobserve.bind(this);
-      this.disconnect = this.disconnect.bind(this);
-    }
-    observe = observeMock;
-    unobserve = unobserveMock;
-    disconnect = disconnectMock;
-  };
+  vi.stubGlobal(
+    'ResizeObserver',
+    vi.fn(() => ({ observe, unobserve, disconnect }))
+  );
+  vi.stubGlobal(
+    'IntersectionObserver',
+    vi.fn(() => ({ disconnect, observe, takeRecords, unobserve }))
+  );
 });
 
 beforeEach(() => {
   setupIntersectionMocking(vi.fn);
+  axiosMock.onAny().reply(200);
 });
 
 afterEach(() => {
   Object.values(nextRouterMock).forEach((mockFn) => mockFn.mockReset());
-  disconnectMock.mockReset();
-  unobserveMock.mockReset();
-  observeMock.mockReset();
   resetIntersectionMocking();
+  disconnect.mockReset();
+  unobserve.mockReset();
+  observe.mockReset();
+  axiosMock.reset();
 });

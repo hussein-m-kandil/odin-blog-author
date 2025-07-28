@@ -4,66 +4,51 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { delay, post, mockAuthContext, author } from '@/test-utils';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { post, author, initAuthData } from '@/test-utils';
 import { PostPageSkeleton } from './post-page.skeleton';
+import { AuthProvider } from '@/contexts/auth-context';
+import { axiosMock } from '@/__mocks__/axios';
 import { PostPage } from './post-page';
 
 const loaderRegex = /loading .* post page/i;
 
+const getInitAuthData = vi.fn(() => initAuthData);
+
 const PostPageWrapper = (
   props: Omit<React.ComponentProps<typeof PostPage>, 'postUrl' | 'postId'>
 ) => {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: 'static' } },
-  });
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <PostPage postUrl={'https://example.com'} postId={post.id} {...props} />
+    <QueryClientProvider
+      client={
+        new QueryClient({
+          defaultOptions: { queries: { retry: false, staleTime: 'static' } },
+        })
+      }>
+      <AuthProvider initAuthData={getInitAuthData()}>
+        <PostPage postUrl={'https://example.com'} postId={post.id} {...props} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
 
-const fetchMock = vi.fn(
-  () =>
-    new Promise<Response>((resolve) =>
-      delay(() => resolve(Response.json(post)))
-    )
-);
-
-vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
-
-const { authData, useAuthData, setAuthData } = mockAuthContext();
-authData.authFetch = window.fetch;
-
-afterEach(() => {
-  vi.clearAllMocks();
-  useAuthData.mockImplementation(() => ({ authData, setAuthData }));
-});
-
 describe('<PostPage />', () => {
+  beforeEach(() => axiosMock.onGet().reply(200, post));
+
   it('should show loader', () => {
     render(<PostPageWrapper />);
     expect(screen.getByLabelText(loaderRegex)).toBeInTheDocument();
   });
 
   it('should show error message on error', async () => {
-    fetchMock.mockImplementationOnce(() => {
-      throw Error('Test Error');
-    });
+    axiosMock.onGet().networkError();
     render(<PostPageWrapper />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.getByText(/could(n't| not) .* post/i)).toBeInTheDocument();
   });
 
   it('should show error message on reject', async () => {
-    fetchMock.mockImplementationOnce(
-      () =>
-        new Promise<Response>((_, reject) =>
-          delay(() => reject(Response.json(null, { status: 404 })))
-        )
-    );
+    axiosMock.onGet().reply(400);
     render(<PostPageWrapper />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.getByText(/could(n't| not) .* post/i)).toBeInTheDocument();
@@ -84,12 +69,7 @@ describe('<PostPage />', () => {
   });
 
   it('should have the given className on loading error', async () => {
-    fetchMock.mockImplementationOnce(
-      () =>
-        new Promise<Response>((_, reject) =>
-          delay(() => reject(Response.json(null, { status: 404 })))
-        )
-    );
+    axiosMock.onGet().reply(400);
     const className = 'test-class';
     const { container } = render(<PostPageWrapper className={className} />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
@@ -135,9 +115,9 @@ describe('<PostPage />', () => {
   });
 
   it('should display the post options menu if current user is its author', async () => {
-    useAuthData.mockImplementation(() => ({
-      authData: { ...authData, user: author },
-      setAuthData,
+    getInitAuthData.mockImplementationOnce(() => ({
+      ...initAuthData,
+      user: author,
     }));
     render(<PostPageWrapper />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
@@ -147,9 +127,9 @@ describe('<PostPage />', () => {
   });
 
   it('should not display the post options menu if current user is not its author', async () => {
-    useAuthData.mockImplementation(() => ({
-      authData: { ...authData, user: { ...author, id: 'x' } },
-      setAuthData,
+    getInitAuthData.mockImplementationOnce(() => ({
+      ...initAuthData,
+      user: { ...author, id: 'x' },
     }));
     render(<PostPageWrapper />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
@@ -157,9 +137,9 @@ describe('<PostPage />', () => {
   });
 
   it('should not display the post options menu if there is no current user at all', async () => {
-    useAuthData.mockImplementation(() => ({
-      authData: { ...authData, user: null },
-      setAuthData,
+    getInitAuthData.mockImplementationOnce(() => ({
+      ...initAuthData,
+      user: null,
     }));
     render(<PostPageWrapper />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
@@ -184,12 +164,7 @@ describe('<PostPage />', () => {
   });
 
   it('should not display an image if the post do not have one', async () => {
-    fetchMock.mockImplementationOnce(
-      () =>
-        new Promise<Response>((resolve) =>
-          delay(() => resolve(Response.json({ ...post, image: null })))
-        )
-    );
+    axiosMock.onGet().reply(200, { ...post, image: null });
     render(<PostPageWrapper />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.queryByRole('img')).toBeNull();

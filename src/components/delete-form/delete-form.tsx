@@ -1,9 +1,10 @@
 import React from 'react';
+import { AxiosResponse } from 'axios';
 import { P } from '@/components/typography/p';
 import { Button } from '@/components/ui/button';
 import { ErrorMessage } from '@/components/error-message';
 import { Loader2, PanelLeftClose, Trash2 } from 'lucide-react';
-import { getResErrorMessageOrThrow, getUnknownErrorMessage } from '@/lib/utils';
+import { getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
 
 export function DeleteForm({
   subject,
@@ -12,9 +13,9 @@ export function DeleteForm({
   onSuccess,
   ...formProps
 }: Omit<React.ComponentProps<'form'>, 'onSubmit'> & {
+  delReqFn: () => Promise<AxiosResponse> | AxiosResponse;
   onCancel: React.MouseEventHandler<HTMLButtonElement>;
-  delReqFn: () => Promise<Response> | Response;
-  onSuccess: () => void;
+  onSuccess?: (res: AxiosResponse) => void;
   subject: string;
 }) {
   const [errorMessage, setErrorMessage] = React.useState('');
@@ -25,13 +26,11 @@ export function DeleteForm({
     setSubmitting(true);
     try {
       const delRes = await delReqFn();
-      if (delRes.ok) {
-        onSuccess();
-      } else {
-        setErrorMessage(await getResErrorMessageOrThrow(delRes));
-      }
+      onSuccess?.(delRes);
     } catch (error) {
-      setErrorMessage(getUnknownErrorMessage(error));
+      setErrorMessage(
+        parseAxiosAPIError(error).message || getUnknownErrorMessage(error)
+      );
     } finally {
       setSubmitting(false);
     }

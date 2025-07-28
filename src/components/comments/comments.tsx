@@ -20,7 +20,7 @@ export function Comments({
   post: Post;
 }) {
   const {
-    authData: { backendUrl, authFetch, user },
+    authData: { authAxios, user },
   } = useAuthData();
   const userId = user?.id;
 
@@ -41,15 +41,14 @@ export function Comments({
     readonly unknown[],
     number
   >({
-    queryKey: ['comments', post.id, backendUrl],
+    queryKey: ['comments', post.id],
     initialData: { pages: [initialComments], pageParams: [0] },
     initialPageParam: initialComments[initialComments.length - 1]?.order || 0,
     queryFn: async ({ pageParam }) => {
-      const url = new URL(`${backendUrl}/posts/${post.id}/comments`);
-      if (pageParam) url.searchParams.set('cursor', pageParam.toString());
-      const res = await authFetch(url);
-      if (!res.ok) throw res;
-      return res.json();
+      const url = `/posts/${post.id}/comments${
+        pageParam ? '?cursor=' + pageParam.toString() : ''
+      }`;
+      return (await authAxios.get(url)).data;
     },
     getNextPageParam: (lastPage, allPages) => {
       if (lastPage.length) {

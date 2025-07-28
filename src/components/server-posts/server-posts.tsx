@@ -11,7 +11,7 @@ export async function ServerPosts({
   authData: { token },
   postsUrl,
 }: {
-  postsUrl: string | URL;
+  postsUrl: string;
   authData: AuthData;
 }) {
   const queryClient = new QueryClient();

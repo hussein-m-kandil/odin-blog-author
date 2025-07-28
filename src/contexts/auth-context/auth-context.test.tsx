@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider, useAuthData } from './auth-context';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
+import { axiosMock } from '@/__mocks__/axios';
 import { initAuthData } from '@/test-utils';
 import { InitAuthData } from '@/types';
 
@@ -18,6 +19,8 @@ const assertAuthDataDisplayed = (data: InitAuthData) => {
   if (user) expect(screen.getByText(user.username)).toBeInTheDocument();
 };
 
+const reqTriggerName = 'Send authorized request';
+
 function AuthConsumer() {
   const { authData, setAuthData } = useAuthData();
   return (
@@ -30,17 +33,12 @@ function AuthConsumer() {
       </button>
       <button
         type='button'
-        onClick={() => authData.authFetch(authData.backendUrl)}>
-        fetch
+        onClick={() => authData.authAxios.get(authData.backendUrl)}>
+        {reqTriggerName}
       </button>
     </div>
   );
 }
-
-const fetchMock = vi.fn();
-vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
-
-afterEach(vi.clearAllMocks);
 
 function AuthWrapper(
   props: Omit<React.ComponentProps<typeof AuthProvider>, 'children'>
@@ -55,6 +53,8 @@ function AuthWrapper(
 }
 
 describe('AuthContext', () => {
+  beforeEach(() => axiosMock.onGet().reply(200));
+
   it('should `useAuthData` throw if used outside of `AuthProvider`', () => {
     expect(() =>
       render(
@@ -80,23 +80,12 @@ describe('AuthContext', () => {
     assertAuthDataDisplayed(newAuthData);
   });
 
-  it('should `authFetch` send an authorized request', async () => {
+  it('should `axios` be an authorized instance of `axios` created', async () => {
     const user = userEvent.setup();
     render(<AuthWrapper initAuthData={initAuthData} />);
-    await user.click(screen.getByRole('button', { name: /fetch/i }));
-    expect(fetchMock).toHaveBeenCalledOnce();
-    expect(fetchMock.mock.calls[0][1]).toEqual({
-      headers: { Authorization: initAuthData.token },
-    });
-  });
-
-  it('should `authFetch` send an unauthorized request', async () => {
-    const user = userEvent.setup();
-    render(
-      <AuthWrapper initAuthData={{ ...initAuthData, token: undefined }} />
+    await user.click(screen.getByRole('button', { name: reqTriggerName }));
+    expect(axiosMock.history.get[0].headers?.Authorization).toBe(
+      initAuthData.token
     );
-    await user.click(screen.getByRole('button', { name: /fetch/i }));
-    expect(fetchMock).toHaveBeenCalledOnce();
-    expect(fetchMock.mock.calls[0][1]).toBeUndefined();
   });
 });

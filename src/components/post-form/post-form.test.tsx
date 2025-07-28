@@ -6,41 +6,46 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
 import { createPostFormAttrs } from './post-form.data';
-import { mockAuthContext, post } from '@/test-utils';
+import { AuthProvider } from '@/contexts/auth-context';
+import { post, initAuthData } from '@/test-utils';
+import { axiosMock } from '@/__mocks__/axios';
 import { PostForm } from './post-form';
 import { Post } from '@/types';
 
-mockAuthContext();
-
-const onSuccessMock = vi.fn();
-const fetchMock = () => {
-  return new Promise<Response>((resolve) =>
-    setTimeout(() => resolve(Response.json(null, { status: 200 })), 50)
-  );
-};
-
-const fetchSpy = vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
-
-afterEach(vi.clearAllMocks);
-
 const PostFormWrapper = (props: React.ComponentProps<typeof PostForm>) => {
-  const queryClient = new QueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
-      <PostForm {...props} />
+    <QueryClientProvider
+      client={
+        new QueryClient({
+          defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+        })
+      }>
+      <AuthProvider initAuthData={initAuthData}>
+        <PostForm {...props} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
 
+const onSuccessMock = vi.fn();
+
 const setup = async (post?: Post) => {
   const data = {
-    submittingOpts: { name: post ? /updating/i : /creating/i },
-    submitterOpts: { name: post ? /update .*post/i : /create .*post/i },
     entries: Object.entries(createPostFormAttrs(post)),
-    formOpts: { name: post ? 'Update Post' : 'Create Post' },
+    ...(post
+      ? {
+          submitterOpts: { name: /update .*post/i },
+          submittingOpts: { name: /updating/i },
+          formOpts: { name: 'Update Post' },
+        }
+      : {
+          submitterOpts: { name: /create .*post/i },
+          submittingOpts: { name: /creating/i },
+          formOpts: { name: 'Create Post' },
+        }),
   };
   const user = userEvent.setup();
   const renderResult = render(
@@ -73,6 +78,14 @@ const assertPostFormFieldsAndSubmitter = async (postData?: Post) => {
 };
 
 describe(`<PostForm />`, () => {
+  beforeEach(() => {
+    axiosMock.onGet().reply(200, ['category']);
+    axiosMock.onPost().reply(201, post);
+    axiosMock.onPut().reply(200, post);
+  });
+
+  afterEach(vi.clearAllMocks);
+
   it('should render a create post form with inputs and correct submitter', async () => {
     await assertPostFormFieldsAndSubmitter();
   });
@@ -98,10 +111,8 @@ describe(`<PostForm />`, () => {
   });
 
   it('should handle promise rejection and not call `onSuccess` function', async () => {
+    axiosMock.onPut().abortRequest();
     const { data, user } = await setup(post);
-    fetchSpy.mockImplementationOnce(
-      () => new Promise((_, reject) => setTimeout(reject, 50))
-    );
     await user.click(screen.getByRole('button', data.submitterOpts));
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', data.submittingOpts)
@@ -112,16 +123,8 @@ describe(`<PostForm />`, () => {
 
   it('should show response error and not call `onSuccess` function', async () => {
     const error = 'Test error';
+    axiosMock.onPut().reply(400, error);
     const { data, user } = await setup(post);
-    fetchSpy.mockImplementationOnce(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () => resolve(Response.json({ error }, { status: 400 })),
-            50
-          )
-        )
-    );
     await user.click(screen.getByRole('button', data.submitterOpts));
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', data.submittingOpts)
@@ -131,17 +134,8 @@ describe(`<PostForm />`, () => {
   });
 
   it('should show unauthorized error and not call `onSuccess` function', async () => {
-    const error = 'Test error';
+    axiosMock.onPut().reply(401);
     const { data, user } = await setup(post);
-    fetchSpy.mockImplementationOnce(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(
-            () => resolve(Response.json({ error }, { status: 401 })),
-            50
-          )
-        )
-    );
     await user.click(screen.getByRole('button', data.submitterOpts));
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', data.submittingOpts)

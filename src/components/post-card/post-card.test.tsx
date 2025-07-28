@@ -1,7 +1,8 @@
-import PostCardSkeleton from './post-card.skeleton';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { post, mockDialogContext, initAuthData } from '@/test-utils';
 import { render, screen } from '@testing-library/react';
-import { post, mockDialogContext } from '@/test-utils';
+import { PostCardSkeleton } from './post-card.skeleton';
+import { AuthProvider } from '@/contexts/auth-context';
 import { describe, expect, it } from 'vitest';
 import { PostCard } from './post-card';
 
@@ -10,7 +11,9 @@ mockDialogContext();
 const PostCardWrapper = (props: React.ComponentProps<typeof PostCard>) => {
   return (
     <QueryClientProvider client={new QueryClient()}>
-      <PostCard {...props} />
+      <AuthProvider initAuthData={initAuthData}>
+        <PostCard {...props} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

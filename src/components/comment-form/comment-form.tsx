@@ -1,17 +1,15 @@
 'use client';
 
 import React from 'react';
-import logger from '@/lib/logger';
+import { cn, getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
 import { ErrorMessage } from '@/components/error-message';
+import { useAuthData } from '@/contexts/auth-context';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { Comment, ID } from '@/types';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export function CommentForm({
   postId,
@@ -42,6 +40,9 @@ export function CommentForm({
     );
   }
 
+  const {
+    authData: { authAxios },
+  } = useAuthData();
   const [content, setContent] = React.useState(updating ? comment.content : '');
   const [submitting, setSubmitting] = React.useState(false);
   const [errMsg, setErrMsg] = React.useState('');
@@ -51,23 +52,18 @@ export function CommentForm({
     e.preventDefault();
     setSubmitting(true);
     try {
-      const commentMetadata = updating
+      const { url, values, axiosReq } = updating
         ? {
-            endpoint: `/posts/${comment.postId}/comments/${comment.id}`,
+            url: `/posts/${comment.postId}/comments/${comment.id}`,
             values: { content },
-            method: 'PUT',
+            axiosReq: authAxios.put,
           }
         : {
-            endpoint: `/posts/${postId}/comments/`,
+            url: `/posts/${postId}/comments/`,
             values: { content, authorId, postId },
-            method: 'POST',
+            axiosReq: authAxios.post,
           };
-      const apiRes = await fetch(`${apiBaseUrl}${commentMetadata.endpoint}`, {
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(commentMetadata.values),
-        method: commentMetadata.method,
-      });
-      if (!apiRes.ok) throw apiRes;
+      await axiosReq(url, values);
       setErrMsg('');
       setContent('');
       router.replace(`/${updating ? comment.postId : postId}`, {
@@ -78,10 +74,11 @@ export function CommentForm({
           updating ? 'updated a' : 'added a new'
         } comment successfully`,
       });
-      if (typeof onSuccess === 'function') onSuccess();
+      onSuccess?.();
     } catch (error) {
-      logger.error(error?.toString?.() || 'Comment error', error);
-      setErrMsg('Sorry, you can not comment right now');
+      const { message } = parseAxiosAPIError(error);
+      if (!message) getUnknownErrorMessage(error); // Just to log it
+      setErrMsg(message || 'Sorry, you can not comment right now');
     } finally {
       setSubmitting(false);
     }

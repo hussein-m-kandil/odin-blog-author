@@ -1,3 +1,5 @@
+import { AxiosInstance } from 'axios';
+
 export type ID = string | number;
 
 export interface User {
@@ -24,7 +26,7 @@ export interface InitAuthData {
 }
 
 export interface AuthData extends InitAuthData {
-  authFetch: typeof fetch;
+  authAxios: AxiosInstance;
 }
 
 export interface Image {

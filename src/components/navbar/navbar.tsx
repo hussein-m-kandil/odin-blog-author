@@ -17,7 +17,7 @@ import {
   UserIcon,
   PenSquare,
 } from 'lucide-react';
-import { cn, getUnknownErrorMessage } from '@/lib/utils';
+import { cn, getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
 import { useDialog } from '@/contexts/dialog-context/';
 import { useAuthData } from '@/contexts/auth-context';
 import { UserAvatar } from '@/components/user-avatar';
@@ -38,7 +38,7 @@ export function Navbar() {
 
   const { authData, setAuthData } = useAuthData();
 
-  const user = authData.user;
+  const { user, authAxios } = authData;
 
   const [yScroll, setYScroll] = React.useState(0);
   const { showDialog, hideDialog } = useDialog();
@@ -74,10 +74,9 @@ export function Navbar() {
 
   const handleSignout = async () => {
     const signoutUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/signout`;
-    toast.promise<Response>(fetch(signoutUrl, { method: 'POST' }), {
+    toast.promise(authAxios.post(signoutUrl, null, { baseURL: '' }), {
       loading: 'Signing out...',
-      success: (apiRes) => {
-        if (!apiRes.ok) return { message: 'Failed to sign you out' };
+      success: () => {
         setAuthData({ ...authData, user: null, token: '' });
         router.replace('/signin');
         return {
@@ -86,7 +85,8 @@ export function Navbar() {
         };
       },
       error: (error) => ({
-        message: getUnknownErrorMessage(error),
+        message:
+          parseAxiosAPIError(error).message || getUnknownErrorMessage(error),
         description: 'Failed to sign you out',
       }),
     });

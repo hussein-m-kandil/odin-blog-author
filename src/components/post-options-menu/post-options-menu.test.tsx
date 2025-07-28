@@ -1,9 +1,10 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { initAuthData, mockDialogContext, post } from '@/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
-import { mockDialogContext, post } from '@/test-utils';
 import { PostOptionsMenu } from './post-options-menu';
+import { AuthProvider } from '@/contexts/auth-context';
 
 const { showDialog } = mockDialogContext();
 
@@ -12,7 +13,9 @@ const PostOptionsMenuWrapper = (
 ) => {
   return (
     <QueryClientProvider client={new QueryClient()}>
-      <PostOptionsMenu {...props} />
+      <AuthProvider initAuthData={initAuthData}>
+        <PostOptionsMenu {...props} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 };

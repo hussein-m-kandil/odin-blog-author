@@ -85,6 +85,32 @@ export const getResErrorMessageOrThrow = async (
   throw resData;
 };
 
+export const parseAxiosAPIError = (
+  error: unknown,
+  hookForm?: UseFormReturn
+) => {
+  const result: { message?: string } = {};
+  if (isObject(error) && isObject(error.response)) {
+    if (error.status === 401 || error.status === 403) {
+      result.message = 'You are unauthorized';
+    } else {
+      const { data } = error.response;
+      if (hookForm && Array.isArray(data) && data.every(isIssue)) {
+        const { formErrors, fieldErrors } = parseIssues(data);
+        showFieldErrors(hookForm, fieldErrors);
+        if (formErrors.length) result.message = formErrors[0];
+      } else if (isErrorResponseWithStringErrorMessage(data)) {
+        result.message = data.error.message;
+      } else if (isErrorResponseWithStringError(data)) {
+        result.message = data.error;
+      } else if (isNoneEmptyString(data)) {
+        result.message = data;
+      }
+    }
+  }
+  return result;
+};
+
 export type Issue = { path: unknown[]; message: string };
 export type FieldErrors = Record<string, string[]>;
 

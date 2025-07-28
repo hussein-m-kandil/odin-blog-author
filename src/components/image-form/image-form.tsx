@@ -1,11 +1,7 @@
 'use client';
 
 import React from 'react';
-import {
-  cn,
-  getResErrorMessageOrThrow,
-  getUnknownErrorMessage,
-} from '@/lib/utils';
+import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { MutableImage } from '@/components/mutable-image';
 import { useAuthData } from '@/contexts/auth-context';
 import { ImageFormProps } from './image-form.types';
@@ -14,6 +10,7 @@ import { Loader, Upload } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Image as ImageType } from '@/types';
+import { AxiosResponse } from 'axios';
 import { toast } from 'sonner';
 
 export function ImageForm({
@@ -26,20 +23,22 @@ export function ImageForm({
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<File | null>();
 
-  const { authData } = useAuthData();
+  const {
+    authData: { authAxios },
+  } = useAuthData();
 
-  const baseUrl = `${authData.backendUrl}/images`;
+  const endpoint = '/images';
   const updating = !!image;
 
-  let url, method, verb;
+  let url: string, method: 'post' | 'put', verb: 'Update' | 'Upload';
   if (updating) {
-    url = `${baseUrl}/${image.id}`;
+    url = `${endpoint}/${image.id}`;
     verb = 'Update';
-    method = 'PUT';
+    method = 'put';
   } else {
-    url = baseUrl;
+    url = endpoint;
     verb = 'Upload';
-    method = 'POST';
+    method = 'post';
   }
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
@@ -49,25 +48,16 @@ export function ImageForm({
         setUploading(true);
         const body = new FormData();
         body.set('image', file);
-        const apiRes = await fetch(url, {
-          headers: { Authorization: authData.token || '' },
-          method,
-          body,
+        const { data } = await authAxios[method]<ImageType>(url, body);
+        (e.target as HTMLFormElement).reset();
+        setFile(null);
+        toast.success('Upload succeeded', {
+          description: 'Your image have been uploaded successfully',
         });
-        if (!apiRes.ok) {
-          const description = await getResErrorMessageOrThrow(apiRes);
-          toast.error('Upload failed', { description });
-        } else {
-          const data = await apiRes.json();
-          (e.target as HTMLFormElement).reset();
-          setFile(null);
-          toast.success('Upload succeeded', {
-            description: 'Your image have been uploaded successfully',
-          });
-          onSuccess?.(data);
-        }
+        onSuccess?.(data);
       } catch (error) {
-        toast.error('Upload failed');
+        const { message: description } = parseAxiosAPIError(error);
+        toast.error('Upload failed', { description });
         onFailed?.(error);
       } finally {
         setUploading(false);
@@ -79,25 +69,11 @@ export function ImageForm({
   };
 
   const updateImageData = async ({ id, ...imageData }: ImageType) => {
-    toast.promise<Response>(
-      fetch(`${baseUrl}/${id}`, {
-        headers: {
-          Authorization: authData.token || '',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(imageData),
-        method: 'PUT',
-      }),
+    toast.promise<AxiosResponse>(
+      authAxios.put<ImageType>(`${endpoint}/${id}`, imageData),
       {
         loading: 'Updating image data...',
-        success: async (apiRes) => {
-          if (!apiRes.ok) {
-            return {
-              message: 'Update failed',
-              description: await getResErrorMessageOrThrow(apiRes),
-            };
-          }
-          const updatedImage = (await apiRes.json()) as ImageType;
+        success: async ({ data: updatedImage }) => {
           onSuccess?.(updatedImage);
           return {
             message: 'Update succeeded',
@@ -105,10 +81,12 @@ export function ImageForm({
           };
         },
         error: (error) => {
+          const { message: description } = parseAxiosAPIError(error);
+          if (description) return { message: 'Update failed', description };
           onFailed?.(error);
           return {
-            message: 'Update failed',
             description: getUnknownErrorMessage(error),
+            message: 'Update failed',
           };
         },
       }
@@ -116,35 +94,24 @@ export function ImageForm({
   };
 
   const deleteImage = async ({ id }: ImageType) => {
-    toast.promise<Response>(
-      fetch(`${baseUrl}/${id}`, {
-        headers: { Authorization: authData.token || '' },
-        method: 'DELETE',
-      }),
-      {
-        loading: 'Deleting image...',
-        success: async (apiRes) => {
-          if (!apiRes.ok) {
-            return {
-              message: 'Delete failed',
-              description: await getResErrorMessageOrThrow(apiRes),
-            };
-          }
-          onSuccess?.(null);
-          return {
-            message: 'Delete succeeded',
-            description: 'Your image have been deleted successfully',
-          };
-        },
-        error: (error) => {
-          onFailed?.(error);
-          return {
-            message: 'Delete failed',
-            description: getUnknownErrorMessage(error),
-          };
-        },
-      }
-    );
+    toast.promise<AxiosResponse>(authAxios.delete<null>(`${endpoint}/${id}`), {
+      loading: 'Deleting image...',
+      success: async ({ data }) => {
+        onSuccess?.(data);
+        return {
+          message: 'Delete succeeded',
+          description: 'Your image have been deleted successfully',
+        };
+      },
+      error: (error) => {
+        const { message } = parseAxiosAPIError(error);
+        onFailed?.(error);
+        return {
+          message: 'Delete failed',
+          description: message || getUnknownErrorMessage(error),
+        };
+      },
+    });
   };
 
   return (
@@ -170,7 +137,10 @@ export function ImageForm({
         />
         <Button size='icon' type='submit' disabled={!file || uploading}>
           {uploading ? (
-            <Loader className='inline-block animate-spin' />
+            <Loader
+              aria-label='Uploading'
+              className='inline-block animate-spin'
+            />
           ) : (
             <Upload className='inline-block' />
           )}

@@ -22,15 +22,15 @@ export function PostPage({
   ...props
 }: React.ComponentProps<'div'> & {
   postId: Post['id'];
-  postUrl: string | URL;
+  postUrl: string;
 }) {
   const {
-    authData: { authFetch, user },
+    authData: { authAxios, user },
   } = useAuthData();
 
   const { data: post, status } = useQuery<Post>({
     queryKey: ['post', postId, postUrl],
-    queryFn: async () => (await authFetch(postUrl)).json(),
+    queryFn: async () => (await authAxios(postUrl)).data,
   });
 
   const titleId = `title-${post?.id}`;

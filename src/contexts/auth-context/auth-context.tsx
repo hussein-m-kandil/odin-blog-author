@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import axios from 'axios';
+import * as React from 'react';
 import { AuthData, InitAuthData } from '@/types';
 
 export type AuthContextValue = {
@@ -8,31 +9,27 @@ export type AuthContextValue = {
   authData: AuthData;
 };
 
+export type AuthProviderProps = Readonly<{
+  children?: React.ReactNode;
+  initAuthData: InitAuthData;
+}>;
+
 const AuthContext = React.createContext<AuthContextValue | null>(null);
 
-const createAuthFetch = (authToken?: string): typeof fetch => {
-  if (!authToken) return fetch;
-  return (url, init) => {
-    const reqInit: RequestInit = init || {};
-    const headers: HeadersInit = { Authorization: authToken };
-    reqInit.headers = reqInit.headers
-      ? { ...headers, ...reqInit.headers }
-      : headers;
-    return fetch(url, reqInit);
-  };
-};
-
 const extendInitData = (data: InitAuthData) => {
-  return { ...data, authFetch: createAuthFetch(data.token) };
+  return {
+    ...data,
+    authAxios: axios.create({
+      headers: { Authorization: data.token },
+      baseURL: data.backendUrl,
+    }),
+  };
 };
 
 export function AuthProvider({
   initAuthData: initData,
   children,
-}: Readonly<{
-  children: React.ReactNode;
-  initAuthData: InitAuthData;
-}>) {
+}: AuthProviderProps) {
   const [data, setData] = React.useState<AuthData>(extendInitData(initData));
 
   const contextValue: AuthContextValue = {

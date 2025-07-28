@@ -1,26 +1,23 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
+import { axiosMock } from '@/__mocks__/axios';
 import { DeleteForm } from './delete-form';
-import { delay } from '@/test-utils';
-
-const onCancel = vi.fn();
-const onSuccess = vi.fn();
-const delReqFn = vi.fn(
-  () =>
-    new Promise<Response>((resolve) =>
-      delay(() => resolve(new Response(null, { status: 204 })))
-    )
-);
-
-const method = 'dialog';
-const subject = 'Delete Test';
-const name = new RegExp(subject);
-const props = { method, subject, delReqFn, onCancel, onSuccess };
-
-afterEach(vi.clearAllMocks);
+import axios from 'axios';
 
 describe('<DeletePostForm />', () => {
+  const delReqFn = () => axios.delete('http://testhost.foo/');
+  const onSuccess = vi.fn();
+  const onCancel = vi.fn();
+  const method = 'dialog';
+  const subject = 'Delete Test';
+  const name = new RegExp(subject);
+  const props = { method, subject, delReqFn, onCancel, onSuccess };
+
+  afterEach(vi.clearAllMocks);
+
+  beforeEach(() => axiosMock.onDelete().reply(204));
+
   it('should be identified by the post title', () => {
     render(<DeleteForm {...props} />);
     const form = screen.getByRole('form', { name });
@@ -48,10 +45,8 @@ describe('<DeletePostForm />', () => {
   });
 
   it('should handle promise rejection and not call `onSuccess` function', async () => {
+    axiosMock.onDelete().abortRequest();
     const user = userEvent.setup();
-    delReqFn.mockImplementationOnce(
-      () => new Promise((_, reject) => delay(reject))
-    );
     render(<DeleteForm {...props} />);
     await user.click(screen.getByRole('button', { name: /delete/i }));
     await waitFor(() => screen.getByRole('button', { name: /deleting/i }));
@@ -63,14 +58,9 @@ describe('<DeletePostForm />', () => {
   });
 
   it('should show response error and not call `onSuccess` function', async () => {
-    const user = userEvent.setup();
     const error = 'Test error';
-    delReqFn.mockImplementationOnce(
-      () =>
-        new Promise((resolve) =>
-          delay(() => resolve(Response.json({ error }, { status: 400 })))
-        )
-    );
+    axiosMock.onDelete().reply(400, error);
+    const user = userEvent.setup();
     render(<DeleteForm {...props} />);
     await user.click(screen.getByRole('button', { name: /delete/i }));
     await waitFor(() => screen.getByRole('button', { name: /deleting/i }));
@@ -81,13 +71,7 @@ describe('<DeletePostForm />', () => {
 
   it('should show unauthorized error and not call `onSuccess` function', async () => {
     const user = userEvent.setup();
-    const error = 'Test error';
-    delReqFn.mockImplementationOnce(
-      () =>
-        new Promise((resolve) =>
-          delay(() => resolve(Response.json({ error }, { status: 401 })))
-        )
-    );
+    axiosMock.onDelete().reply(401);
     render(<DeleteForm {...props} />);
     await user.click(screen.getByRole('button', { name: /delete/i }));
     await waitFor(() => screen.getByRole('button', { name: /deleting/i }));
@@ -100,12 +84,6 @@ describe('<DeletePostForm />', () => {
 
   it('should call `onSuccess` function', async () => {
     const user = userEvent.setup();
-    delReqFn.mockImplementationOnce(
-      () =>
-        new Promise((resolve) =>
-          delay(() => resolve(new Response(null, { status: 204 })))
-        )
-    );
     render(<DeleteForm {...props} />);
     await user.click(screen.getByRole('button', { name: /delete/i }));
     await waitFor(() => screen.getByRole('button', { name: /deleting/i }));

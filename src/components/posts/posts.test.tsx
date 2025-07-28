@@ -1,11 +1,12 @@
-import { post, delay, mockAuthContext, mockDialogContext } from '@/test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { post, initAuthData, mockDialogContext } from '@/test-utils';
 import { render, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { axiosMock } from '@/__mocks__/axios';
 import { Posts } from './posts';
+import { AuthProvider } from '@/contexts/auth-context';
 
 mockDialogContext();
-mockAuthContext();
 
 const postsUrl = 'https://example.com/';
 
@@ -17,28 +18,45 @@ const PostsWrapper = (
       client={
         new QueryClient({ defaultOptions: { queries: { retry: false } } })
       }>
-      <Posts postsUrl={postsUrl} {...props} />
+      <AuthProvider initAuthData={initAuthData}>
+        <Posts postsUrl={postsUrl} {...props} />
+      </AuthProvider>
     </QueryClientProvider>
   );
 };
 
 const posts = [post, { ...post, id: 'test-post-2', title: 'Test Post #2' }];
 
-const fetchMock = vi.fn(
-  () =>
-    new Promise<Response>((resolve) =>
-      delay(() => resolve(Response.json(posts)))
-    )
-);
-
-vi.spyOn(window, 'fetch').mockImplementation(fetchMock);
-
-afterEach(vi.clearAllMocks);
-
 describe('<Posts />', () => {
-  it('should call fetch with given url', () => {
+  beforeEach(() => axiosMock.onGet().reply(200, posts));
+
+  it('should call axios with given url', () => {
     render(<PostsWrapper />);
-    expect((fetchMock.mock.calls[0] as URL[])[0].href).toStrictEqual(postsUrl);
+    expect(axiosMock.history.get[0].url).toStrictEqual(postsUrl);
+  });
+
+  it('should display a message informs the user that there are no posts', async () => {
+    axiosMock.onGet().reply(200, []);
+    render(<PostsWrapper />);
+    await waitFor(() =>
+      expect(screen.getByText(/no posts/i)).toBeInTheDocument()
+    );
+  });
+
+  it('should show error message on error', async () => {
+    axiosMock.onGet().networkError();
+    render(<PostsWrapper />);
+    await waitFor(() =>
+      expect(screen.getByText(/could(n't| not).*posts/i)).toBeInTheDocument()
+    );
+  });
+
+  it('should show error message on abort', async () => {
+    axiosMock.onGet().abortRequest();
+    render(<PostsWrapper />);
+    await waitFor(() =>
+      expect(screen.getByText(/could(n't| not).*posts/i)).toBeInTheDocument()
+    );
   });
 
   it('should display all the given posts', async () => {
@@ -53,41 +71,5 @@ describe('<Posts />', () => {
     for (const post of posts) {
       expect(screen.getByText(post.title)).toBeInTheDocument();
     }
-  });
-
-  it('should display a message informs the user that there are no posts', async () => {
-    fetchMock.mockImplementationOnce(
-      () =>
-        new Promise<Response>((resolve) =>
-          delay(() => resolve(Response.json([])))
-        )
-    );
-    render(<PostsWrapper />);
-    await waitFor(() =>
-      expect(screen.getByText(/no posts/i)).toBeInTheDocument()
-    );
-  });
-
-  it('should show error message on error', async () => {
-    fetchMock.mockImplementationOnce(() => {
-      throw Error('test error');
-    });
-    render(<PostsWrapper />);
-    await waitFor(() =>
-      expect(screen.getByText(/could(n't| not).*posts/i)).toBeInTheDocument()
-    );
-  });
-
-  it('should show error message on reject', async () => {
-    fetchMock.mockImplementationOnce(
-      () =>
-        new Promise<Response>((_, reject) => {
-          reject(Response.json(null, { status: 400 }));
-        })
-    );
-    render(<PostsWrapper />);
-    await waitFor(() =>
-      expect(screen.getByText(/could(n't| not).*posts/i)).toBeInTheDocument()
-    );
   });
 });
