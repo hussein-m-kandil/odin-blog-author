@@ -93,8 +93,8 @@ export const post: Post = {
   categories: [
     {
       postId,
+      name: 'Software',
       id: crypto.randomUUID(),
-      categoryName: 'Software',
     },
   ],
   comments: Array.from({ length: 5 }).map((_, i) => ({

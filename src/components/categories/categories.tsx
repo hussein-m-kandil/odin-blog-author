@@ -16,7 +16,7 @@ export function Categories({
 
   const strCats: string[] = [];
   for (const c of categories) {
-    const catName = typeof c === 'string' ? c : c.categoryName;
+    const catName = typeof c === 'string' ? c : c.name;
     if (!strCats.includes(catName)) strCats.push(catName);
   }
 

@@ -33,7 +33,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   );
   const [allCategories, setAllCategories] = React.useState<string[]>([]);
   const [categories, setCategories] = React.useState<string[]>(
-    isUpdate ? post.categories.map((c) => c.categoryName) : []
+    isUpdate ? post.categories.map((c) => c.name) : []
   );
   const [categoriesError, setCategoriesError] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
@@ -153,8 +153,10 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
               searchValidator={(value: string) => /^\w*$/.test(value)}
               onSearch={(value) => {
                 return value
-                  ? allCategories.filter((c) =>
-                      new RegExp(`^${value}`, 'i').test(c)
+                  ? allCategories.filter(
+                      (c) =>
+                        !categories.includes(c) &&
+                        new RegExp(`^${value}`, 'i').test(c)
                     )
                   : [];
               }}

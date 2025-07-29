@@ -48,8 +48,8 @@ export interface Image {
 
 export interface Category {
   id: string;
+  name: string;
   postId: string;
-  categoryName: string;
 }
 
 export interface Vote {
