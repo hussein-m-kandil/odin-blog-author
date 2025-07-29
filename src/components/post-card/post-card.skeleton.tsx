@@ -6,6 +6,7 @@ import {
   CardContent,
   CardDescription,
 } from '@/components/ui/card';
+import { MutableImageSkeleton } from '@/components/mutable-image';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
@@ -31,7 +32,7 @@ export function PostCardSkeleton({
         </CardDescription>
       </CardHeader>
       <CardContent className='mt-auto p-0'>
-        <Skeleton className='relative aspect-video' />
+        <MutableImageSkeleton className='rounded-none!' />
         <div className='space-y-2 my-4 px-6'>
           <Skeleton className='h-4' />
           <Skeleton className='h-4' />
