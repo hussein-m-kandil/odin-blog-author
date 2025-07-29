@@ -32,7 +32,8 @@ export function MutableImage({
           {...props}
           className={cn(
             'relative w-full aspect-video my-2 bg-muted-foreground text-background overflow-hidden',
-            className
+            className,
+            loading && 'hidden'
           )}>
           <Image
             fill

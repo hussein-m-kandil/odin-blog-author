@@ -12,7 +12,7 @@ export function MutableImageSkeleton({
     <Skeleton
       {...props}
       className={cn(
-        'relative w-full aspect-video my-2 overflow-hidden',
+        'relative w-full aspect-video my-2 overflow-hidden rounded-none',
         className
       )}>
       <ImageIcon
