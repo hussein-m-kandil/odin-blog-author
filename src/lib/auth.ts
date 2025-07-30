@@ -5,19 +5,17 @@ import logger from './logger';
 
 export const URL_HEADER_KEY = 'x-url';
 export const AUTH_COOKIE_KEY = 'authorization';
-export const API_BASE_URL = process.env.API_BASE_URL;
-export const PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+export const backendUrl = process.env.BACKEND_URL;
+export const authUrl = process.env.AUTH_URL;
 
-if (!API_BASE_URL) {
+if (!backendUrl) {
   throw new Error(
-    'Expect the environment variable `API_BASE_URL` to be defined'
+    'Expect the environment variable `BACKEND_URL` to be defined'
   );
 }
 
-if (!PUBLIC_API_BASE_URL) {
-  throw new Error(
-    'Expect the environment variable `PUBLIC_API_BASE_URL` to be defined'
-  );
+if (!authUrl) {
+  throw new Error('Expect the environment variable `AUTH_URL` to be defined');
 }
 
 export async function getAuthorization(): Promise<string | undefined> {
@@ -29,7 +27,7 @@ export const getAuthorizedUser = async (
 ): Promise<User | null> => {
   try {
     if (Authorization) {
-      const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      const res = await fetch(`${backendUrl}/auth/me`, {
         headers: { Authorization },
       });
       if (res.ok) return await res.json();
@@ -43,7 +41,7 @@ export const getAuthorizedUser = async (
 export const getBaseAuthData = async (): Promise<BaseAuthData> => {
   const token = await getAuthorization();
   const user = await getAuthorizedUser(token);
-  return { backendUrl: API_BASE_URL, token, user };
+  return { backendUrl, authUrl, token, user };
 };
 
 export const getServerAuthData = async (): Promise<ServerAuthData> => {
@@ -51,7 +49,7 @@ export const getServerAuthData = async (): Promise<ServerAuthData> => {
   const authFetch = async (pathname: string, init: RequestInit = {}) => {
     if (!pathname) throw new Error('Expect string `pathname` as 1st arg');
     const { headers, ...reqInit } = init;
-    const res = await fetch(`${API_BASE_URL}${pathname}`, {
+    const res = await fetch(`${backendUrl}${pathname}`, {
       headers: { Authorization: initAuthData.token || '', ...headers },
       ...reqInit,
     });

@@ -7,13 +7,14 @@ import { initAuthData } from '@/test-utils';
 import { BaseAuthData } from '@/types';
 
 const newAuthData: BaseAuthData = {
-  backendUrl: 'https://new-test.com/api/v1',
+  ...initAuthData,
   token: 'new-test-token',
   user: null,
 };
 
 const assertAuthDataDisplayed = (data: BaseAuthData) => {
-  const { token, user, backendUrl } = data;
+  const { token, user, authUrl, backendUrl } = data;
+  expect(screen.getByText(authUrl)).toBeInTheDocument();
   expect(screen.getByText(backendUrl)).toBeInTheDocument();
   if (token) expect(screen.getByText(token)).toBeInTheDocument();
   if (user) expect(screen.getByText(user.username)).toBeInTheDocument();
@@ -28,6 +29,7 @@ function AuthConsumer() {
       <div>{authData.token}</div>
       <div>{authData.user?.username}</div>
       <div>{authData.backendUrl}</div>
+      <div>{authData.authUrl}</div>
       <button type='button' onClick={() => setAuthData(newAuthData)}>
         change data
       </button>

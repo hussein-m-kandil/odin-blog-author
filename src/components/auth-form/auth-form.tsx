@@ -103,7 +103,7 @@ export function AuthForm({
   > = async (hookForm, values) => {
     try {
       const { showToast, endpoint, method, name } = formData;
-      const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`;
+      const url = `${authData.authUrl}${endpoint}`;
       const { data } = await axios[method](url, values, { baseURL: '' });
       if (isObject(data) && 'user' in data && 'token' in data) {
         setAuthData({ ...authData, ...data });

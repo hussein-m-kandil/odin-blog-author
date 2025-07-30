@@ -17,6 +17,7 @@ export const author: User = {
 };
 
 export const initAuthData: BaseAuthData = {
+  authUrl: '/auth',
   backendUrl: 'https://test.com/api/v1',
   token: 'test-token',
   user: author,

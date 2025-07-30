@@ -73,7 +73,7 @@ export function Navbar() {
   }, [yScroll]);
 
   const handleSignout = async () => {
-    const signoutUrl = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/signout`;
+    const signoutUrl = `${authData.authUrl}/auth/signout`;
     toast.promise(authAxios.post(signoutUrl, null, { baseURL: '' }), {
       loading: 'Signing out...',
       success: () => {

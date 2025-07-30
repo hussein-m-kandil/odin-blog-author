@@ -20,6 +20,7 @@ export interface AuthRes {
 }
 
 export interface BaseAuthData {
+  authUrl: string;
   backendUrl: string;
   user?: User | null;
   token?: string;
