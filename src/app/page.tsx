@@ -1,12 +1,13 @@
-import { API_BASE_URL, getCurrentUrl, getServerAuthData } from '@/lib/auth';
+import { getCurrentUrl, getServerAuthData } from '@/lib/auth';
 import { ServerPosts } from '@/components/server-posts';
 import { H1 } from '@/components/typography/';
 import { Header } from '@/components/header';
 
 export default async function Home() {
   const authData = await getServerAuthData();
+  const { backendUrl } = authData;
 
-  let postsUrl = `${API_BASE_URL}/posts`;
+  let postsUrl = `${backendUrl}/posts`;
   try {
     postsUrl += (await getCurrentUrl()).search;
   } catch {}
