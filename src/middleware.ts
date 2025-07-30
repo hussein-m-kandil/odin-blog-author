@@ -1,5 +1,5 @@
 import {
-  getSignedInUser,
+  getBaseAuthData,
   createAuthCookie,
   getResWithXHeaders,
 } from './lib/auth';
@@ -8,7 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const authUrls = ['/signin', '/signup'];
 
 export default async function middleware(req: NextRequest) {
-  const user = await getSignedInUser();
+  const { user } = await getBaseAuthData();
 
   const isAuthUrl = authUrls.includes(req.nextUrl.pathname);
 
