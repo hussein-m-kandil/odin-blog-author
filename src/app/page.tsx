@@ -1,19 +1,15 @@
-import { API_BASE_URL, getServerAuthData, URL_HEADER_KEY } from '@/lib/auth';
+import { API_BASE_URL, getCurrentUrl, getServerAuthData } from '@/lib/auth';
+import { ServerPosts } from '@/components/server-posts';
 import { H1 } from '@/components/typography/';
 import { Header } from '@/components/header';
-import { headers } from 'next/headers';
-import { ServerPosts } from '@/components/server-posts';
 
 export default async function Home() {
   const authData = await getServerAuthData();
 
-  const headerStore = await headers();
-
-  const currentUrl =
-    headerStore.get(URL_HEADER_KEY) || headerStore.get('referer');
-  const postsUrl = `${API_BASE_URL}/posts${
-    currentUrl ? new URL(currentUrl).search : ''
-  }`;
+  let postsUrl = `${API_BASE_URL}/posts`;
+  try {
+    postsUrl += (await getCurrentUrl()).search;
+  } catch {}
 
   return (
     <>
