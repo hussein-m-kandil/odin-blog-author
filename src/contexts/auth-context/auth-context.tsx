@@ -2,21 +2,21 @@
 
 import axios from 'axios';
 import * as React from 'react';
-import { AuthData, InitAuthData } from '@/types';
+import { ClientAuthData, BaseAuthData } from '@/types';
 
 export type AuthContextValue = {
-  setAuthData: (data: InitAuthData) => void;
-  authData: AuthData;
+  setAuthData: (data: BaseAuthData) => void;
+  authData: ClientAuthData;
 };
 
 export type AuthProviderProps = Readonly<{
   children?: React.ReactNode;
-  initAuthData: InitAuthData;
+  initAuthData: BaseAuthData;
 }>;
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
 
-const extendInitData = (data: InitAuthData) => {
+const extendInitData = (data: BaseAuthData) => {
   return {
     ...data,
     authAxios: axios.create({
@@ -30,7 +30,9 @@ export function AuthProvider({
   initAuthData: initData,
   children,
 }: AuthProviderProps) {
-  const [data, setData] = React.useState<AuthData>(extendInitData(initData));
+  const [data, setData] = React.useState<ClientAuthData>(
+    extendInitData(initData)
+  );
 
   const contextValue: AuthContextValue = {
     setAuthData: (data) => setData(extendInitData(data)),

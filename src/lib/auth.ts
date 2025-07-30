@@ -1,6 +1,6 @@
+import { ServerAuthData, AuthRes, BaseAuthData, User } from '@/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies, headers } from 'next/headers';
-import { AuthData, AuthRes, User } from '@/types';
 import logger from './logger';
 
 export const PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -32,8 +32,7 @@ export const getAuthorizedUser = async (
   try {
     if (Authorization) {
       const res = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: { 'Content-Type': 'application/json', Authorization },
-        cache: 'no-store', // TODO: Think about Caching this request, in case it is used multiple times in a row
+        headers: { Authorization },
       });
       if (res.ok) return await res.json();
     }
@@ -47,12 +46,25 @@ export async function getSignedInUser(): Promise<User | null> {
   return getAuthorizedUser(await getAuthorization());
 }
 
-export const getAuthData = async (): Promise<AuthData> => {
-  const data = {} as AuthData;
-  data.backendUrl = API_BASE_URL;
-  data.token = await getAuthorization();
-  data.user = await getAuthorizedUser(data.token);
-  return data;
+export const getBaseAuthData = async (): Promise<BaseAuthData> => {
+  const token = await getAuthorization();
+  const user = await getAuthorizedUser(token);
+  return { backendUrl: API_BASE_URL, token, user };
+};
+
+export const getServerAuthData = async (): Promise<ServerAuthData> => {
+  const initAuthData = await getBaseAuthData();
+  const authFetch = async (pathname: string, init: RequestInit = {}) => {
+    if (!pathname) throw new Error('Expect string `pathname` as 1st arg');
+    const { headers, ...reqInit } = init;
+    const res = await fetch(`${API_BASE_URL}${pathname}`, {
+      headers: { Authorization: initAuthData.token || '', ...headers },
+      ...reqInit,
+    });
+    if (!res.ok) throw res;
+    return res.json();
+  };
+  return { ...initAuthData, authFetch };
 };
 
 export function createAuthCookie(value: string, maxAge = 7 * 24 * 60 * 60) {
@@ -89,32 +101,6 @@ export function signin(authRes: AuthRes, req: NextRequest) {
     status: 200,
   });
   return getResWithXHeaders(req, res);
-}
-
-export async function authedFetch(pathname: string, init?: RequestInit) {
-  const headerStore = await headers();
-  const reqInit = init || { headers: {} };
-  const currentUrl = new URL(
-    throwFalsyReturnTruthy(
-      headerStore.get(URL_HEADER_KEY) || headerStore.get('referer')
-    )
-  );
-  const apiRes = await fetch(
-    new URL(
-      `${PUBLIC_API_BASE_URL}${pathname}${currentUrl.search}`,
-      currentUrl.origin
-    ),
-    {
-      cache: 'no-store',
-      ...reqInit,
-      headers: {
-        // Forward HTTP headers (including cookies) from incoming client request
-        ...Object.fromEntries(headerStore.entries()),
-        ...reqInit.headers,
-      },
-    }
-  );
-  return apiRes;
 }
 
 export async function getCurrentUrl() {

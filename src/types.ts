@@ -19,14 +19,18 @@ export interface AuthRes {
   user: User;
 }
 
-export interface InitAuthData {
+export interface BaseAuthData {
   backendUrl: string;
   user?: User | null;
   token?: string;
 }
 
-export interface AuthData extends InitAuthData {
+export interface ClientAuthData extends BaseAuthData {
   authAxios: AxiosInstance;
+}
+
+export interface ServerAuthData extends BaseAuthData {
+  authFetch: <T>(pathname: string, init?: RequestInit) => Promise<T>;
 }
 
 export interface Image {

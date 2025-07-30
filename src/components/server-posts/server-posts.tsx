@@ -5,25 +5,20 @@ import {
 } from '@tanstack/react-query';
 import { H2 } from '@/components/typography';
 import { Posts } from '@/components/posts';
-import { AuthData } from '@/types';
+import { ServerAuthData } from '@/types';
 
 export async function ServerPosts({
-  authData: { token },
+  authData: { authFetch },
   postsUrl,
 }: {
+  authData: ServerAuthData;
   postsUrl: string;
-  authData: AuthData;
 }) {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchInfiniteQuery({
-    queryKey: ['posts', postsUrl, token],
-    queryFn: async () => {
-      const res = await fetch(postsUrl, {
-        headers: { Authorization: token || '' },
-      });
-      return res.json();
-    },
+    queryKey: ['posts', postsUrl],
+    queryFn: async () => await authFetch(postsUrl),
     initialPageParam: 0,
   });
 

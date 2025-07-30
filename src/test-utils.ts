@@ -1,4 +1,4 @@
-import { User, Post, Image, InitAuthData } from '@/types';
+import { User, Post, Image, BaseAuthData } from '@/types';
 import { vi } from 'vitest';
 
 export const dates = {
@@ -16,7 +16,7 @@ export const author: User = {
   fullname: 'Nowhere-Man',
 };
 
-export const initAuthData: InitAuthData = {
+export const initAuthData: BaseAuthData = {
   backendUrl: 'https://test.com/api/v1',
   token: 'test-token',
   user: author,

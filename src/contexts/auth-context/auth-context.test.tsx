@@ -4,15 +4,15 @@ import { userEvent } from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { axiosMock } from '@/__mocks__/axios';
 import { initAuthData } from '@/test-utils';
-import { InitAuthData } from '@/types';
+import { BaseAuthData } from '@/types';
 
-const newAuthData: InitAuthData = {
+const newAuthData: BaseAuthData = {
   backendUrl: 'https://new-test.com/api/v1',
   token: 'new-test-token',
   user: null,
 };
 
-const assertAuthDataDisplayed = (data: InitAuthData) => {
+const assertAuthDataDisplayed = (data: BaseAuthData) => {
   const { token, user, backendUrl } = data;
   expect(screen.getByText(backendUrl)).toBeInTheDocument();
   if (token) expect(screen.getByText(token)).toBeInTheDocument();

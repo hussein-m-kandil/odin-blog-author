@@ -1,11 +1,11 @@
-import { API_BASE_URL, getAuthData, URL_HEADER_KEY } from '@/lib/auth';
+import { API_BASE_URL, getServerAuthData, URL_HEADER_KEY } from '@/lib/auth';
 import { H1 } from '@/components/typography/';
 import { Header } from '@/components/header';
 import { headers } from 'next/headers';
 import { ServerPosts } from '@/components/server-posts';
 
 export default async function Home() {
-  const authData = await getAuthData();
+  const authData = await getServerAuthData();
 
   const headerStore = await headers();
 

@@ -4,7 +4,7 @@ import {
   HydrationBoundary,
 } from '@tanstack/react-query';
 import { PostPage } from '@/components/post-page';
-import { getAuthData } from '@/lib/auth';
+import { getServerAuthData } from '@/lib/auth';
 
 export default async function Post({
   params,
@@ -13,21 +13,15 @@ export default async function Post({
 }) {
   const { id: postId } = await params;
 
-  const { backendUrl, token } = await getAuthData();
+  const { authFetch } = await getServerAuthData();
 
-  const url = `${backendUrl}/posts/${postId}`;
+  const url = `/posts/${postId}`;
 
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ['post', postId, url, token],
-    queryFn: async () => {
-      // TODO: Use (authedFetch -> authFetch)
-      const res = await fetch(url, {
-        headers: { Authorization: token || '' },
-      });
-      return res.json();
-    },
+    queryKey: ['post', postId, url],
+    queryFn: async () => await authFetch(url),
   });
 
   return (

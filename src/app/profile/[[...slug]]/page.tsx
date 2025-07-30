@@ -1,6 +1,6 @@
 import { ServerPosts } from '@/components/server-posts';
 import { UserProfile } from '@/components/user-profile';
-import { API_BASE_URL, getAuthData } from '@/lib/auth';
+import { API_BASE_URL, getServerAuthData } from '@/lib/auth';
 import { Header } from '@/components/header';
 import { redirect } from 'next/navigation';
 import { User } from '@/types';
@@ -12,15 +12,12 @@ export default async function Profile({
 }) {
   const profileId = (await params).slug?.[0];
 
-  const authData = await getAuthData();
+  const authData = await getServerAuthData();
+  const { authFetch } = authData;
 
   // TODO: Use react-query for this too
   const user = profileId
-    ? ((await (
-        await fetch(`${API_BASE_URL}/users/${profileId}`, {
-          headers: { Authorization: authData.token || '' },
-        })
-      ).json()) as User)
+    ? await authFetch<User>(`${API_BASE_URL}/users/${profileId}`)
     : authData.user;
 
   if (!user) return redirect('/signin');

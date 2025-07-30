@@ -9,7 +9,7 @@ import { DialogProvider } from '@/contexts/dialog-context/';
 import { AuthProvider } from '@/contexts/auth-context';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from 'next-themes';
-import { AuthData } from '@/types';
+import { BaseAuthData } from '@/types';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -35,10 +35,10 @@ function getQueryClient() {
 }
 
 export function Providers({
-  authData,
+  initAuthData: initAuthData,
   children,
 }: {
-  authData: AuthData;
+  initAuthData: BaseAuthData;
   children: React.ReactNode;
 }) {
   const queryClient = getQueryClient();
@@ -50,7 +50,7 @@ export function Providers({
       defaultTheme='system'
       disableTransitionOnChange>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider initAuthData={authData}>
+        <AuthProvider initAuthData={initAuthData}>
           <DialogProvider>{children}</DialogProvider>
         </AuthProvider>
       </QueryClientProvider>

@@ -1,5 +1,5 @@
 import './globals.css';
-import { getAuthData, getCurrentPathname } from '@/lib/auth';
+import { getBaseAuthData, getCurrentPathname } from '@/lib/auth';
 import { Navbar } from '@/components/navbar';
 import { redirect } from 'next/navigation';
 import { Providers } from './providers';
@@ -20,16 +20,16 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = await getCurrentPathname();
-  const authData = await getAuthData();
+  const baseAuthData = await getBaseAuthData();
 
-  if (!authData.user && !/\/sign(in|up)/.test(pathname)) {
+  if (!baseAuthData.user && !/\/sign(in|up)/.test(pathname)) {
     return redirect('/signin');
   }
 
   return (
     <html lang='en' suppressHydrationWarning>
       <body>
-        <Providers authData={authData}>
+        <Providers initAuthData={baseAuthData}>
           <Navbar />
           <div className='container mx-auto px-4'>{children}</div>
         </Providers>
