@@ -1,5 +1,5 @@
 import './globals.css';
-import { getBaseAuthData, getCurrentPathname } from '@/lib/auth';
+import { getBaseAuthData, getCurrentUrl } from '@/lib/auth';
 import { Navbar } from '@/components/navbar';
 import { redirect } from 'next/navigation';
 import { Providers } from './providers';
@@ -19,7 +19,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = await getCurrentPathname();
+  const { pathname } = await getCurrentUrl();
   const baseAuthData = await getBaseAuthData();
 
   if (!baseAuthData.user && !/\/sign(in|up)/.test(pathname)) {

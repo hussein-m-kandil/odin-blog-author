@@ -3,12 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies, headers } from 'next/headers';
 import logger from './logger';
 
-export const PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-export const API_BASE_URL = process.env.API_BASE_URL;
-export const AUTH_COOKIE_KEY = 'authorization';
-export const PATHNAME_HEADER_KEY = 'x-pathname';
-export const USER_ID_HEADER_KEY = 'x-uid';
 export const URL_HEADER_KEY = 'x-url';
+export const AUTH_COOKIE_KEY = 'authorization';
+export const API_BASE_URL = process.env.API_BASE_URL;
+export const PUBLIC_API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 if (!API_BASE_URL) {
   throw new Error(
@@ -42,10 +40,6 @@ export const getAuthorizedUser = async (
   return null;
 };
 
-export async function getSignedInUser(): Promise<User | null> {
-  return getAuthorizedUser(await getAuthorization());
-}
-
 export const getBaseAuthData = async (): Promise<BaseAuthData> => {
   const token = await getAuthorization();
   const user = await getAuthorizedUser(token);
@@ -74,14 +68,8 @@ export function createAuthCookie(value: string, maxAge = 7 * 24 * 60 * 60) {
   return `${cookieKey}=${cookieValue}; Path=/; HttpOnly; Secure; SameSite=Strict; Expires=${expires}; Max-Age=${maxAge}`;
 }
 
-export const getResWithXHeaders = (
-  req: NextRequest,
-  res: NextResponse,
-  user?: User | null
-) => {
-  res.headers.set(PATHNAME_HEADER_KEY, req.nextUrl.pathname);
+export const getResWithXHeaders = (req: NextRequest, res: NextResponse) => {
   res.headers.set(URL_HEADER_KEY, req.nextUrl.toString());
-  if (user) res.headers.set(USER_ID_HEADER_KEY, user.id);
   return res;
 };
 
@@ -105,17 +93,11 @@ export function signin(authRes: AuthRes, req: NextRequest) {
 
 export async function getCurrentUrl() {
   const headerStore = await headers();
-  return throwFalsyReturnTruthy(
-    headerStore.get('referer') || headerStore.get(URL_HEADER_KEY)
-  );
-}
-
-export async function getCurrentPathname() {
-  return throwFalsyReturnTruthy((await headers()).get(PATHNAME_HEADER_KEY));
-}
-
-export async function getUserId() {
-  return (await headers()).get(USER_ID_HEADER_KEY);
+  const url = headerStore.get(URL_HEADER_KEY);
+  if (!url) {
+    throw new Error('Could not get the current URL');
+  }
+  return new URL(url);
 }
 
 export function isAuthRes(resData: unknown): resData is AuthRes {
@@ -142,20 +124,4 @@ export function isAuthRes(resData: unknown): resData is AuthRes {
     'bio' in resData.user &&
     (typeof resData.user.bio === 'string' || resData.user.bio === null)
   );
-}
-
-function throwFalsyReturnTruthy<T>(value: T): NonNullable<T> | never {
-  const evaluatedValue = typeof value === 'function' ? value() : value;
-  if (evaluatedValue) return evaluatedValue;
-  throw new AuthError();
-}
-
-class AuthError extends Error {
-  constructor(...args: ConstructorParameters<typeof Error>) {
-    if (!args[0]) {
-      args[0] = 'Something went wrong';
-    }
-    super(...args);
-    this.name = 'AuthError';
-  }
 }

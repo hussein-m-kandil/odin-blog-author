@@ -23,7 +23,7 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/', req.nextUrl));
   }
 
-  return getResWithXHeaders(req, NextResponse.next(), user);
+  return getResWithXHeaders(req, NextResponse.next());
 }
 
 // Routes Middleware should not run on
