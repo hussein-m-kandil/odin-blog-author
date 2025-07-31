@@ -1,5 +1,5 @@
+import { post, initAuthData, mockDialogContext, author } from '@/test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { post, initAuthData, mockDialogContext } from '@/test-utils';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { axiosMock } from '@/__mocks__/axios';
@@ -8,7 +8,7 @@ import { AuthProvider } from '@/contexts/auth-context';
 
 mockDialogContext();
 
-const postsUrl = 'https://example.com/';
+const postsUrl = `/posts?author=${author.username}`;
 
 const PostsWrapper = (
   props: Omit<React.ComponentProps<typeof Posts>, 'postsUrl'>
@@ -32,7 +32,9 @@ describe('<Posts />', () => {
 
   it('should call axios with given url', () => {
     render(<PostsWrapper />);
-    expect(axiosMock.history.get[0].url).toStrictEqual(postsUrl);
+    expect(axiosMock.history.get[0].url).toStrictEqual(
+      `${initAuthData.backendUrl}${postsUrl}`
+    );
   });
 
   it('should display a message informs the user that there are no posts', async () => {

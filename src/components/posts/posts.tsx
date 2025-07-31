@@ -37,7 +37,7 @@ export function Posts({ postsUrl }: { postsUrl: string }) {
     queryFn: async ({ pageParam }) => {
       const url = new URL(`${backendUrl}${postsUrl}`);
       if (pageParam) url.searchParams.set('cursor', pageParam.toString());
-      return (await authAxios.get(url.href)).data;
+      return (await authAxios.get(url.href, { baseURL: '' })).data;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
