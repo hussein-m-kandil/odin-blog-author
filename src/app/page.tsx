@@ -1,4 +1,4 @@
-import { ServerPosts } from '@/components/server-posts';
+import { PostsWrapper } from '@/components/posts-wrapper';
 import { getServerAuthData } from '@/lib/auth';
 import { H1 } from '@/components/typography/';
 import { Header } from '@/components/header';
@@ -31,7 +31,7 @@ export default async function Home({
         <H1>{process.env.NEXT_PUBLIC_APP_NAME || 'Home Page'}</H1>
       </Header>
       <main>
-        <ServerPosts postsUrl={postsUrl} authData={authData} />
+        <PostsWrapper postsUrl={postsUrl} authData={authData} />
       </main>
     </>
   );

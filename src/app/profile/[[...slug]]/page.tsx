@@ -1,4 +1,4 @@
-import { ServerPosts } from '@/components/server-posts';
+import { PostsWrapper } from '@/components/posts-wrapper';
 import { UserProfile } from '@/components/user-profile';
 import { getServerAuthData } from '@/lib/auth';
 import { Header } from '@/components/header';
@@ -30,7 +30,7 @@ export default async function Profile({
         <UserProfile user={user} />
       </Header>
       <main>
-        <ServerPosts postsUrl={postsUrl} authData={authData} />
+        <PostsWrapper postsUrl={postsUrl} authData={authData} />
       </main>
     </>
   );

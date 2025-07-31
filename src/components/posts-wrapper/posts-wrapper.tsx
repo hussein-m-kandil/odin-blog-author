@@ -7,7 +7,7 @@ import { H2 } from '@/components/typography';
 import { Posts } from '@/components/posts';
 import { ServerAuthData } from '@/types';
 
-export async function ServerPosts({
+export async function PostsWrapper({
   authData: { authFetch, backendUrl },
   postsUrl,
 }: {
@@ -32,4 +32,4 @@ export async function ServerPosts({
   );
 }
 
-export default ServerPosts;
+export default PostsWrapper;
