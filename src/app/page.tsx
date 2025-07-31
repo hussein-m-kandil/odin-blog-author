@@ -1,15 +1,29 @@
-import { getCurrentUrl, getServerAuthData } from '@/lib/auth';
 import { ServerPosts } from '@/components/server-posts';
+import { getServerAuthData } from '@/lib/auth';
 import { H1 } from '@/components/typography/';
 import { Header } from '@/components/header';
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const urlSearchParams = new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(await searchParams).map(([k, v]) => {
+        if (Array.isArray(v)) {
+          return [k, v.map((str) => [k, str])];
+        } else if (!v) {
+          return [k, 'true'];
+        }
+        return [k, v];
+      })
+    )
+  );
+
   const authData = await getServerAuthData();
 
-  let postsUrl = '/posts';
-  try {
-    postsUrl += (await getCurrentUrl()).search;
-  } catch {}
+  const postsUrl = `/posts?${urlSearchParams.toString()}`;
 
   return (
     <>
