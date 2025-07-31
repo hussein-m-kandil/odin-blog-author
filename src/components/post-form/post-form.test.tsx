@@ -123,7 +123,7 @@ describe(`<PostForm />`, () => {
 
   it('should show response error and not call `onSuccess` function', async () => {
     const error = 'Test error';
-    axiosMock.onPut().reply(400, error);
+    axiosMock.onPut().reply(400, { error });
     const { data, user } = await setup(post);
     await user.click(screen.getByRole('button', data.submitterOpts));
     await waitForElementToBeRemoved(() =>

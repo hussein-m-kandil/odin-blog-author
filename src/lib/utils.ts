@@ -103,8 +103,6 @@ export const parseAxiosAPIError = (
         result.message = data.error.message;
       } else if (isErrorResponseWithStringError(data)) {
         result.message = data.error;
-      } else if (isNoneEmptyString(data)) {
-        result.message = data;
       }
     }
   }

@@ -59,7 +59,7 @@ describe('<DeletePostForm />', () => {
 
   it('should show response error and not call `onSuccess` function', async () => {
     const error = 'Test error';
-    axiosMock.onDelete().reply(400, error);
+    axiosMock.onDelete().reply(400, { error });
     const user = userEvent.setup();
     render(<DeleteForm {...props} />);
     await user.click(screen.getByRole('button', { name: /delete/i }));
