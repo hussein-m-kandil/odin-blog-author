@@ -56,7 +56,7 @@ export function PostCard({
         )}
       </CardHeader>
       <CardContent className='mt-auto p-0'>
-        <MutableImage image={post.image} />
+        {post.image && <MutableImage image={post.image} />}
         <Lead className='line-clamp-3 font-light text-lg px-6'>
           {post.content}
         </Lead>
