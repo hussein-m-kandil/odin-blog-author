@@ -1,7 +1,6 @@
 import './globals.css';
-import { getBaseAuthData, getCurrentUrl } from '@/lib/auth';
+import { getBaseAuthData } from '@/lib/auth';
 import { Navbar } from '@/components/navbar';
-import { redirect } from 'next/navigation';
 import { Providers } from './providers';
 import { Metadata } from 'next';
 
@@ -19,12 +18,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { pathname } = await getCurrentUrl();
   const baseAuthData = await getBaseAuthData();
-
-  if (!baseAuthData.user && !/\/sign(in|up)/.test(pathname)) {
-    return redirect('/signin');
-  }
 
   return (
     <html lang='en' suppressHydrationWarning>
