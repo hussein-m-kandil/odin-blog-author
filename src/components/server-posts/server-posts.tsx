@@ -8,7 +8,7 @@ import { Posts } from '@/components/posts';
 import { ServerAuthData } from '@/types';
 
 export async function ServerPosts({
-  authData: { authFetch },
+  authData: { authFetch, backendUrl },
   postsUrl,
 }: {
   authData: ServerAuthData;
@@ -17,8 +17,8 @@ export async function ServerPosts({
   const queryClient = new QueryClient();
 
   await queryClient.prefetchInfiniteQuery({
-    queryKey: ['posts', postsUrl],
-    queryFn: async () => await authFetch(postsUrl),
+    queryKey: ['posts', postsUrl, backendUrl],
+    queryFn: () => authFetch(postsUrl),
     initialPageParam: 0,
   });
 

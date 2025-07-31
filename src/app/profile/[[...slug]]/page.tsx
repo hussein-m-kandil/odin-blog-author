@@ -13,16 +13,16 @@ export default async function Profile({
   const profileId = (await params).slug?.[0];
 
   const authData = await getServerAuthData();
-  const { authFetch, backendUrl } = authData;
+  const { authFetch } = authData;
 
   // TODO: Use react-query for this too
   const user = profileId
-    ? await authFetch<User>(`${backendUrl}/users/${profileId}`)
+    ? await authFetch<User>(`/users/${profileId}`)
     : authData.user;
 
   if (!user) return redirect('/signin');
 
-  const postsUrl = `${backendUrl}/posts?author=${user.id}`;
+  const postsUrl = `/posts?author=${user.id}`;
 
   return (
     <>

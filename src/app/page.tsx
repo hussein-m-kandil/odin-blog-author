@@ -5,9 +5,8 @@ import { Header } from '@/components/header';
 
 export default async function Home() {
   const authData = await getServerAuthData();
-  const { backendUrl } = authData;
 
-  let postsUrl = `${backendUrl}/posts`;
+  let postsUrl = '/posts';
   try {
     postsUrl += (await getCurrentUrl()).search;
   } catch {}

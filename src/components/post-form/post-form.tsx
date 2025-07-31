@@ -36,7 +36,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const router = useRouter();
 
   const {
-    authData: { backendUrl, authAxios },
+    authData: { authAxios },
   } = useAuthData();
 
   React.useEffect(() => {
@@ -65,8 +65,8 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
       const formValues = submitArgs[1];
       const body = { ...formValues, categories, image: image?.id };
       const { data } = await (isUpdate
-        ? authAxios.put<Post>(`${backendUrl}/posts/${post.id}`, body)
-        : authAxios.post<Post>(`${backendUrl}/posts`, body));
+        ? authAxios.put<Post>(`/posts/${post.id}`, body)
+        : authAxios.post<Post>('/posts', body));
       return data;
     },
     onSuccess: (resPost, [hookForm]) => {

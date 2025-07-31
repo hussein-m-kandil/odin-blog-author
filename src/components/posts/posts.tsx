@@ -13,7 +13,7 @@ import { Post } from '@/types';
 
 export function Posts({ postsUrl }: { postsUrl: string }) {
   const {
-    authData: { user, authAxios },
+    authData: { user, authAxios, backendUrl },
   } = useAuthData();
 
   const {
@@ -33,17 +33,18 @@ export function Posts({ postsUrl }: { postsUrl: string }) {
     readonly unknown[],
     number
   >({
-    queryKey: ['posts', postsUrl, authAxios],
+    queryKey: ['posts', postsUrl, backendUrl],
     queryFn: async ({ pageParam }) => {
-      const url = new URL(postsUrl);
-      if (pageParam) {
-        url.searchParams.set('cursor', pageParam.toString());
-      }
+      const url = new URL(`${backendUrl}${postsUrl}`);
+      if (pageParam) url.searchParams.set('cursor', pageParam.toString());
       return (await authAxios.get(url.href)).data;
     },
     initialPageParam: 0,
     getNextPageParam: (lastPage) => {
-      if (lastPage.length) return lastPage.at(-1)?.order;
+      if (lastPage.length) {
+        const lastPost = lastPage[lastPage.length - 1];
+        return lastPost ? lastPost.order : null;
+      }
     },
   });
 
