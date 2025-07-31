@@ -14,18 +14,13 @@ import {
   refineSignupSchema,
   updateUserFormAttrs,
 } from './auth-form.data';
-import {
-  cn,
-  parseAxiosAPIError,
-  getUnknownErrorMessage,
-  isObject,
-} from '@/lib/utils';
+import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
 import { AuthFormProps } from './auth-form.types';
 import { useRouter } from 'next/navigation';
+import { AxiosRequestConfig } from 'axios';
 import { toast } from 'sonner';
-import axios from 'axios';
 import { z } from 'zod';
 
 export function AuthForm({
@@ -39,6 +34,7 @@ export function AuthForm({
   const router = useRouter();
 
   const { authData, setAuthData } = useAuthData();
+  const { authUrl, authAxios } = authData;
 
   let formData: {
     props: {
@@ -47,9 +43,7 @@ export function AuthForm({
       formAttrs: DynamicFormProps['formAttrs'];
     };
     showToast: (username: string) => void;
-    method: 'post' | 'patch';
-    endpoint: string;
-    name: string;
+    reqConfig: AxiosRequestConfig;
   };
   if (formType === 'signin') {
     formData = {
@@ -62,9 +56,7 @@ export function AuthForm({
         toast.success(`Hello, @${username}!`, {
           description: `You have signed in successfully`,
         }),
-      endpoint: '/auth/signin',
-      method: 'post',
-      name: 'user',
+      reqConfig: { url: `${authUrl}/signin`, method: 'post', baseURL: '' },
     };
   } else if (user) {
     formData = {
@@ -77,9 +69,7 @@ export function AuthForm({
         toast.success(`@${username} updated`, {
           description: 'Your profile is updated successfully',
         }),
-      endpoint: `/users/${user.id}`,
-      method: 'patch',
-      name: user.username,
+      reqConfig: { url: `/users/${user.id}`, method: 'patch' },
     };
   } else {
     formData = {
@@ -92,9 +82,7 @@ export function AuthForm({
         toast.success(`Hello, @${username}!`, {
           description: `You have signed up successfully`,
         }),
-      endpoint: '/users',
-      method: 'post',
-      name: 'user',
+      reqConfig: { url: `${authUrl}/signup`, method: 'post', baseURL: '' },
     };
   }
 
@@ -102,17 +90,14 @@ export function AuthForm({
     z.infer<typeof formData.props.formSchema>
   > = async (hookForm, values) => {
     try {
-      const { showToast, endpoint, method, name } = formData;
-      const url = `${authData.authUrl}${endpoint}`;
-      const { data } = await axios[method](url, values, { baseURL: '' });
-      if (isObject(data) && 'user' in data && 'token' in data) {
-        setAuthData({ ...authData, ...data });
-      }
+      formData.reqConfig.data = values;
+      const { data } = await authAxios(formData.reqConfig);
+      setAuthData({ ...authData, ...data });
       setErrorMessage('');
       hookForm.reset();
       if (onSuccess) onSuccess();
       else router.replace('/');
-      showToast(values.username || name);
+      formData.showToast(values.username || user?.username || 'user');
     } catch (error) {
       setErrorMessage(
         parseAxiosAPIError(error, hookForm).message ||
