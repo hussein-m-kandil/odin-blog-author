@@ -3,19 +3,30 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies, headers } from 'next/headers';
 import logger from './logger';
 
-export const URL_HEADER_KEY = 'x-url';
-export const AUTH_COOKIE_KEY = 'authorization';
-export const backendUrl = process.env.BACKEND_URL;
-export const authUrl = process.env.AUTH_URL;
-
-if (!backendUrl) {
+const BACKEND_URL = process.env.BACKEND_URL;
+if (!BACKEND_URL) {
   throw new Error(
     'Expect the environment variable `BACKEND_URL` to be defined'
   );
 }
+export const backendUrl = BACKEND_URL;
 
-if (!authUrl) {
+const AUTH_URL = process.env.AUTH_URL;
+if (!AUTH_URL) {
   throw new Error('Expect the environment variable `AUTH_URL` to be defined');
+}
+export const authUrl = AUTH_URL;
+
+export const AUTH_COOKIE_KEY = 'authorization';
+export const URL_HEADER_KEY = 'x-url';
+
+export async function getCurrentUrl() {
+  const headerStore = await headers();
+  const url = headerStore.get(URL_HEADER_KEY);
+  if (!url) {
+    throw new Error('Could not get the current URL');
+  }
+  return new URL(url);
 }
 
 export async function getAuthorization(): Promise<string | undefined> {
@@ -87,15 +98,6 @@ export function signin(authRes: AuthRes, req: NextRequest) {
     status: 200,
   });
   return getResWithXHeaders(req, res);
-}
-
-export async function getCurrentUrl() {
-  const headerStore = await headers();
-  const url = headerStore.get(URL_HEADER_KEY);
-  if (!url) {
-    throw new Error('Could not get the current URL');
-  }
-  return new URL(url);
 }
 
 export function isAuthRes(resData: unknown): resData is AuthRes {
