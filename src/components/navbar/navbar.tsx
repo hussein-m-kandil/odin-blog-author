@@ -36,7 +36,7 @@ function CustomMenuItem({ children }: React.PropsWithChildren) {
 export function Navbar() {
   const navContainerRef = React.useRef<HTMLDivElement>(null);
 
-  const { authData, setAuthData } = useAuthData();
+  const { authData, signout } = useAuthData();
 
   const { user, authAxios } = authData;
 
@@ -77,7 +77,7 @@ export function Navbar() {
     toast.promise(authAxios.post(signoutUrl, null, { baseURL: '' }), {
       loading: 'Signing out...',
       success: () => {
-        setAuthData({ ...authData, user: null, token: '' });
+        signout();
         router.replace('/signin');
         return {
           message: `Bye${user ? ', ' + user.username : ''}`,

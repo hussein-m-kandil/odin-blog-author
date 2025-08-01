@@ -2,11 +2,12 @@
 
 import axios from 'axios';
 import * as React from 'react';
-import { ClientAuthData, BaseAuthData } from '@/types';
+import { ClientAuthData, BaseAuthData, AuthResData } from '@/types';
 
 export type AuthContextValue = {
-  setAuthData: (data: BaseAuthData) => void;
+  signin: (data: AuthResData) => void;
   authData: ClientAuthData;
+  signout: () => void;
 };
 
 export type AuthProviderProps = Readonly<{
@@ -16,30 +17,32 @@ export type AuthProviderProps = Readonly<{
 
 const AuthContext = React.createContext<AuthContextValue | null>(null);
 
-const extendInitData = (data: BaseAuthData) => {
+const extendBaseAuthData = (baseAuthData: BaseAuthData) => {
   return {
-    ...data,
+    ...baseAuthData,
     authAxios: axios.create({
-      headers: { Authorization: data.token },
-      baseURL: data.backendUrl,
+      headers: { Authorization: baseAuthData.token },
+      baseURL: baseAuthData.backendUrl,
     }),
   };
 };
 
-export function AuthProvider({
-  initAuthData: initData,
-  children,
-}: AuthProviderProps) {
-  const [data, setData] = React.useState<ClientAuthData>(
-    extendInitData(initData)
+export function AuthProvider({ initAuthData, children }: AuthProviderProps) {
+  const [authData, setAuthData] = React.useState<ClientAuthData>(
+    extendBaseAuthData(initAuthData)
   );
 
-  const contextValue: AuthContextValue = {
-    setAuthData: (data) => setData(extendInitData(data)),
-    authData: data,
+  const signin = (authResData: AuthResData) => {
+    setAuthData(extendBaseAuthData({ ...authData, ...authResData }));
   };
 
-  return <AuthContext value={contextValue}>{children}</AuthContext>;
+  const signout = () => {
+    setAuthData({ ...authData, user: null, token: '' });
+  };
+
+  return (
+    <AuthContext value={{ authData, signin, signout }}>{children}</AuthContext>
+  );
 }
 
 export function useAuthData() {

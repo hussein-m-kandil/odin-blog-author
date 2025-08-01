@@ -20,6 +20,7 @@ import { useAuthData } from '@/contexts/auth-context';
 import { AuthFormProps } from './auth-form.types';
 import { useRouter } from 'next/navigation';
 import { AxiosRequestConfig } from 'axios';
+import { AuthResData } from '@/types';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -33,7 +34,7 @@ export function AuthForm({
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
 
-  const { authData, setAuthData } = useAuthData();
+  const { authData, signin } = useAuthData();
   const { authUrl, authAxios } = authData;
 
   let formData: {
@@ -91,10 +92,10 @@ export function AuthForm({
   > = async (hookForm, values) => {
     try {
       formData.reqConfig.data = values;
-      const { data } = await authAxios(formData.reqConfig);
-      setAuthData({ ...authData, ...data });
+      const { data } = await authAxios<AuthResData>(formData.reqConfig);
       setErrorMessage('');
       hookForm.reset();
+      signin(data);
       if (onSuccess) onSuccess();
       else router.replace('/');
       formData.showToast(values.username || user?.username || 'user');
