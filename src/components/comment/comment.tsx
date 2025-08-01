@@ -2,19 +2,16 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
-import { useRouter } from 'next/navigation';
 import { Muted } from '@/components/typography';
 import { useDialog } from '@/contexts/dialog-context';
-import { DeleteForm } from '@/components/delete-form';
 import { UserAvatar } from '@/components/user-avatar';
-import { useAuthData } from '@/contexts/auth-context';
 import { OptionsMenu } from '@/components/options-menu';
 import { CommentForm } from '@/components/comment-form';
 import { UsernameLink } from '@/components/username-link';
 import { Comment as CommentType, ID, Post } from '@/types';
 import { FormattedDate } from '@/components/formatted-date';
+import { DeleteCommentForm } from '../delete-comment-form';
+import { cn } from '@/lib/utils';
 
 export function Comment({
   currentUserId,
@@ -27,34 +24,23 @@ export function Comment({
   comment: CommentType;
   post: Post;
 }) {
-  const {
-    authData: { authAxios },
-  } = useAuthData();
   const [truncContent, setHideContent] = React.useState(true);
   const [updating, setUpdating] = React.useState(false);
-  const router = useRouter();
 
   const { showDialog, hideDialog } = useDialog();
 
   const enterDelete = () => {
+    const deleteTitleId = `delete-comment-${comment.id}`;
     showDialog({
-      title: 'Delete Comment',
+      title: <span id={deleteTitleId}>Delete Comment</span>,
       description: 'Confirm deleting this comment',
       body: (
-        <DeleteForm
+        <DeleteCommentForm
           method='dialog'
-          subject={comment.content}
+          comment={comment}
           onCancel={hideDialog}
-          onSuccess={() => {
-            hideDialog();
-            router.replace(`/${comment.postId}`, { scroll: false });
-            toast.success('Comment Deleted', {
-              description: 'You have deleted a comment successfully',
-            });
-          }}
-          delReqFn={() =>
-            authAxios.delete(`/posts/${comment.postId}/comments/${comment.id}`)
-          }
+          onSuccess={hideDialog}
+          aria-labelledby={deleteTitleId}
         />
       ),
     });

@@ -1,39 +1,26 @@
 import React from 'react';
-import { AxiosResponse } from 'axios';
-import { P } from '@/components/typography/p';
-import { Button } from '@/components/ui/button';
+import { Loader, PanelLeftClose, Trash2 } from 'lucide-react';
 import { ErrorMessage } from '@/components/error-message';
-import { Loader2, PanelLeftClose, Trash2 } from 'lucide-react';
-import { getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { P } from '@/components/typography/p';
 
 export function DeleteForm({
+  errorMessage = '',
+  deleting = false,
   subject,
-  delReqFn,
   onCancel,
-  onSuccess,
+  onDelete,
   ...formProps
 }: Omit<React.ComponentProps<'form'>, 'onSubmit'> & {
-  delReqFn: () => Promise<AxiosResponse> | AxiosResponse;
-  onCancel: React.MouseEventHandler<HTMLButtonElement>;
-  onSuccess?: (res: AxiosResponse) => void;
+  errorMessage?: string;
+  deleting?: boolean;
   subject: string;
+  onDelete?: () => void;
+  onCancel?: () => void;
 }) {
-  const [errorMessage, setErrorMessage] = React.useState('');
-  const [submitting, setSubmitting] = React.useState(false);
-
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    try {
-      const delRes = await delReqFn();
-      onSuccess?.(delRes);
-    } catch (error) {
-      setErrorMessage(
-        parseAxiosAPIError(error).message || getUnknownErrorMessage(error)
-      );
-    } finally {
-      setSubmitting(false);
-    }
+    onDelete?.();
   };
 
   return (
@@ -42,26 +29,26 @@ export function DeleteForm({
       onSubmit={handleSubmit}
       aria-label={`Delete confirmation form for ${subject}`}>
       <ErrorMessage>{errorMessage}</ErrorMessage>
-      <P>
+      <P className='max-sm:text-center'>
         Do you really want to delete
         <span className='font-bold'>{` "${
           subject.length > 24 ? subject.slice(0, 21) + '...' : subject
         }"`}</span>
         ?
       </P>
-      <div className='flex justify-end gap-4 mt-5'>
+      <div className='flex justify-end max-[320px]:flex-col max-sm:justify-center gap-4 mt-5 *:min-w-26'>
         <Button
           type='reset'
           variant='outline'
-          onClick={onCancel}
-          disabled={submitting}>
+          disabled={deleting}
+          onClick={() => onCancel?.()}>
           <PanelLeftClose />
           Cancel
         </Button>
-        <Button type='submit' variant='destructive' disabled={submitting}>
-          {submitting ? (
+        <Button type='submit' variant='destructive' disabled={deleting}>
+          {deleting ? (
             <>
-              <Loader2 className='animate-spin' /> Deleting
+              <Loader className='animate-spin' /> Deleting
             </>
           ) : (
             <>

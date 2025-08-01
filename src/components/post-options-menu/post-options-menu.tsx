@@ -2,12 +2,9 @@
 
 import React from 'react';
 import { OptionsMenu } from '@/components/options-menu';
-import { useQueryClient } from '@tanstack/react-query';
 import { useDialog } from '@/contexts/dialog-context';
-import { DeleteForm } from '@/components/delete-form';
-import { useAuthData } from '@/contexts/auth-context';
+import { DeletePostForm } from '../delete-post-form';
 import { PostForm } from '@/components/post-form';
-import { useRouter } from 'next/navigation';
 import { Edit, Trash2 } from 'lucide-react';
 import { Post } from '@/types';
 
@@ -21,45 +18,36 @@ export function PostOptionsMenu({
 > & {
   post: Post;
 }) {
-  const {
-    authData: { authAxios },
-  } = useAuthData();
   const { showDialog, hideDialog } = useDialog();
-  const queryClient = useQueryClient();
-  const router = useRouter();
-  const id = React.useId();
 
   const showUpdateForm = () => {
-    const formProps = {
-      'aria-labelledby': `update-post-form-${id}`,
-      onSuccess: hideDialog,
-      post,
-    };
-
+    const titleId = `post-opts-update-form-${post.id}`;
     showDialog({
-      body: <PostForm {...formProps} />,
-      title: <span id={formProps['aria-labelledby']}>Update Post</span>,
+      body: (
+        <PostForm
+          post={post}
+          onSuccess={hideDialog}
+          aria-labelledby={titleId}
+        />
+      ),
+      title: <span id={titleId}>Update Post</span>,
       description: 'Do whatever updates on the post, then click "update".',
     });
   };
 
   const showDeleteForm = () => {
-    const formProps = {
-      method: 'dialog',
-      subject: post.title,
-      onCancel: hideDialog,
-      'aria-labelledby': `delete-post-form-${id}`,
-      onSuccess: () => {
-        hideDialog();
-        router.replace('/');
-        return queryClient.invalidateQueries({ queryKey: ['posts'] });
-      },
-      delReqFn: () => authAxios.delete(`/posts/${post.id}`),
-    };
-
+    const titleId = `post-opts-delete-form-${post.id}`;
     showDialog({
-      body: <DeleteForm {...formProps} />,
-      title: <span id={formProps['aria-labelledby']}>Delete Post</span>,
+      body: (
+        <DeletePostForm
+          post={post}
+          method='dialog'
+          onCancel={hideDialog}
+          onSuccess={hideDialog}
+          aria-labelledby={titleId}
+        />
+      ),
+      title: <span id={titleId}>Delete Post</span>,
       description: 'You are deleting a post now! This action cannot be undone.',
     });
   };
