@@ -1,6 +1,6 @@
-import { signin, signout, isAuthRes, backendUrl } from '@/lib/auth';
-import { NextRequest } from 'next/server';
+import { signin, signout, isAuthResData, backendUrl } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { NextRequest } from 'next/server';
 import logger from '@/lib/logger';
 
 export async function POST(
@@ -39,12 +39,12 @@ export async function POST(
     const res = await fetch(url, options);
 
     if (res.ok) {
-      const resData = await res.json();
-      if (!isAuthRes(resData)) {
-        logger.error(`Unexpect ${action} response`, resData);
+      const data = await res.json();
+      if (!isAuthResData(data)) {
+        logger.error(`Unexpect ${action} response`, data);
         return Response.json(null, { status: 500 });
       }
-      return signin(resData, req);
+      return signin(data, req);
     }
 
     return res;

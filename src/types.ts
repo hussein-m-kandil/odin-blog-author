@@ -14,7 +14,7 @@ export interface User {
   avatar?: string | null;
 }
 
-export interface AuthRes {
+export interface AuthResData {
   token: string;
   user: User;
 }

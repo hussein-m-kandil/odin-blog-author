@@ -1,4 +1,4 @@
-import { ServerAuthData, AuthRes, BaseAuthData, User } from '@/types';
+import { ServerAuthData, AuthResData, BaseAuthData, User } from '@/types';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies, headers } from 'next/headers';
 import logger from './logger';
@@ -89,10 +89,10 @@ export function signout() {
   });
 }
 
-export function signin(authRes: AuthRes, req: NextRequest) {
-  const res = new NextResponse(JSON.stringify(authRes), {
+export function signin(authResData: AuthResData, req: NextRequest) {
+  const res = new NextResponse(JSON.stringify(authResData), {
     headers: {
-      'set-cookie': createAuthCookie(authRes.token),
+      'set-cookie': createAuthCookie(authResData.token),
       'Content-Type': 'application/json',
     },
     status: 200,
@@ -100,28 +100,28 @@ export function signin(authRes: AuthRes, req: NextRequest) {
   return getResWithXHeaders(req, res);
 }
 
-export function isAuthRes(resData: unknown): resData is AuthRes {
+export function isAuthResData(data: unknown): data is AuthResData {
   return (
-    typeof resData === 'object' &&
-    resData !== null &&
-    'token' in resData &&
-    typeof resData.token === 'string' &&
-    'user' in resData &&
-    typeof resData.user === 'object' &&
-    resData.user !== null &&
-    'id' in resData.user &&
-    typeof resData.user.id === 'string' &&
-    'username' in resData.user &&
-    typeof resData.user.username === 'string' &&
-    'fullname' in resData.user &&
-    typeof resData.user.fullname === 'string' &&
-    'isAdmin' in resData.user &&
-    typeof resData.user.isAdmin === 'boolean' &&
-    'createdAt' in resData.user &&
-    typeof resData.user.createdAt === 'string' &&
-    'updatedAt' in resData.user &&
-    typeof resData.user.updatedAt === 'string' &&
-    'bio' in resData.user &&
-    (typeof resData.user.bio === 'string' || resData.user.bio === null)
+    typeof data === 'object' &&
+    data !== null &&
+    'token' in data &&
+    typeof data.token === 'string' &&
+    'user' in data &&
+    typeof data.user === 'object' &&
+    data.user !== null &&
+    'id' in data.user &&
+    typeof data.user.id === 'string' &&
+    'username' in data.user &&
+    typeof data.user.username === 'string' &&
+    'fullname' in data.user &&
+    typeof data.user.fullname === 'string' &&
+    'isAdmin' in data.user &&
+    typeof data.user.isAdmin === 'boolean' &&
+    'createdAt' in data.user &&
+    typeof data.user.createdAt === 'string' &&
+    'updatedAt' in data.user &&
+    typeof data.user.updatedAt === 'string' &&
+    'bio' in data.user &&
+    (typeof data.user.bio === 'string' || data.user.bio === null)
   );
 }
