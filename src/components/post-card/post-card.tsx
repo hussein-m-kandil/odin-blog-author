@@ -37,7 +37,7 @@ export function PostCard({
   return (
     <Card
       {...props}
-      className={cn('flex-col justify-between gap-4', className)}>
+      className={cn('w-full flex-col justify-between gap-4', className)}>
       <CardHeader>
         <CardTitle
           title={post.title}
