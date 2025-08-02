@@ -1,19 +1,12 @@
 'use client';
 
-import {
-  format,
-  DateArg,
-  formatDistance,
-  differenceInMilliseconds,
-} from 'date-fns';
+import { DateArg, formatDistance, differenceInMilliseconds } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const formatDate = (date: DateArg<Date>) => {
   return formatDistance(date, new Date(), { addSuffix: true });
 };
-
-const FORMAT = 'yyyy-MM-dd HH:mm:ss.SSS';
 
 export function FormattedDate({
   createdAt,
@@ -29,8 +22,9 @@ export function FormattedDate({
       {...props}
       className={cn('flex flex-wrap items-center gap-1 text-sm', className)}>
       <time
-        dateTime={format(createdAt, FORMAT)}
-        className='inline-flex items-center'>
+        suppressHydrationWarning
+        className='inline-flex items-center'
+        dateTime={new Date(createdAt).toISOString()}>
         <Clock
           className='inline-block me-1'
           aria-label='Created at'
@@ -40,7 +34,9 @@ export function FormattedDate({
       </time>
       {updatedAt &&
         differenceInMilliseconds(updatedAt, createdAt) > 59 * 1000 && (
-          <time dateTime={format(updatedAt, FORMAT)}>
+          <time
+            suppressHydrationWarning
+            dateTime={new Date(updatedAt).toISOString()}>
             &nbsp;(Updated {formatDate(updatedAt)})
           </time>
         )}
