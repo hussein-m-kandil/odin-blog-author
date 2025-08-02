@@ -1,99 +1,129 @@
 'use client';
 
 import React from 'react';
+import {
+  useMutation,
+  InfiniteData,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { cn, getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
-import { Comment, ID } from '@/types';
+import { Comment, Post, User } from '@/types';
+import { Loader } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function CommentForm({
-  postId,
-  comment,
-  authorId,
   onCancel,
   onSuccess,
+  comment,
+  post,
+  user,
   className,
   ...formProps
 }: Omit<React.ComponentProps<'form'>, 'onSubmit'> & {
-  onSuccess?: () => void;
   onCancel?: () => void;
-  comment?: Comment;
-  authorId?: ID;
-  postId?: ID;
+  onSuccess?: () => void;
+  comment?: Comment | null;
+  post: Post;
+  user: User;
 }) {
-  if ((!authorId || !postId) && !comment) {
-    throw new Error(
-      'Missing either a `comment` prop or `postId` & `authorId` props'
-    );
-  }
-
-  const updating = comment && true;
-
-  if (updating && typeof onCancel !== 'function') {
-    throw new Error(
-      'Expect `onCancel` prop of type `function`, for update comment form'
-    );
-  }
+  const updating = !!comment;
 
   const {
     authData: { authAxios },
   } = useAuthData();
-  const [content, setContent] = React.useState(updating ? comment.content : '');
-  const [submitting, setSubmitting] = React.useState(false);
+  const [content, setContent] = React.useState('');
   const [errMsg, setErrMsg] = React.useState('');
-  const router = useRouter();
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
+  const commentInpRef = React.useRef<HTMLTextAreaElement>(null);
+
+  React.useEffect(() => {
+    setContent(updating ? comment.content : '');
+    setTimeout(() => updating && commentInpRef.current?.focus(), 100);
+  }, [comment, updating]);
+
+  const queryClient = useQueryClient();
+
+  const { reset, mutate, isPending } = useMutation<Comment>({
+    mutationFn: async () => {
       const { url, values, axiosReq } = updating
         ? {
-            url: `/posts/${comment.postId}/comments/${comment.id}`,
+            url: `/posts/${post.id}/comments/${comment.id}`,
             values: { content },
             axiosReq: authAxios.put,
           }
         : {
-            url: `/posts/${postId}/comments/`,
-            values: { content, authorId, postId },
+            url: `/posts/${post.id}/comments/`,
+            values: { content, authorId: user.id, postId: post.id },
             axiosReq: authAxios.post,
           };
-      await axiosReq(url, values);
+      return (await axiosReq(url, values)).data;
+    },
+    onSuccess: async (updatedComment) => {
       setErrMsg('');
       setContent('');
-      router.replace(`/${updating ? comment.postId : postId}`, {
-        scroll: false,
-      });
-      toast.success(updating ? 'Comment Updated' : 'New Comment Added', {
-        description: `You have ${
-          updating ? 'updated a' : 'added a new'
-        } comment successfully`,
-      });
+      if (updating) {
+        toast.success('Comment updated', {
+          description: `Your comment is updated successfully`,
+        });
+        queryClient.setQueryData<InfiniteData<Comment[], number>>(
+          ['comments', post.id],
+          (infiniteCommentsData) => {
+            if (infiniteCommentsData) {
+              return {
+                ...infiniteCommentsData,
+                pages: infiniteCommentsData.pages.map((commentPage) =>
+                  commentPage.map((c) =>
+                    c.id === updatedComment.id ? updatedComment : c
+                  )
+                ),
+              };
+            }
+          }
+        );
+      } else {
+        toast.success('New comment added', {
+          description: `Your comment is added successfully`,
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ['comments', post.id],
+        });
+      }
       onSuccess?.();
-    } catch (error) {
+    },
+    onError: (error) => {
       const { message } = parseAxiosAPIError(error);
-      if (!message) getUnknownErrorMessage(error); // Just to log it
-      setErrMsg(message || 'Sorry, you can not comment right now');
-    } finally {
-      setSubmitting(false);
-    }
+      setErrMsg(message || getUnknownErrorMessage(error));
+    },
+  });
+
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+    mutate();
   };
 
   const cancelUpdate = () => {
     if (updating) {
-      setErrMsg('');
       setContent(comment.content);
-      if (typeof onCancel === 'function') onCancel();
+      setErrMsg('');
+      reset();
+      onCancel?.();
     }
   };
 
-  const handleEscape: React.KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
-    if (e.key === 'Escape') cancelUpdate();
+  const handleEscapeOrEnter: React.KeyboardEventHandler<HTMLTextAreaElement> = (
+    e
+  ) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelUpdate();
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      mutate();
+    }
   };
 
   return (
@@ -112,6 +142,7 @@ export function CommentForm({
         )}>
         {updating && (
           <Button
+            size='sm'
             type='button'
             variant='outline'
             onClick={cancelUpdate}
@@ -122,26 +153,29 @@ export function CommentForm({
         <Textarea
           name='comment'
           value={content}
-          aria-label='Comment'
+          ref={commentInpRef}
           autoFocus={updating}
-          onKeyDown={handleEscape}
+          aria-label='Comment'
           aria-invalid={Boolean(errMsg)}
+          onKeyDown={handleEscapeOrEnter}
           onFocus={(e) => e.target.select()}
           placeholder='Reflect on what you read...'
           onChange={(e) => setContent(e.target.value)}
           className={cn(
-            'placeholder:pt-3 focus-visible:placeholder:text-transparent',
             'focus-visible:border-input focus-visible:ring-0',
-            'resize-none min-h-17 h-17 rounded-none border-0'
+            'focus-visible:placeholder:text-transparent',
+            'resize-none rounded-none border-0'
           )}
         />
         <Button
+          size='sm'
           type='submit'
           variant='outline'
+          disabled={!content.trim()}
           className='focus-visible:ring-0 focus-visible:underline underline-offset-2 h-auto text-md rounded-none border-0'>
-          {submitting ? (
+          {isPending ? (
             <>
-              <Loader2 className='animate-spin' />{' '}
+              <Loader className='animate-spin' />{' '}
               {updating ? 'Updating' : 'Commenting'}
             </>
           ) : updating ? (

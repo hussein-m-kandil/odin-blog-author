@@ -22,7 +22,6 @@ export function Comments({
   const {
     authData: { authAxios, user },
   } = useAuthData();
-  const userId = user?.id;
 
   const {
     data,
@@ -70,7 +69,7 @@ export function Comments({
 
   return (
     <div {...props}>
-      {userId && <CommentForm postId={post.id} authorId={userId} />}
+      {user && <CommentForm post={post} user={user} />}
       {isLoading ? (
         loader
       ) : isLoadingError || !Array.isArray(data?.pages[0]) ? (
@@ -86,7 +85,7 @@ export function Comments({
               <React.Fragment key={i}>
                 {comments.map((c) => (
                   <li key={c.id}>
-                    <Comment comment={c} post={post} currentUserId={userId} />
+                    <Comment comment={c} post={post} user={user} />
                   </li>
                 ))}
               </React.Fragment>

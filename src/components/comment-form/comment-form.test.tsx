@@ -10,17 +10,17 @@ import { userEvent } from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/auth-context';
 import { axiosMock } from '@/__mocks__/axios';
 import { CommentForm } from './comment-form';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 describe('<CommentForm />', () => {
-  const postId = post.id;
-  const authorId = author.id;
   const comment = post.comments[0];
+  const user = author;
 
   const onSuccess = vi.fn();
   const onCancel = vi.fn();
 
-  const createCommentProps = { postId, authorId, onSuccess };
-  const updateCommentProps = { comment, onSuccess, onCancel };
+  const createCommentProps = { post, user, onSuccess };
+  const updateCommentProps = { post, user, comment, onSuccess, onCancel };
 
   beforeEach(() => {
     axiosMock.onPost().reply(201, comment);
@@ -33,31 +33,18 @@ describe('<CommentForm />', () => {
     props: React.ComponentProps<typeof CommentForm>
   ) => {
     return (
-      <AuthProvider initAuthData={initAuthData}>
-        <CommentForm {...props} />
-      </AuthProvider>
+      <QueryClientProvider
+        client={
+          new QueryClient({
+            defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+          })
+        }>
+        <AuthProvider initAuthData={initAuthData}>
+          <CommentForm {...props} />
+        </AuthProvider>
+      </QueryClientProvider>
     );
   };
-
-  it('should throw if not given neither `comment` & `onCancel` prop, nor `postId` & `authorId` props', () => {
-    const errRegex = /comment.*postId.*authorId/i;
-    expect(() => render(<CommentFormWrapper />)).toThrowError(errRegex);
-    expect(() => render(<CommentFormWrapper postId={postId} />)).toThrowError(
-      errRegex
-    );
-    expect(() =>
-      render(<CommentFormWrapper authorId={authorId} />)
-    ).toThrowError(errRegex);
-    expect(() => render(<CommentFormWrapper comment={comment} />)).toThrowError(
-      /onCancel/i
-    );
-    expect(() =>
-      render(<CommentFormWrapper comment={comment} onCancel={onCancel} />)
-    ).not.toThrowError();
-    expect(() =>
-      render(<CommentFormWrapper postId={postId} authorId={authorId} />)
-    ).not.toThrowError();
-  });
 
   it('should render a new comment form', () => {
     render(<CommentFormWrapper {...createCommentProps} />);
@@ -126,7 +113,7 @@ describe('<CommentForm />', () => {
     await user.clear(commentBox);
     await user.type(commentBox, updatedContent);
     await user.keyboard('{Escape}');
-    await waitFor(() => expect(onCancel).toHaveBeenCalledOnce());
+    expect(onCancel).toHaveBeenCalledOnce();
     expect(screen.getByText(comment.content)).toBeInTheDocument();
     expect(screen.queryByText(updatedContent)).toBeNull();
     expect(axiosMock.history).toHaveLength(0);
