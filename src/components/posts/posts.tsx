@@ -58,10 +58,9 @@ export function Posts({ postsUrl }: { postsUrl: string }) {
         {isPending ? (
           Array.from({ length: 3 }).map((_, i) => <PostCardSkeleton key={i} />)
         ) : isLoadingError || !Array.isArray(data.pages[0]) ? (
-          <QueryError
-            onRefetch={refetch}
-            message='Sorry, we could not load any posts'
-          />
+          <QueryError onRefetch={refetch}>
+            Sorry, we could not load any posts
+          </QueryError>
         ) : !data.pages[0]?.length ? (
           <P className='text-center'>There are no posts</P>
         ) : (
@@ -81,10 +80,9 @@ export function Posts({ postsUrl }: { postsUrl: string }) {
       {isFetchingNextPage ? (
         <Loader className='animate-spin mx-auto' />
       ) : isFetchNextPageError ? (
-        <QueryError
-          onRefetch={fetchNextIfYouCan}
-          message='Sorry, we could not load more posts'
-        />
+        <QueryError onRefetch={fetchNextIfYouCan}>
+          Sorry, we could not load more posts
+        </QueryError>
       ) : (
         hasNextPage && (
           <InView

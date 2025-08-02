@@ -5,16 +5,15 @@ import { cn } from '@/lib/utils';
 export function QueryError({
   onRefetch,
   className,
-  message,
+  children,
   ...props
 }: React.ComponentProps<'div'> & {
   onRefetch: () => void;
-  message?: string;
 }) {
   return (
-    <div {...props} className={cn('text-center', className)}>
+    <div {...props} className={cn('text-center space-y-2', className)}>
       <ErrorMessage>
-        {message || 'Sorry, we could not load the data'}
+        {children || 'Sorry, we could not load the data'}
       </ErrorMessage>
       <Button
         autoFocus

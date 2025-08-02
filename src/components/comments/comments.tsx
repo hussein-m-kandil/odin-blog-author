@@ -74,10 +74,9 @@ export function Comments({
       {isLoading ? (
         loader
       ) : isLoadingError || !Array.isArray(data?.pages[0]) ? (
-        <QueryError
-          onRefetch={refetch}
-          message='Sorry, we could not load the comments'
-        />
+        <QueryError onRefetch={refetch}>
+          Sorry, we could not load the comments
+        </QueryError>
       ) : !data.pages[0].length ? (
         <Muted className='text-center'>There are no comments</Muted>
       ) : (
@@ -97,10 +96,9 @@ export function Comments({
             {isFetchingNextPage ? (
               loader
             ) : isFetchNextPageError ? (
-              <QueryError
-                onRefetch={fetchNextIfYouCan}
-                message='Sorry, we could not load more comments'
-              />
+              <QueryError onRefetch={fetchNextIfYouCan}>
+                Sorry, we could not load more comments
+              </QueryError>
             ) : (
               hasNextPage && (
                 <Button

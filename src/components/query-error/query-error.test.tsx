@@ -21,7 +21,7 @@ describe('<QueryError />', () => {
 
   it('should show the given message', () => {
     const message = 'Blah blah ...';
-    render(<QueryError onRefetch={refetchMock} message={message} />);
+    render(<QueryError onRefetch={refetchMock}>{message}</QueryError>);
     expect(screen.getByText(message)).toBeInTheDocument();
   });
 

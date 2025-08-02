@@ -3,15 +3,15 @@
 import { PostOptionsMenu } from '@/components/post-options-menu';
 import { H1, H2, Lead, Muted } from '@/components/typography';
 import { FormattedDate } from '@/components/formatted-date';
-import { Comments } from '@/components/comments';
 import { MutableImage } from '@/components/mutable-image';
-import { ErrorMessage } from '@/components/error-message';
 import { UsernameLink } from '@/components/username-link';
 import { PostPageSkeleton } from './post-page.skeleton';
 import { PrivacyIcon } from '@/components/privacy-icon';
 import { useAuthData } from '@/contexts/auth-context';
+import { QueryError } from '@/components/query-error';
 import { Categories } from '@/components/categories';
 import { useQuery } from '@tanstack/react-query';
+import { Comments } from '@/components/comments';
 import { cn } from '@/lib/utils';
 import { Post } from '@/types';
 
@@ -28,7 +28,11 @@ export function PostPage({
     authData: { authAxios, user },
   } = useAuthData();
 
-  const { data: post, status } = useQuery<Post>({
+  const {
+    data: post,
+    status,
+    refetch,
+  } = useQuery<Post>({
     queryKey: ['post', postId, postUrl],
     queryFn: async () => (await authAxios(postUrl)).data,
   });
@@ -39,9 +43,9 @@ export function PostPage({
     <div {...props} className={cn('max-w-5xl mx-auto', className)}>
       {status === 'error' ? (
         <div className={className}>
-          <ErrorMessage className='mt-6'>
+          <QueryError className='mt-6' onRefetch={refetch}>
             Sorry, we could not get the post data
-          </ErrorMessage>
+          </QueryError>
         </div>
       ) : status === 'pending' ? (
         <div className={className}>
