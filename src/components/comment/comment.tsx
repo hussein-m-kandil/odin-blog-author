@@ -2,32 +2,33 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Muted } from '@/components/typography';
-import { useDialog } from '@/contexts/dialog-context';
-import { UserAvatar } from '@/components/user-avatar';
-import { OptionsMenu } from '@/components/options-menu';
-import { CommentForm } from '@/components/comment-form';
-import { UsernameLink } from '@/components/username-link';
-import { Comment as CommentType, ID, Post } from '@/types';
 import { FormattedDate } from '@/components/formatted-date';
 import { DeleteCommentForm } from '../delete-comment-form';
+import { Comment as CommentT, Post, User } from '@/types';
+import { UsernameLink } from '@/components/username-link';
+import { OptionsMenu } from '@/components/options-menu';
+import { UserAvatar } from '@/components/user-avatar';
+import { useDialog } from '@/contexts/dialog-context';
+import { Muted } from '@/components/typography';
 import { cn } from '@/lib/utils';
 
 export function Comment({
-  currentUserId,
-  className,
+  onUpdate,
   comment,
   post,
+  user,
+  className,
   ...props
 }: React.ComponentProps<'div'> & {
-  currentUserId?: ID | null;
-  comment: CommentType;
+  onUpdate: (comment: CommentT) => void;
+  comment: CommentT;
   post: Post;
+  user?: User | null;
 }) {
   const [truncContent, setHideContent] = React.useState(true);
-  const [updating, setUpdating] = React.useState(false);
-
   const { showDialog, hideDialog } = useDialog();
+
+  const enterUpdate = () => onUpdate(comment);
 
   const enterDelete = () => {
     const deleteTitleId = `delete-comment-${comment.id}`;
@@ -46,18 +47,10 @@ export function Comment({
     });
   };
 
-  const exitUpdate = () => setUpdating(false);
+  const isCurrentUserCommentAuthor = user && user.id === comment.authorId;
+  const isCurrentUserPostAuthor = user && user.id === post.authorId;
 
-  const isCurrentUserCommentAuthor = currentUserId === comment.authorId;
-  const isCurrentUserPostAuthor = currentUserId === post.authorId;
-
-  return updating ? (
-    <CommentForm
-      onSuccess={exitUpdate}
-      onCancel={exitUpdate}
-      comment={comment}
-    />
-  ) : (
+  return (
     <div
       {...props}
       className={cn(
@@ -104,7 +97,7 @@ export function Comment({
                 <button
                   type='button'
                   key={`update-${comment.id}`}
-                  onClick={() => setUpdating(true)}>
+                  onClick={enterUpdate}>
                   Update
                 </button>,
                 <button

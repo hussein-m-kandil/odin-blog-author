@@ -10,6 +10,7 @@ import { userEvent } from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/auth-context';
 import { axiosMock } from '@/__mocks__/axios';
 import { CommentForm } from './comment-form';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 describe('<CommentForm />', () => {
   const postId = post.id;
@@ -33,9 +34,16 @@ describe('<CommentForm />', () => {
     props: React.ComponentProps<typeof CommentForm>
   ) => {
     return (
-      <AuthProvider initAuthData={initAuthData}>
-        <CommentForm {...props} />
-      </AuthProvider>
+      <QueryClientProvider
+        client={
+          new QueryClient({
+            defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+          })
+        }>
+        <AuthProvider initAuthData={initAuthData}>
+          <CommentForm {...props} />
+        </AuthProvider>
+      </QueryClientProvider>
     );
   };
 

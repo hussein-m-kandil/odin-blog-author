@@ -4,6 +4,7 @@ import { userEvent } from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/auth-context';
 import { describe, expect, it } from 'vitest';
 import { Comment } from './comment';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const comment = post.comments[0];
 const authorId = post.authorId;
@@ -16,9 +17,16 @@ mockDialogContext();
 
 const CommentWrapper = (props: React.ComponentProps<typeof Comment>) => {
   return (
-    <AuthProvider initAuthData={initAuthData}>
-      <Comment {...props} />
-    </AuthProvider>
+    <QueryClientProvider
+      client={
+        new QueryClient({
+          defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+        })
+      }>
+      <AuthProvider initAuthData={initAuthData}>
+        <Comment {...props} />
+      </AuthProvider>
+    </QueryClientProvider>
   );
 };
 

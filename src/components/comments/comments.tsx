@@ -19,6 +19,10 @@ export function Comments({
   initialComments: CommentT[];
   post: Post;
 }) {
+  const [commentToUpdate, setCommentToUpdate] = React.useState<CommentT | null>(
+    null
+  );
+
   const {
     authData: { authAxios, user },
   } = useAuthData();
@@ -70,7 +74,14 @@ export function Comments({
 
   return (
     <div {...props}>
-      {userId && <CommentForm postId={post.id} authorId={userId} />}
+      {userId && (
+        <CommentForm
+          post={post}
+          user={user}
+          comment={commentToUpdate}
+          onCancel={() => setCommentToUpdate(null)}
+        />
+      )}
       {isLoading ? (
         loader
       ) : isLoadingError || !Array.isArray(data?.pages[0]) ? (
@@ -86,7 +97,12 @@ export function Comments({
               <React.Fragment key={i}>
                 {comments.map((c) => (
                   <li key={c.id}>
-                    <Comment comment={c} post={post} currentUserId={userId} />
+                    <Comment
+                      comment={c}
+                      post={post}
+                      user={user}
+                      onUpdate={setCommentToUpdate}
+                    />
                   </li>
                 ))}
               </React.Fragment>
