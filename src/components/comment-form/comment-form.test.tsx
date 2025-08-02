@@ -70,6 +70,11 @@ describe('<CommentForm />', () => {
     expect(commentBox).toHaveTextContent(comment.content);
   });
 
+  it('should submit button be disabled if the comment input is empty', async () => {
+    render(<CommentFormWrapper {...createCommentProps} />);
+    expect(screen.queryByRole('button', { name: /comment/i })).toBeDisabled();
+  });
+
   it('should submit a new comment and call `onSuccess`', async () => {
     axiosMock.resetHistory();
     const user = userEvent.setup();
@@ -87,6 +92,38 @@ describe('<CommentForm />', () => {
       content,
     });
     expect(onSuccess).toHaveBeenCalledOnce();
+    expect(onSuccess.mock.calls[0][0]).toEqual(comment);
+  });
+
+  it('should submit a new comment via `Enter` key and call `onSuccess`', async () => {
+    axiosMock.resetHistory();
+    const user = userEvent.setup();
+    const { authorId, postId, content } = comment;
+    render(<CommentFormWrapper {...createCommentProps} />);
+    await user.type(screen.getByRole('textbox', { name: /comment/i }), content);
+    await user.keyboard('{Enter}');
+    await waitForElementToBeRemoved(() =>
+      screen.getByRole('button', { name: /commenting/i })
+    );
+    expect(axiosMock.history.post).toHaveLength(1);
+    expect(JSON.parse(axiosMock.history.post[0].data)).toEqual({
+      authorId,
+      postId,
+      content,
+    });
+    expect(onSuccess).toHaveBeenCalledOnce();
+    expect(onSuccess.mock.calls[0][0]).toEqual(comment);
+  });
+
+  it('should not submit via `Enter` key if the comment input is empty', async () => {
+    axiosMock.resetHistory();
+    const user = userEvent.setup();
+    render(<CommentFormWrapper {...createCommentProps} />);
+    await user.keyboard('{Enter}');
+    expect(screen.queryByRole('button', { name: /commenting/i })).toBeNull();
+    expect(axiosMock.history).toHaveLength(0);
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(onCancel).not.toHaveBeenCalled();
   });
 
   it('should Cancel a comment update and call `onCancel` when cancel-button clicked', async () => {
@@ -138,5 +175,6 @@ describe('<CommentForm />', () => {
     expect(screen.queryByDisplayValue(comment.content)).toBeNull();
     expect(screen.queryByText(comment.content)).toBeNull();
     expect(onSuccess).toHaveBeenCalledOnce();
+    expect(onSuccess.mock.calls[0][0]).toEqual(comment);
   });
 });

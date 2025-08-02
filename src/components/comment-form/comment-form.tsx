@@ -2,18 +2,35 @@
 
 import React from 'react';
 import {
+  Form,
+  FormItem,
+  FormField,
+  FormMessage,
+  FormControl,
+} from '@/components/ui/form';
+import {
   useMutation,
   InfiniteData,
   useQueryClient,
 } from '@tanstack/react-query';
 import { cn, getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
-import { ErrorMessage } from '@/components/error-message';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuthData } from '@/contexts/auth-context';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Comment, Post, User } from '@/types';
+import { useForm } from 'react-hook-form';
 import { Loader } from 'lucide-react';
 import { toast } from 'sonner';
+import { z } from 'zod';
+
+const ERR_MSG = 'Missing a comment value';
+
+const formSchema = z.object({
+  content: z.string().trim().min(1, { message: ERR_MSG }).optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export function CommentForm({
   onCancel,
@@ -35,20 +52,17 @@ export function CommentForm({
   const {
     authData: { authAxios },
   } = useAuthData();
-  const [content, setContent] = React.useState('');
-  const [errMsg, setErrMsg] = React.useState('');
 
-  const commentInpRef = React.useRef<HTMLTextAreaElement>(null);
-
-  React.useEffect(() => {
-    setContent(updating ? comment.content : '');
-    setTimeout(() => updating && commentInpRef.current?.focus(), 100);
-  }, [comment, updating]);
+  const hookForm = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { content: updating ? comment.content : '' },
+  });
 
   const queryClient = useQueryClient();
 
-  const { reset, mutate, isPending } = useMutation<Comment>({
-    mutationFn: async () => {
+  const mutation = useMutation<Comment, Error, FormValues>({
+    mutationFn: async ({ content }) => {
+      if (updating && comment.content === content) return comment;
       const { url, values, axiosReq } = updating
         ? {
             url: `/posts/${post.id}/comments/${comment.id}`,
@@ -63,8 +77,7 @@ export function CommentForm({
       return (await axiosReq(url, values)).data;
     },
     onSuccess: async (updatedComment) => {
-      setErrMsg('');
-      setContent('');
+      hookForm.setValue('content', '');
       if (updating) {
         toast.success('Comment updated', {
           description: `Your comment is updated successfully`,
@@ -95,97 +108,103 @@ export function CommentForm({
       onSuccess?.();
     },
     onError: (error) => {
-      const { message } = parseAxiosAPIError(error);
-      setErrMsg(message || getUnknownErrorMessage(error));
+      const { message } = parseAxiosAPIError(error, hookForm);
+      hookForm.setError('content', {
+        message: message || getUnknownErrorMessage(error),
+      });
     },
   });
 
-  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
-    e.preventDefault();
-    mutate();
-  };
-
   const cancelUpdate = () => {
     if (updating) {
-      setContent(comment.content);
-      setErrMsg('');
-      reset();
+      hookForm.reset();
+      mutation.reset();
       onCancel?.();
     }
   };
 
-  const handleEscapeOrEnter: React.KeyboardEventHandler<HTMLTextAreaElement> = (
+  const submit = (values: FormValues) => mutation.mutate(values);
+
+  const handleKeyboardEvent: React.KeyboardEventHandler<HTMLTextAreaElement> = (
     e
   ) => {
-    if (e.key === 'Escape') {
+    if (e.key === 'Enter' && !e.shiftKey && hookForm.formState.isValid) {
+      e.preventDefault();
+      submit(hookForm.getValues());
+    } else if (e.key === 'Escape' && updating) {
       e.preventDefault();
       cancelUpdate();
-    } else if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      mutate();
     }
   };
 
   return (
-    <form
-      {...formProps}
-      onSubmit={handleSubmit}
-      className={cn('my-4', className)}
-      aria-label={updating ? 'Update Comment' : 'Create Comment'}>
-      <ErrorMessage className='text-start text-sm ps-4 m-0!'>
-        {errMsg}
-      </ErrorMessage>
-      <div
+    <Form {...hookForm}>
+      <form
+        {...formProps}
+        aria-label={updating ? 'Update Comment' : 'Create Comment'}
         className={cn(
-          'focus-within:ring-3 focus-within:ring-ring/25 transition-all flex rounded-md',
-          'rounded-lg border border-input overflow-hidden has-aria-[invalid="true"]:border-destructive'
-        )}>
-        {updating && (
-          <Button
-            size='sm'
-            type='button'
-            variant='outline'
-            onClick={cancelUpdate}
-            className='focus-visible:ring-0 focus-visible:underline underline-offset-2 h-auto text-md rounded-none border-0'>
-            Cancel
-          </Button>
+          'my-4 focus-within:ring-3 focus-within:ring-ring/25 transition-all rounded-lg bg-input/50',
+          'border border-input overflow-hidden has-aria-[invalid="true"]:border-destructive',
+          className
         )}
-        <Textarea
-          name='comment'
-          value={content}
-          ref={commentInpRef}
-          autoFocus={updating}
-          aria-label='Comment'
-          aria-invalid={Boolean(errMsg)}
-          onKeyDown={handleEscapeOrEnter}
-          onFocus={(e) => e.target.select()}
-          placeholder='Reflect on what you read...'
-          onChange={(e) => setContent(e.target.value)}
-          className={cn(
-            'focus-visible:border-input focus-visible:ring-0',
-            'focus-visible:placeholder:text-transparent',
-            'resize-none rounded-none border-0'
+        onSubmit={hookForm.handleSubmit(submit)}>
+        <FormField
+          control={hookForm.control}
+          name='content'
+          render={({ field }) => (
+            <FormItem className='relative'>
+              <FormMessage className='absolute top-1 left-3 right-3 text-center' />
+              <FormControl>
+                <Textarea
+                  {...field}
+                  aria-label='Comment'
+                  autoFocus={updating}
+                  onKeyDown={handleKeyboardEvent}
+                  onFocus={(e) => e.target.select()}
+                  placeholder='Reflect on what you read...'
+                  className={cn(
+                    'focus-visible:border-input focus-visible:ring-0 focus-visible:placeholder:text-transparent',
+                    'resize-none rounded-none border-0 bg-transparent dark:bg-transparent min-h-12 pt-5'
+                  )}
+                />
+              </FormControl>
+            </FormItem>
           )}
         />
-        <Button
-          size='sm'
-          type='submit'
-          variant='outline'
-          disabled={!content.trim()}
-          className='focus-visible:ring-0 focus-visible:underline underline-offset-2 h-auto text-md rounded-none border-0'>
-          {isPending ? (
-            <>
-              <Loader className='animate-spin' />{' '}
-              {updating ? 'Updating' : 'Commenting'}
-            </>
-          ) : updating ? (
-            'Update'
-          ) : (
-            'Comment'
+        <div className='flex border-1 *:grow'>
+          {updating && (
+            <Button
+              size='sm'
+              type='button'
+              variant='outline'
+              onClick={cancelUpdate}
+              className='border-none rounded-none rounded-bl-md'>
+              Cancel
+            </Button>
           )}
-        </Button>
-      </div>
-    </form>
+          <Button
+            size='sm'
+            type='submit'
+            variant='outline'
+            disabled={!hookForm.formState.isValid}
+            className={cn(
+              'ms-auto border-none rounded-none rounded-br-md',
+              !updating && 'rounded-bl-md'
+            )}>
+            {mutation.isPending ? (
+              <>
+                <Loader className='animate-spin' />{' '}
+                {updating ? 'Updating' : 'Commenting'}
+              </>
+            ) : updating ? (
+              'Update'
+            ) : (
+              'Comment'
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }
 
