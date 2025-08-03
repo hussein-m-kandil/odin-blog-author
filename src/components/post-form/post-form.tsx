@@ -69,10 +69,10 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         : authAxios.post<Post>('/posts', body));
       return data;
     },
-    onSuccess: (resPost, [hookForm]) => {
+    onSuccess: async (resPost, [hookForm]) => {
       hookForm.reset();
       setErrorMessage('');
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         predicate: ({ queryKey }) => {
           return (
             queryKey[0] === 'posts' ||

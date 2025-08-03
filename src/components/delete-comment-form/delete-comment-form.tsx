@@ -35,7 +35,7 @@ export function DeleteCommentForm({
       toast.success('Comment deleted', {
         description: 'You have deleted the comment successfully',
       });
-      queryClient.invalidateQueries({
+      return queryClient.invalidateQueries({
         queryKey: ['comments', comment.postId],
       });
     },

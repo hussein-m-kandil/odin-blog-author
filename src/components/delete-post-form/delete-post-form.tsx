@@ -5,9 +5,9 @@ import { getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthData } from '@/contexts/auth-context';
 import { DeleteForm } from '@/components/delete-form';
+import { useRouter } from 'next/navigation';
 import { Post } from '@/types';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 export function DeletePostForm({
   post,
@@ -31,14 +31,14 @@ export function DeletePostForm({
     mutationFn: async () => {
       return (await authAxios.delete(`/posts/${post.id}`)).data;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       onSuccess?.();
       router.replace('/', { scroll: true });
       toast.success('Post deleted', {
         description: 'You have deleted the post successfully',
       });
       queryClient.removeQueries({ queryKey: ['post', post.id] });
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      return queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
     onError: (error) => {
       const { message } = parseAxiosAPIError(error);
