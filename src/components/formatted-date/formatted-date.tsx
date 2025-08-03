@@ -48,7 +48,10 @@ export function FormattedDate({
   return (
     <span
       {...props}
-      className={cn('flex flex-wrap items-center gap-1 text-sm', className)}>
+      className={cn(
+        'flex flex-wrap items-center gap-1 text-sm leading-0',
+        className
+      )}>
       <Clock className='inline-block' aria-label='Clock icon' size={14} />
       <time
         suppressHydrationWarning
