@@ -88,7 +88,9 @@ export function PostPage({
               />
               <section className='my-4'>
                 <header>
-                  <H2 className='text-center text-xl'>Comments</H2>
+                  <H2 className='text-center text-xl'>
+                    {post._count.comments} Comments
+                  </H2>
                 </header>
                 <main>
                   <Comments initialComments={post.comments} post={post} />
