@@ -41,7 +41,6 @@ export function PostOptionsMenu({
       body: (
         <DeletePostForm
           post={post}
-          method='dialog'
           onCancel={hideDialog}
           onSuccess={hideDialog}
           aria-labelledby={titleId}

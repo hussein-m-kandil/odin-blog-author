@@ -26,6 +26,7 @@ export function DeleteForm({
   return (
     <form
       {...formProps}
+      method='dialog'
       onSubmit={handleSubmit}
       aria-label={`Delete confirmation form for ${subject}`}>
       <ErrorMessage>{errorMessage}</ErrorMessage>

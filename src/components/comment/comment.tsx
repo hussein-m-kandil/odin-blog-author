@@ -52,7 +52,6 @@ export function Comment({
       description: 'Confirm deleting this comment',
       body: (
         <DeleteCommentForm
-          method='dialog'
           comment={comment}
           onCancel={hideDialog}
           onSuccess={handleCommentDeleted}
