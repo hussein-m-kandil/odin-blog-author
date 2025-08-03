@@ -3,7 +3,7 @@ import { Globe, Lock } from 'lucide-react';
 
 export function PrivacyIcon({
   isPublic = false,
-  size = 16,
+  size = 14,
   className,
 }: React.ComponentProps<'span'> & {
   size?: string | number;
