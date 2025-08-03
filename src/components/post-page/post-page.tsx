@@ -60,10 +60,9 @@ export function PostPage({
               </H1>
               {user?.id === post.authorId && <PostOptionsMenu post={post} />}
             </div>
-            <div className='flex items-baseline justify-between mt-1'>
-              <Muted className='flex'>
+            <div className='flex items-center justify-between mt-1'>
+              <Muted className='flex items-center gap-1 leading-0'>
                 <PrivacyIcon isPublic={post.published} />
-                &nbsp;
                 <UsernameLink user={post.author} prefix='By ' />
               </Muted>
               <Muted>
