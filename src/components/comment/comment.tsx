@@ -14,12 +14,16 @@ import { Muted } from '@/components/typography';
 import { cn } from '@/lib/utils';
 
 export function Comment({
+  onUpdate,
+  onDelete,
   comment,
   post,
   user,
   className,
   ...props
 }: React.ComponentProps<'div'> & {
+  onUpdate?: (comment: CommentT) => void;
+  onDelete?: (comment: CommentT) => void;
   comment: CommentT;
   post: Post;
   user?: User | null;
@@ -31,6 +35,16 @@ export function Comment({
   const enterUpdate = () => setUpdating(true);
   const exitUpdate = () => setUpdating(false);
 
+  const handleCommentUpdated = (c: CommentT) => {
+    exitUpdate();
+    onUpdate?.(c);
+  };
+
+  const handleCommentDeleted = () => {
+    hideDialog();
+    onDelete?.(comment);
+  };
+
   const enterDelete = () => {
     const deleteTitleId = `delete-comment-${comment.id}`;
     showDialog({
@@ -41,7 +55,7 @@ export function Comment({
           method='dialog'
           comment={comment}
           onCancel={hideDialog}
-          onSuccess={hideDialog}
+          onSuccess={handleCommentDeleted}
           aria-labelledby={deleteTitleId}
         />
       ),
@@ -56,8 +70,8 @@ export function Comment({
       post={post}
       user={user}
       comment={comment}
-      onSuccess={exitUpdate}
       onCancel={exitUpdate}
+      onSuccess={handleCommentUpdated}
     />
   ) : (
     <div

@@ -33,16 +33,16 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function CommentForm({
-  onCancel,
   onSuccess,
+  onCancel,
   comment,
   post,
   user,
   className,
   ...formProps
 }: Omit<React.ComponentProps<'form'>, 'onSubmit'> & {
+  onSuccess?: (comment: Comment) => void;
   onCancel?: () => void;
-  onSuccess?: () => void;
   comment?: Comment | null;
   post: Post;
   user: User;
@@ -76,7 +76,7 @@ export function CommentForm({
           };
       return (await axiosReq(url, values)).data;
     },
-    onSuccess: async (updatedComment) => {
+    onSuccess: (resComment) => {
       hookForm.setValue('content', '');
       if (updating) {
         toast.success('Comment updated', {
@@ -90,7 +90,7 @@ export function CommentForm({
                 ...infiniteCommentsData,
                 pages: infiniteCommentsData.pages.map((commentPage) =>
                   commentPage.map((c) =>
-                    c.id === updatedComment.id ? updatedComment : c
+                    c.id === resComment.id ? resComment : c
                   )
                 ),
               };
@@ -101,11 +101,11 @@ export function CommentForm({
         toast.success('New comment added', {
           description: `Your comment is added successfully`,
         });
-        await queryClient.invalidateQueries({
-          queryKey: ['comments', post.id],
-        });
       }
-      onSuccess?.();
+      onSuccess?.(resComment);
+      return queryClient.invalidateQueries({
+        queryKey: ['comments', post.id],
+      });
     },
     onError: (error) => {
       const { message } = parseAxiosAPIError(error, hookForm);

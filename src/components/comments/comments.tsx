@@ -32,6 +32,7 @@ export function Comments({
     fetchNextPage,
     isLoadingError,
     isFetchingNextPage,
+    isFetchedAfterMount,
     isFetchNextPageError,
   } = useInfiniteQuery<
     CommentT[],
@@ -63,13 +64,81 @@ export function Comments({
 
   const isFetchDisabled = !hasNextPage || isFetching;
 
+  const [extraComments, setExtraComments] = React.useState<CommentT[]>([]);
+
+  React.useEffect(() => {
+    if (isFetchedAfterMount) {
+      const filteredExtraComments = [...extraComments];
+      data.pages.forEach((p) =>
+        p.forEach((c) => {
+          const indexInExtras = filteredExtraComments.findIndex(
+            ({ id }) => c.id === id
+          );
+          if (indexInExtras >= 0)
+            filteredExtraComments.splice(indexInExtras, 1);
+        })
+      );
+      if (filteredExtraComments.length < extraComments.length) {
+        setExtraComments(filteredExtraComments);
+      }
+    }
+  }, [data.pages, extraComments, isFetchedAfterMount]);
+
   const loader = (
     <Loader aria-label='Loading comments' className='animate-spin mx-auto' />
   );
 
+  const updateExtraComment = (updatedComment: CommentT) => {
+    let extraCommentUpdated = false;
+    const updatedExtraComments = extraComments.map((ec) => {
+      if (ec.id === updatedComment.id) {
+        extraCommentUpdated = true;
+        return updatedComment;
+      }
+      return ec;
+    });
+    if (extraCommentUpdated) setExtraComments(updatedExtraComments);
+  };
+
+  const deleteExtraComment = ({ id }: CommentT) => {
+    const filteredExtraComments = extraComments.filter((ec) => ec.id !== id);
+    if (filteredExtraComments.length < extraComments.length) {
+      setExtraComments(filteredExtraComments);
+    }
+  };
+
+  const CommentItems = ({ comments }: { comments: CommentT[] }) => {
+    return comments.map((c) => (
+      <li key={c.id}>
+        <Comment
+          onUpdate={updateExtraComment}
+          onDelete={deleteExtraComment}
+          comment={c}
+          post={post}
+          user={user}
+        />
+      </li>
+    ));
+  };
+
+  const commentListRef = React.useRef<HTMLUListElement>(null);
+
+  React.useEffect(() => {
+    const commentList = commentListRef.current;
+    if (isFetchedAfterMount && !isFetching && commentList) {
+      commentList.lastElementChild?.scrollIntoView?.();
+    }
+  }, [isFetchedAfterMount, isFetching]);
+
   return (
     <div {...props}>
-      {user && <CommentForm post={post} user={user} />}
+      {user && (
+        <CommentForm
+          post={post}
+          user={user}
+          onSuccess={(c) => setExtraComments(extraComments.concat(c))}
+        />
+      )}
       {isLoading ? (
         loader
       ) : isLoadingError || !Array.isArray(data?.pages[0]) ? (
@@ -80,16 +149,11 @@ export function Comments({
         <Muted className='text-center'>There are no comments</Muted>
       ) : (
         <div>
-          <ul aria-label='Comments' className='space-y-2'>
+          <ul ref={commentListRef} aria-label='Comments' className='space-y-2'>
             {data.pages.map((comments, i) => (
-              <React.Fragment key={i}>
-                {comments.map((c) => (
-                  <li key={c.id}>
-                    <Comment comment={c} post={post} user={user} />
-                  </li>
-                ))}
-              </React.Fragment>
+              <CommentItems key={i} comments={comments} />
             ))}
+            <CommentItems comments={extraComments} />
           </ul>
           <div className='my-4 text-center'>
             {isFetchingNextPage ? (
