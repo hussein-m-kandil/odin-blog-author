@@ -19,6 +19,8 @@ export function Comments({
   initialComments: CommentT[];
   post: Post;
 }) {
+  const countRef = React.useRef(0);
+
   const {
     authData: { authAxios, user },
   } = useAuthData();
@@ -32,7 +34,6 @@ export function Comments({
     fetchNextPage,
     isLoadingError,
     isFetchingNextPage,
-    isFetchedAfterMount,
     isFetchNextPageError,
   } = useInfiniteQuery<
     CommentT[],
@@ -60,14 +61,16 @@ export function Comments({
     },
   });
 
-  const fetchNextIfYouCan = () => hasNextPage && !isFetching && fetchNextPage();
-
   const isFetchDisabled = !hasNextPage || isFetching;
+
+  const fetchNextIfYouCan = () => {
+    if (hasNextPage && !isFetching) fetchNextPage();
+  };
 
   const [extraComments, setExtraComments] = React.useState<CommentT[]>([]);
 
   React.useEffect(() => {
-    if (isFetchedAfterMount) {
+    if (extraComments.length) {
       const filteredExtraComments = [...extraComments];
       data.pages.forEach((p) =>
         p.forEach((c) => {
@@ -82,11 +85,11 @@ export function Comments({
         setExtraComments(filteredExtraComments);
       }
     }
-  }, [data.pages, extraComments, isFetchedAfterMount]);
+  }, [data.pages, extraComments]);
 
-  const loader = (
-    <Loader aria-label='Loading comments' className='animate-spin mx-auto' />
-  );
+  const addComment = (newComment: CommentT) => {
+    setExtraComments([...extraComments, newComment]);
+  };
 
   const updateExtraComment = (updatedComment: CommentT) => {
     let extraCommentUpdated = false;
@@ -97,7 +100,9 @@ export function Comments({
       }
       return ec;
     });
-    if (extraCommentUpdated) setExtraComments(updatedExtraComments);
+    if (extraCommentUpdated) {
+      setExtraComments(updatedExtraComments);
+    }
   };
 
   const deleteExtraComment = ({ id }: CommentT) => {
@@ -124,21 +129,21 @@ export function Comments({
   const commentListRef = React.useRef<HTMLUListElement>(null);
 
   React.useEffect(() => {
-    const commentList = commentListRef.current;
-    if (isFetchedAfterMount && !isFetching && commentList) {
-      commentList.lastElementChild?.scrollIntoView?.();
+    const oldCount = countRef.current;
+    countRef.current = extraComments.length;
+    countRef.current += data.pages.reduce((count, p) => count + p.length, 0);
+    if (oldCount && oldCount < countRef.current) {
+      commentListRef.current?.lastElementChild?.scrollIntoView?.();
     }
-  }, [isFetchedAfterMount, isFetching]);
+  }, [data.pages, extraComments]);
+
+  const loader = (
+    <Loader aria-label='Loading comments' className='animate-spin mx-auto' />
+  );
 
   return (
     <div {...props}>
-      {user && (
-        <CommentForm
-          post={post}
-          user={user}
-          onSuccess={(c) => setExtraComments(extraComments.concat(c))}
-        />
-      )}
+      {user && <CommentForm post={post} user={user} onSuccess={addComment} />}
       {isLoading ? (
         loader
       ) : isLoadingError || !Array.isArray(data?.pages[0]) ? (
