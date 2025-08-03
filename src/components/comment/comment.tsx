@@ -63,7 +63,7 @@ export function Comment({
     <div
       {...props}
       className={cn(
-        'bg-secondary/50 p-2 rounded-md border border-input',
+        'bg-muted/50 p-2 rounded-md border border-input',
         'relative flex justify-between items-center gap-2',
         className
       )}>
@@ -71,7 +71,10 @@ export function Comment({
         href={`/profile${
           isCurrentUserCommentAuthor ? '' : '/' + comment.authorId
         }`}>
-        <UserAvatar user={comment.author} className='size-12 text-lg' />
+        <UserAvatar
+          user={comment.author}
+          className='size-12 text-lg shadow-sm'
+        />
       </Link>
       <div className='grow font-light'>
         <div className='text-foreground italic pe-2 pb-1'>
