@@ -15,12 +15,13 @@ function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        refetchOnReconnect: true,
-        refetchOnWindowFocus: true,
+        gcTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 1 * 60 * 1000, // 1 minute
         refetchIntervalInBackground: false,
-        refetchInterval: 5 * 60 * 1000,
-        staleTime: 1 * 60 * 1000,
-        gcTime: 5 * 60 * 1000,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+        networkMode: 'online',
+        retry: 1,
       },
     },
   });
