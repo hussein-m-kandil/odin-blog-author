@@ -81,7 +81,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         },
       });
       onSuccess?.();
-      router.push(`/${resPost && resPost.id ? resPost.id : ''}`);
+      if (!isUpdate) router.push(`/${resPost.id}`);
     },
     onError: async (error, [hookForm]) => {
       setErrorMessage(
