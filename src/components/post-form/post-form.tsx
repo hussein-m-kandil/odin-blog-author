@@ -15,42 +15,24 @@ import { Categories } from '@/components/categories';
 import { ImageForm } from '@/components/image-form';
 import { Combobox } from '@/components/combobox';
 import { Category, Image, Post } from '@/types';
-import { P } from '@/components/typography/p';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
 
 const CATEGORIES_MAX_NUM = 7;
 
 export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
-  const isUpdate = !!post;
-
-  const [image, setImage] = React.useState<Image | null>(
-    isUpdate ? post.image : null
-  );
-  const [allCategories, setAllCategories] = React.useState<string[]>([]);
+  const [image, setImage] = React.useState<Image | null>(post?.image || null);
   const [categories, setCategories] = React.useState<string[]>(
-    isUpdate ? post.categories.map((c) => c.name) : []
+    post?.categories.map((c) => c.name) || []
   );
   const [categoriesError, setCategoriesError] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
-
   const {
     authData: { authAxios },
   } = useAuthData();
 
-  React.useEffect(() => {
-    authAxios
-      .get<Category[]>('/posts/categories')
-      .then(({ data: cats }) => {
-        setAllCategories(cats.map((c) => c.name));
-      })
-      .catch((error) => {
-        getUnknownErrorMessage(error);
-        setErrorMessage('Could not load the categories');
-      });
-  }, [authAxios]);
-
+  const isUpdate = !!post;
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
 
@@ -91,11 +73,35 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
     },
   });
 
+  const validateCategory = (value: string) => /^\w*$/.test(value);
+  const searchCategories = async (searchValue: string) => {
+    if (!searchValue) return [];
+    const url = `/posts/categories?categories=${searchValue}`;
+    const { data } = await authAxios.get<Category[]>(url);
+    const fetchedCategories = data.map((category) => category.name);
+    return fetchedCategories.filter(
+      (category) =>
+        !categories.includes(category) &&
+        new RegExp(`^${searchValue}`, 'i').test(category)
+    );
+  };
+  const selectCategory = (selectedCategory: string) => {
+    if (categories.length < CATEGORIES_MAX_NUM) {
+      setCategories((cats) => {
+        return cats.find(
+          (c) => c.toUpperCase() === selectedCategory.toUpperCase()
+        )
+          ? cats
+          : [...cats, selectedCategory];
+      });
+    } else {
+      setCategoriesError('You have reached the maximum number of categories');
+    }
+  };
+
   return (
     <>
-      {errorMessage && (
-        <P className='text-destructive text-sm text-center'>{errorMessage}</P>
-      )}
+      <ErrorMessage>{errorMessage}</ErrorMessage>
       <ImageForm image={image} onSuccess={(img) => setImage(img)} />
       <DynamicForm
         {...formProps}
@@ -122,31 +128,10 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
                   <Plus className='opacity-50' />
                 </>
               }
-              searchValidator={(value: string) => /^\w*$/.test(value)}
-              onSearch={(value) => {
-                return value
-                  ? allCategories.filter(
-                      (c) =>
-                        !categories.includes(c) &&
-                        new RegExp(`^${value}`, 'i').test(c)
-                    )
-                  : [];
-              }}
-              onSelect={(category) => {
-                if (categories.length < CATEGORIES_MAX_NUM) {
-                  setCategories((cats) => {
-                    return cats.find(
-                      (c) => c.toUpperCase() === category.toUpperCase()
-                    )
-                      ? cats
-                      : [...cats, category];
-                  });
-                } else {
-                  setCategoriesError(
-                    'You have reached the maximum number of categories'
-                  );
-                }
-              }}
+              onValidate={validateCategory}
+              onSearch={searchCategories}
+              onSelect={selectCategory}
+              blacklist={categories}
             />
             <Categories
               categories={categories}

@@ -15,57 +15,57 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { QueryError } from '@/components/query-error';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Loader } from 'lucide-react';
-import logger from '@/lib/logger';
+
+const createStrEqChecker = (a: string) => (b: string) => {
+  return a.toLowerCase() === b.toLowerCase();
+};
 
 export function Combobox({
+  blacklist = [],
   triggerContent,
-  searchValidator,
+  onValidate,
   onSearch,
   onSelect,
 }: {
-  onSearch: (v: string) => string[] | Promise<string[]>;
-  searchValidator?: (v: string) => boolean;
+  onSearch: (searchValue: string) => string[] | Promise<string[]>;
+  onValidate: (searchValue: string) => boolean;
   triggerContent: React.ReactNode;
   onSelect: (v: string) => void;
+  blacklist?: string[];
 }) {
-  const [searchResult, setSearchResult] = React.useState<string[]>([]);
-  const [loading, setLoading] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState('');
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState('');
-  const isFreshSearchRef = React.useRef(false);
+  const id = React.useId();
 
-  React.useEffect(() => {
-    return () => {
-      isFreshSearchRef.current = false;
-    };
-  }, []);
+  const queryClient = useQueryClient();
+  const queryKey = ['combobox', id, searchValue];
+  const { data, refetch, isError, isFetching } = useQuery<string[]>({
+    queryKey,
+    retry: false,
+    enabled: !!searchValue,
+    queryFn: () => onSearch(searchValue),
+    select: (queryResult) => {
+      return queryResult.filter(
+        (value) => !blacklist.some(createStrEqChecker(value))
+      );
+    },
+  });
 
-  const handleSearch = async (currentValue: string) => {
-    try {
-      if (searchValidator && !searchValidator(currentValue)) return;
-      setLoading(true);
-      setValue(currentValue);
-      isFreshSearchRef.current = true;
-      const fetchedResult = await onSearch(currentValue);
-      if (isFreshSearchRef.current) {
-        const updatedResult = Array.from(new Set(fetchedResult));
-        setSearchResult(updatedResult);
-      }
-    } catch (error) {
-      logger.error('Autocomplete error', error);
-    } finally {
-      setLoading(false);
+  const handleSearch = async (inputValue: string) => {
+    if (onValidate(inputValue)) {
+      queryClient.cancelQueries({ queryKey, exact: true });
+      setSearchValue(inputValue);
     }
   };
 
   const handleSelectItem = (selectedValue: string) => {
-    isFreshSearchRef.current = false;
     onSelect(selectedValue);
-    setSearchResult([]);
+    setSearchValue('');
     setOpen(false);
-    setValue('');
   };
 
   return (
@@ -75,10 +75,10 @@ export function Combobox({
           {triggerContent}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-[200px] p-0 max-h-28'>
-        <Command>
+      <PopoverContent className='w-[200px] p-0'>
+        <Command filter={() => 1}>
           <CommandInput
-            value={value}
+            value={searchValue}
             autoComplete='off'
             name='autocomplete'
             aria-label='Search'
@@ -86,37 +86,40 @@ export function Combobox({
             placeholder='Search...'
             className='h-9'
           />
-          <CommandList>
-            <CommandGroup
-              className='max-h-28 overflow-auto'
-              onWheel={(e) => e.stopPropagation()}
-              onTouchMove={(e) => e.stopPropagation()}>
-              {loading && (
-                <div
-                  aria-label='Loading...'
-                  className='flex justify-center py-1'>
-                  <Loader size={16} className='animate-spin' />
-                </div>
-              )}
-              {!searchResult.find(
-                (x) => x.toUpperCase() === value.toUpperCase()
-              ) && (
-                <CommandItem
-                  value={value}
-                  className='font-bold'
-                  onSelect={handleSelectItem}>
-                  {value}
-                </CommandItem>
-              )}
-              {searchResult.map((item) => (
-                <CommandItem
-                  key={item}
-                  value={item}
-                  onSelect={handleSelectItem}>
-                  {item}
-                </CommandItem>
-              ))}
-            </CommandGroup>
+          <CommandList
+            className='max-h-28 overflow-auto py-1'
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}>
+            {isError ? (
+              <QueryError onRefetch={refetch} className='space-y-1 pb-2'>
+                Could not search
+              </QueryError>
+            ) : isFetching ? (
+              <div aria-label='Loading...' className='flex justify-center py-1'>
+                <Loader size={16} className='animate-spin' />
+              </div>
+            ) : (
+              Array.isArray(data) && (
+                <CommandGroup>
+                  {data.findIndex(createStrEqChecker(searchValue)) < 0 && (
+                    <CommandItem
+                      value={searchValue}
+                      className='font-bold'
+                      onSelect={handleSelectItem}>
+                      {searchValue}
+                    </CommandItem>
+                  )}
+                  {data.map((item) => (
+                    <CommandItem
+                      key={item}
+                      value={item}
+                      onSelect={handleSelectItem}>
+                      {item}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
