@@ -1,7 +1,5 @@
 'use client';
 
-// https://ui.shadcn.com/docs/components/combobox
-
 import * as React from 'react';
 import {
   Command,
@@ -24,7 +22,7 @@ const createStrEqChecker = (a: string) => (b: string) => {
   return a.toLowerCase() === b.toLowerCase();
 };
 
-export function Combobox({
+export function Querybox({
   blacklist = [],
   triggerContent,
   onValidate,
@@ -42,7 +40,7 @@ export function Combobox({
   const id = React.useId();
 
   const queryClient = useQueryClient();
-  const queryKey = ['combobox', id, searchValue];
+  const queryKey = ['querybox', id, searchValue];
   const { data, refetch, isError, isFetching } = useQuery<string[]>({
     queryKey,
     retry: false,
@@ -71,7 +69,7 @@ export function Combobox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant='outline' role='combobox' aria-expanded={open}>
+        <Button variant='outline' aria-expanded={open}>
           {triggerContent}
         </Button>
       </PopoverTrigger>
@@ -127,4 +125,4 @@ export function Combobox({
   );
 }
 
-export default Combobox;
+export default Querybox;

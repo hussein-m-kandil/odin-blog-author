@@ -1,12 +1,12 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import Combobox from './combobox';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
+import { Querybox } from './querybox';
 
-type ComboboxProps = React.ComponentProps<typeof Combobox>;
+type QueryboxProps = React.ComponentProps<typeof Querybox>;
 
-const ComboboxWrapper = (props: ComboboxProps) => {
+const QueryboxWrapper = (props: QueryboxProps) => {
   return (
     <QueryClientProvider
       client={
@@ -14,7 +14,7 @@ const ComboboxWrapper = (props: ComboboxProps) => {
           defaultOptions: { queries: { retry: false, staleTime: Infinity } },
         })
       }>
-      <Combobox {...props} />
+      <Querybox {...props} />
     </QueryClientProvider>
   );
 };
@@ -24,7 +24,7 @@ const onValidate = vi.fn(() => true);
 const onSelect = vi.fn();
 const triggerText = 'Open';
 
-const props: ComboboxProps = {
+const props: QueryboxProps = {
   blacklist: [],
   onSearch,
   onSelect,
@@ -32,17 +32,17 @@ const props: ComboboxProps = {
   triggerContent: triggerText,
 };
 
-describe('<Combobox />', () => {
+describe('<Querybox />', () => {
   afterEach(vi.clearAllMocks);
 
   it('should display the given `triggerContent`', () => {
-    render(<ComboboxWrapper {...props} />);
+    render(<QueryboxWrapper {...props} />);
     expect(screen.getByText(triggerText)).toBeInTheDocument();
   });
 
   it('should display search input after clicking on the trigger', async () => {
     const user = userEvent.setup();
-    render(<ComboboxWrapper {...props} />);
+    render(<QueryboxWrapper {...props} />);
     await user.click(screen.getByText(triggerText));
     const searchInp = screen.getByLabelText(/search/i) as HTMLInputElement;
     expect(searchInp).toBeInTheDocument();
@@ -51,7 +51,7 @@ describe('<Combobox />', () => {
 
   it('should call `onSearch` while typing', async () => {
     const user = userEvent.setup();
-    render(<ComboboxWrapper {...props} />);
+    render(<QueryboxWrapper {...props} />);
     await user.click(screen.getByText(triggerText));
     await user.type(screen.getByLabelText(/search/i), 'xyz');
     expect(screen.getByDisplayValue('xyz')).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('<Combobox />', () => {
 
   it('should call `onValidate` while typing', async () => {
     const user = userEvent.setup();
-    render(<ComboboxWrapper {...props} />);
+    render(<QueryboxWrapper {...props} />);
     await user.click(screen.getByText(triggerText));
     await user.type(screen.getByLabelText(/search/i), 'xyz');
     expect(screen.getByDisplayValue('xyz')).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('<Combobox />', () => {
   it('should prevent typing invalid input', async () => {
     onValidate.mockImplementation(() => false);
     const user = userEvent.setup();
-    render(<ComboboxWrapper {...props} />);
+    render(<QueryboxWrapper {...props} />);
     await user.click(screen.getByText(triggerText));
     await user.type(screen.getByLabelText(/search/i), 'xyz');
     expect(onValidate.mock.calls).toStrictEqual([['x'], ['y'], ['z']]);
@@ -82,7 +82,7 @@ describe('<Combobox />', () => {
   it('should display the typed text as the first option', async () => {
     const user = userEvent.setup();
     onSearch.mockImplementation(() => ['x', 'y', 'z']);
-    render(<ComboboxWrapper {...{ ...props, blacklist: ['x', 'y'] }} />);
+    render(<QueryboxWrapper {...{ ...props, blacklist: ['x', 'y'] }} />);
     await user.click(screen.getByText(triggerText));
     await user.type(screen.getByLabelText(/search/i), 'xyz');
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
@@ -92,7 +92,7 @@ describe('<Combobox />', () => {
   it('should show a list of the response result minus any value from the given blacklist', async () => {
     const user = userEvent.setup();
     onSearch.mockImplementation(() => ['xyz', 'xy', 'x']);
-    render(<ComboboxWrapper {...{ ...props, blacklist: ['x', 'xy'] }} />);
+    render(<QueryboxWrapper {...{ ...props, blacklist: ['x', 'xy'] }} />);
     await user.click(screen.getByText(triggerText));
     await user.type(screen.getByLabelText(/search/i), 'x');
     expect(screen.getAllByRole('option')).toHaveLength(2);
@@ -104,7 +104,7 @@ describe('<Combobox />', () => {
   it('should show the prefect match once at the start of the list', async () => {
     const user = userEvent.setup();
     onSearch.mockImplementation(() => ['xyz', 'xy', 'x']);
-    render(<ComboboxWrapper {...{ ...props, blacklist: ['xy', 'x'] }} />);
+    render(<QueryboxWrapper {...{ ...props, blacklist: ['xy', 'x'] }} />);
     await user.click(screen.getByText(triggerText));
     await user.type(screen.getByLabelText(/search/i), 'xyz');
     expect(screen.getAllByRole('option')).toHaveLength(1);

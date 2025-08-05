@@ -13,7 +13,7 @@ import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
 import { Categories } from '@/components/categories';
 import { ImageForm } from '@/components/image-form';
-import { Combobox } from '@/components/combobox';
+import { Querybox } from '@/components/querybox';
 import { Category, Image, Post } from '@/types';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
@@ -121,7 +121,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         }>
         <div>
           <div className='flex justify-between items-baseline space-x-2'>
-            <Combobox
+            <Querybox
               triggerContent={
                 <>
                   Add Category
