@@ -76,16 +76,16 @@ export function Querybox({
       <PopoverContent className='w-[200px] p-0'>
         <Command filter={() => 1}>
           <CommandInput
-            value={searchValue}
-            autoComplete='off'
-            name='autocomplete'
-            aria-label='Search'
             onValueChange={handleSearch}
             placeholder='Search...'
+            value={searchValue}
+            aria-label='Search'
+            name='autocomplete'
+            autoComplete='off'
             className='h-9'
           />
           <CommandList
-            className='max-h-28 overflow-auto py-1'
+            className='py-1'
             onWheel={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}>
             {isError ? (
