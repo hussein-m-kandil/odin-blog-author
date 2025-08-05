@@ -47,7 +47,7 @@ export function MutableImage({
             className={cn(loading && 'absolute opacity-0 -z-50')}
             sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
             style={{
-              objectPosition: `${image.xPos}% ${image.yPos}%`,
+              objectPosition: `50% ${image.yPos}%`,
               objectFit: 'cover',
             }}
           />

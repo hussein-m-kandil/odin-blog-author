@@ -34,7 +34,7 @@ const props: React.ComponentProps<typeof MutableImage> = {
   mutation: { update: updateMock, delete: deleteMock },
 };
 
-const { src, alt, xPos, yPos } = image;
+const { src, alt, yPos } = image;
 
 afterEach(vi.clearAllMocks);
 
@@ -65,7 +65,7 @@ describe('<MutableImage />', () => {
     expect(img).toHaveAttribute('alt', alt);
     expect(img.src).toMatch(new RegExp(`^${src}`));
     expect(img.style.objectFit).toBe('cover');
-    expect(img.style.objectPosition).toBe(`${xPos}% ${yPos}%`);
+    expect(img.style.objectPosition).toBe(`50% ${yPos}%`);
   });
 
   it('should display the mutation buttons if given the callbacks', async () => {
