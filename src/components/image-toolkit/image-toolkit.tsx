@@ -6,9 +6,11 @@ import { ImageToolkitProps } from './image-toolkit.types';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Small } from '@/components/typography';
-import { Move, Trash } from 'lucide-react';
+import { MoveVertical, Trash } from 'lucide-react';
 import { useDrag } from '@/hooks/use-drag';
 import { cn } from '@/lib/utils';
+
+const CURSOR_CN = 'cursor-ns-resize';
 
 const getImgYPos = (img: HTMLImageElement) => {
   const matches = (img.style.objectPosition || '50% 50%')
@@ -44,7 +46,7 @@ export function ImageToolkit({
       const img = imgRef.current;
       if (img) {
         if (updating && cancel) setImgYPos(img, image.yPos);
-        img.classList.remove('cursor-move');
+        img.classList.remove(CURSOR_CN);
         img.focus();
       }
     },
@@ -59,7 +61,7 @@ export function ImageToolkit({
   const enterUpdate = () => {
     setMode('update');
     onEnterUpdate?.();
-    imgRef.current?.classList.add('cursor-move');
+    imgRef.current?.classList.add(CURSOR_CN);
   };
 
   const updateImage = React.useCallback(() => {
@@ -164,7 +166,7 @@ export function ImageToolkit({
                 className: '',
                 label: 'Position the image',
                 onClick: enterUpdate,
-                icon: <Move />,
+                icon: <MoveVertical />,
               },
             ].map(({ icon, label, className, onClick }) => (
               <Button
