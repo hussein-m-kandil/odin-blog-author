@@ -100,7 +100,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   };
 
   return (
-    <>
+    <div>
       <ErrorMessage>{errorMessage}</ErrorMessage>
       <ImageForm image={image} onSuccess={(img) => setImage(img)} />
       <DynamicForm
@@ -147,7 +147,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
           </ErrorMessage>
         </div>
       </DynamicForm>
-    </>
+    </div>
   );
 }
 
