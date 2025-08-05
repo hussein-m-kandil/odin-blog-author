@@ -106,9 +106,7 @@ export function DynamicForm({
                   {attrs.description && (
                     <FormDescription>{attrs.description}</FormDescription>
                   )}
-                  <div className='h-3.5'>
-                    <FormMessage />
-                  </div>
+                  <FormMessage />
                 </FormItem>
               );
             }}
