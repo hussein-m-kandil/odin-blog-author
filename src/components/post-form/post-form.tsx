@@ -36,9 +36,20 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
 
+  const isPostSavedRef = React.useRef(isUpdate);
+
+  React.useEffect(() => {
+    return () => {
+      const isImageForNotSavedPost = !isPostSavedRef.current && image;
+      if (isImageForNotSavedPost) {
+        authAxios.delete(`/images/${image.id}`).catch();
+      }
+    };
+  }, [authAxios, image]);
+
   const queryClient = useQueryClient();
 
-  const upsertPostMutation = useMutation<
+  const { mutate } = useMutation<
     Post,
     Error | Response,
     Parameters<DynamicFormSubmitHandler<NewPostInput>>
@@ -54,6 +65,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
     onSuccess: async (resPost, [hookForm]) => {
       hookForm.reset();
       setErrorMessage('');
+      isPostSavedRef.current = true;
       await queryClient.invalidateQueries({
         predicate: ({ queryKey }) => {
           return (
@@ -116,7 +128,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
         onSubmit={(...args) =>
           new Promise((resolve) => {
             // This way the `DynamicForm` can monitor the submitting period
-            upsertPostMutation.mutate(args, { onSettled: resolve });
+            mutate(args, { onSettled: resolve });
           })
         }>
         <div>

@@ -82,6 +82,7 @@ describe(`<PostForm />`, () => {
     axiosMock.onGet().reply(200, ['category']);
     axiosMock.onPost().reply(201, post);
     axiosMock.onPut().reply(200, post);
+    axiosMock.onDelete().reply(204);
   });
 
   afterEach(vi.clearAllMocks);
