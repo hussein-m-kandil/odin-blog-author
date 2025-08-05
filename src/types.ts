@@ -53,7 +53,7 @@ export interface Image {
   updatedAt: string;
 }
 
-export interface Category {
+export interface Tag {
   id: string;
   name: string;
   postId: string;
@@ -88,10 +88,10 @@ export interface Post {
   createdAt: string;
   updatedAt: string;
   published: boolean;
-  categories: Category[];
   comments: Comment[];
-  image: Image | null;
   votes: Vote[];
+  tags: Tag[];
   author: User;
+  image: Image | null;
   _count: { comments: number; votes: number };
 }

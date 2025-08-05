@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { XCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export function Category({
+export function Tag({
   className,
   onRemove,
   name,
@@ -14,7 +14,7 @@ export function Category({
   name: string;
   onRemove?: (name: string) => void;
 }) {
-  const categoryProps: React.ComponentProps<typeof Button> = {
+  const tagProps: React.ComponentProps<typeof Button> = {
     ...props,
     type: 'button',
     variant: 'outline',
@@ -27,7 +27,7 @@ export function Category({
 
   return typeof onRemove === 'function' ? (
     <div className='relative inline-block'>
-      <Button {...categoryProps}>{name}</Button>
+      <Button {...tagProps}>{name}</Button>
       <Button
         type='button'
         variant='secondary'
@@ -41,12 +41,10 @@ export function Category({
       </Button>
     </div>
   ) : (
-    <Button {...categoryProps} asChild>
-      <Link href={`/?categories=${encodeURIComponent(name.toLowerCase())}`}>
-        {name}
-      </Link>
+    <Button {...tagProps} asChild>
+      <Link href={`/?tags=${encodeURIComponent(name)}`}>{name}</Link>
     </Button>
   );
 }
 
-export default Category;
+export default Tag;

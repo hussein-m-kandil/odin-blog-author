@@ -9,7 +9,7 @@ import { PostPageSkeleton } from './post-page.skeleton';
 import { PrivacyIcon } from '@/components/privacy-icon';
 import { useAuthData } from '@/contexts/auth-context';
 import { QueryError } from '@/components/query-error';
-import { Categories } from '@/components/categories';
+import { Tags } from '@/components/tags';
 import { useQuery } from '@tanstack/react-query';
 import { Comments } from '@/components/comments';
 import { cn } from '@/lib/utils';
@@ -81,10 +81,7 @@ export function PostPage({
               <Lead className='text-foreground font-light mb-6'>
                 {post.content}
               </Lead>
-              <Categories
-                categories={post.categories}
-                className='justify-end'
-              />
+              <Tags tags={post.tags} className='justify-end' />
               <section className='my-4'>
                 <header>
                   <H2 className='text-center text-xl'>

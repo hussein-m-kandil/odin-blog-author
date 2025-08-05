@@ -11,22 +11,22 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PostFormProps, NewPostInput } from './post-form.types';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
-import { Categories } from '@/components/categories';
 import { ImageForm } from '@/components/image-form';
 import { Querybox } from '@/components/querybox';
-import { Category, Image, Post } from '@/types';
 import { useRouter } from 'next/navigation';
+import { Tag, Image, Post } from '@/types';
+import { Tags } from '@/components/tags';
 import { Plus } from 'lucide-react';
 
-const CATEGORIES_MAX_NUM = 7;
+const MAX_TAGS_NUM = 7;
 
 export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   const [image, setImage] = React.useState<Image | null>(post?.image || null);
-  const [categories, setCategories] = React.useState<string[]>(
-    post?.categories.map((c) => c.name) || []
+  const [tags, setTags] = React.useState<string[]>(
+    post?.tags.map((t) => t.name) || []
   );
-  const [categoriesError, setCategoriesError] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
+  const [tagsError, setTagsError] = React.useState('');
   const router = useRouter();
   const {
     authData: { authAxios },
@@ -56,7 +56,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
   >({
     mutationFn: async (submitArgs) => {
       const formValues = submitArgs[1];
-      const body = { ...formValues, categories, image: image?.id };
+      const body = { ...formValues, tags, image: image?.id };
       const { data } = await (isUpdate
         ? authAxios.put<Post>(`/posts/${post.id}`, body)
         : authAxios.post<Post>('/posts', body));
@@ -85,29 +85,23 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
     },
   });
 
-  const validateCategory = (value: string) => /^\w*$/.test(value);
-  const searchCategories = async (searchValue: string) => {
+  const validateTag = (value: string) => /^\w*$/.test(value);
+  const searchTags = async (searchValue: string) => {
     if (!searchValue) return [];
-    const url = `/posts/categories?categories=${searchValue}`;
-    const { data } = await authAxios.get<Category[]>(url);
-    const fetchedCategories = data.map((category) => category.name);
-    return fetchedCategories.filter(
-      (category) =>
-        !categories.includes(category) &&
-        new RegExp(`^${searchValue}`, 'i').test(category)
-    );
+    const url = `/posts/tags?tags=${searchValue}`;
+    const { data } = await authAxios.get<Tag[]>(url);
+    const fetchedTags = data.map((tag) => tag.name);
+    return fetchedTags.filter((t) => !tags.includes(t));
   };
-  const selectCategory = (selectedCategory: string) => {
-    if (categories.length < CATEGORIES_MAX_NUM) {
-      setCategories((cats) => {
-        return cats.find(
-          (c) => c.toUpperCase() === selectedCategory.toUpperCase()
-        )
-          ? cats
-          : [...cats, selectedCategory];
+  const selectTag = (selectedTag: string) => {
+    if (tags.length < MAX_TAGS_NUM) {
+      setTags((tags) => {
+        return tags.find((t) => t.toUpperCase() === selectedTag.toUpperCase())
+          ? tags
+          : [...tags, selectedTag];
       });
     } else {
-      setCategoriesError('You have reached the maximum number of categories');
+      setTagsError('You have reached the maximum number of tags');
     }
   };
 
@@ -136,26 +130,26 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
             <Querybox
               triggerContent={
                 <>
-                  Add Category
+                  Add Tag
                   <Plus className='opacity-50' />
                 </>
               }
-              onValidate={validateCategory}
-              onSearch={searchCategories}
-              onSelect={selectCategory}
-              blacklist={categories}
+              onValidate={validateTag}
+              onSearch={searchTags}
+              onSelect={selectTag}
+              blacklist={tags}
             />
-            <Categories
-              categories={categories}
+            <Tags
+              tags={tags}
               className='justify-end'
-              onRemove={(catToDel) => {
-                setCategories((cats) => cats.filter((c) => c !== catToDel));
-                setCategoriesError('');
+              onRemove={(tagToDel) => {
+                setTags((tags) => tags.filter((t) => t !== tagToDel));
+                setTagsError('');
               }}
             />
           </div>
           <ErrorMessage className='[&:not(:first-child)]:mt-2 mt-2'>
-            {categoriesError}
+            {tagsError}
           </ErrorMessage>
         </div>
       </DynamicForm>

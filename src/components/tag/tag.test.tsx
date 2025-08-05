@@ -1,12 +1,12 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { Category } from './category';
+import { Tag } from './tag';
 import userEvent from '@testing-library/user-event';
 
-describe('<Category />', () => {
+describe('<Tag />', () => {
   it('should render the given name as a link if not given `onRemove` prop', () => {
     const name = 'Test';
-    render(<Category name={name} />);
+    render(<Tag name={name} />);
     expect(
       screen.getByRole('link', { name: new RegExp(name, 'i') })
     ).toBeInTheDocument();
@@ -14,7 +14,7 @@ describe('<Category />', () => {
 
   it('should add the given className', () => {
     const className = 'text-9xl';
-    render(<Category name={'Test'} className={className} />);
+    render(<Tag name={'Test'} className={className} />);
     expect(screen.getByRole('link')).toHaveClass(className);
   });
 
@@ -22,7 +22,7 @@ describe('<Category />', () => {
     const name = 'Test';
     const user = userEvent.setup();
     const handleRemoveMock = vi.fn();
-    render(<Category name={name} onRemove={handleRemoveMock} />);
+    render(<Tag name={name} onRemove={handleRemoveMock} />);
     expect(
       screen.getByRole('button', { name: new RegExp(`^${name}$`, 'i') })
     ).toBeInTheDocument();

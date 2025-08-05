@@ -1,11 +1,11 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-export function CategoriesSkeleton({
+export function TagsSkeleton({
   className,
   ...props
 }: React.ComponentProps<'div'>) {
-  props['aria-label'] = props['aria-label'] || 'Loading the post categories';
+  props['aria-label'] = props['aria-label'] || 'Loading the post tags';
   return (
     <div
       {...props}
@@ -20,4 +20,4 @@ export function CategoriesSkeleton({
   );
 }
 
-export default CategoriesSkeleton;
+export default TagsSkeleton;

@@ -53,7 +53,7 @@ export const post: Post = {
   id: postId,
   authorId: author.id,
   content: 'Just for testing...',
-  categories: [
+  tags: [
     {
       postId,
       name: 'Software',

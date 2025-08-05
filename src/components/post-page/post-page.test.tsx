@@ -106,10 +106,10 @@ describe('<PostPage />', () => {
     }
   });
 
-  it('should display the post categories', async () => {
+  it('should display the post tags', async () => {
     render(<PostPageWrapper />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
-    for (const { name } of post.categories) {
+    for (const { name } of post.tags) {
       expect(screen.getByText(name)).toBeInTheDocument();
     }
   });

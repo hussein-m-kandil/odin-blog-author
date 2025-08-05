@@ -1,6 +1,6 @@
 import { CommentsSkeleton } from '@/components/comments';
 import { MutableImageSkeleton } from '@/components/mutable-image';
-import { CategoriesSkeleton } from '@/components/categories';
+import { TagsSkeleton } from '@/components/tags';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +35,7 @@ export function PostPageSkeleton({
             ))}
             <Skeleton className='h-4 w-3/4' />
           </div>
-          <CategoriesSkeleton className='justify-end' />
+          <TagsSkeleton className='justify-end' />
           <div className='my-4'>
             <Skeleton className='h-6 w-32 mx-auto my-4' />
             <CommentsSkeleton />

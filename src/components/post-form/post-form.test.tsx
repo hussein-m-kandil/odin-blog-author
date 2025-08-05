@@ -79,7 +79,7 @@ const assertPostFormFieldsAndSubmitter = async (postData?: Post) => {
 
 describe(`<PostForm />`, () => {
   beforeEach(() => {
-    axiosMock.onGet().reply(200, ['category']);
+    axiosMock.onGet().reply(200, ['tag']);
     axiosMock.onPost().reply(201, post);
     axiosMock.onPut().reply(200, post);
     axiosMock.onDelete().reply(204);
