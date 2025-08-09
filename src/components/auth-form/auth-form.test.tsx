@@ -45,8 +45,8 @@ const setup = async (props: AuthFormProps) => {
   const data =
     props.formType === 'signin'
       ? {
-          submitterOpts: { name: /(sign( |-)?in)/i },
-          submittingOpts: { name: /signing( |-)?in/i },
+          submitterOpts: { name: /(sign ?in)/i },
+          submittingOpts: { name: /signing ?in/i },
           entries: Object.entries(signinFormAttrs),
         }
       : props.user
@@ -56,8 +56,8 @@ const setup = async (props: AuthFormProps) => {
           entries: Object.entries(injectDefaults(updateUserFormAttrs, author)),
         }
       : {
-          submitterOpts: { name: /(sign( |-)?up)/i },
-          submittingOpts: { name: /signing( |-)?up/i },
+          submitterOpts: { name: /(sign ?up)/i },
+          submittingOpts: { name: /signing ?up/i },
           entries: Object.entries(signupFormAttrs),
         };
   const user = userEvent.setup();

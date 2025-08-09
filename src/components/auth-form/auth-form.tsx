@@ -23,6 +23,7 @@ import { AxiosRequestConfig } from 'axios';
 import { AuthResData } from '@/types';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import { Button } from '../ui/button';
 
 export function AuthForm({
   formLabelId,
@@ -107,8 +108,36 @@ export function AuthForm({
     }
   };
 
+  const signInAsGuest = async () => {
+    try {
+      const { data } = await authAxios<AuthResData>({
+        url: `${authUrl}/guest`,
+        method: 'post',
+        baseURL: '',
+      });
+      setErrorMessage('');
+      signin(data);
+      if (onSuccess) onSuccess();
+      else router.replace('/');
+      toast.success(`Hello, Guest!`, {
+        description: `You have signed in as a guest successfully`,
+      });
+    } catch (error) {
+      setErrorMessage(
+        parseAxiosAPIError(error).message || getUnknownErrorMessage(error)
+      );
+    }
+  };
+
   return (
-    <div className={cn('px-4 max-w-md mx-auto mt-6', className)}>
+    <div className={cn('px-4 max-w-md mx-auto mt-6 space-y-4', className)}>
+      {!user && (
+        <div className='text-center flex justify-center *:grow'>
+          <Button type='button' onClick={signInAsGuest}>
+            Sign-in as a guest!
+          </Button>
+        </div>
+      )}
       <ErrorMessage>{errorMessage}</ErrorMessage>
       <DynamicForm
         aria-labelledby={formLabelId}
