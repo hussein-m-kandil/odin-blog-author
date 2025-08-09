@@ -6,7 +6,7 @@ import logger from '@/lib/logger';
 export async function POST(
   req: NextRequest,
   context: {
-    params: Promise<{ action: 'signin' | 'signup' | 'signout' }>;
+    params: Promise<{ action: 'signin' | 'signup' | 'signout' | 'guest' }>;
   }
 ) {
   try {
@@ -28,6 +28,9 @@ export async function POST(
     switch (action) {
       case 'signin':
         url.pathname += '/auth/signin';
+        break;
+      case 'guest':
+        url.pathname += '/users/guest';
         break;
       case 'signup':
         url.pathname += '/users';
