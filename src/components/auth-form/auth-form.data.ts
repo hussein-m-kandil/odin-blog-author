@@ -38,7 +38,7 @@ export const signupFormAttrs: DynamicFormAttrs = {
       .trim()
       .min(8, { message: 'Password must be at least 8 characters.' })
       .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$/,
         `Password must contain a number, a special character a lowercase letter, and an uppercase letter`
       ),
   },
