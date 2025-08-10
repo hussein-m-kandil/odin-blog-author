@@ -102,9 +102,10 @@ describe('<DynamicForm />', () => {
     expect(screen.getByText(formAttrs.username.description ?? ''));
   });
 
-  it('should have the given submitter label and className', async () => {
+  it('should have the given submitter: label, className, and icon', async () => {
     const submitterLabel = { idle: 'Sign in', submitting: 'Signing in' };
     const submitterClassName = 'blah';
+    const submitterIcon = 'sub-icon';
     const user = userEvent.setup();
     render(
       <DynamicForm
@@ -112,6 +113,7 @@ describe('<DynamicForm />', () => {
           formSchema,
           formAttrs,
           onSubmit,
+          submitterIcon,
           submitterLabel,
           submitterClassName,
         }}
@@ -121,7 +123,7 @@ describe('<DynamicForm />', () => {
     const usernameInp = screen.getByLabelText(username) as HTMLInputElement;
     const passwordInp = screen.getByLabelText(password) as HTMLInputElement;
     const submitter = getSubmitBtn(submitterLabel.idle);
-    expect(submitter).toHaveTextContent(submitterLabel.idle);
+    expect(submitter).toHaveTextContent(submitterIcon + submitterLabel.idle);
     expect(submitter).toHaveClass(submitterClassName);
     await user.type(passwordInp, '12345678');
     await user.type(usernameInp, 'xyz');

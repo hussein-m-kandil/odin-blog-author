@@ -19,13 +19,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { PasswordInput } from '@/components/password-input';
 import { DynamicFormProps } from './dynamic-form.types';
 import { useForm } from 'react-hook-form';
-import { Loader2 } from 'lucide-react';
+import { Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
 export function DynamicForm({
   submitterLabel = { idle: 'Submit', submitting: 'Submitting' },
   submitterClassName,
+  submitterIcon,
   formSchema,
   formAttrs,
   className,
@@ -121,11 +122,14 @@ export function DynamicForm({
           className={cn(`min-w-[${submitterMaxWidthPX}]`, submitterClassName)}>
           {hookForm.formState.isSubmitting ? (
             <>
-              <Loader2 className='animate-spin' />
+              <Loader className='animate-spin' />
               {submitterLabel.submitting}
             </>
           ) : (
-            submitterLabel.idle
+            <>
+              {submitterIcon}
+              {submitterLabel.idle}
+            </>
           )}
         </Button>
       </form>
