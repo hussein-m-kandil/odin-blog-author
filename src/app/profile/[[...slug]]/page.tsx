@@ -3,31 +3,44 @@ import { UserProfile } from '@/components/user-profile';
 import { getServerAuthData } from '@/lib/auth';
 import { Header } from '@/components/header';
 import { redirect } from 'next/navigation';
+import { Metadata } from 'next';
 import { User } from '@/types';
 
-export default async function Profile({
-  params,
-}: {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
   params: Promise<{ slug?: string[] }>;
-}) {
-  const profileId = (await params).slug?.[0];
+};
 
+const getProfileAndAuthDataOrRedirect = async (profileId?: string) => {
   const authData = await getServerAuthData();
   const { authFetch } = authData;
 
-  // TODO: Use react-query for this too
-  const user = profileId
+  const profile = profileId
     ? await authFetch<User>(`/users/${profileId}`)
     : authData.user;
 
-  if (!user) return redirect('/signin');
+  if (!profile) return redirect('/signin');
 
-  const postsUrl = `/posts?author=${user.id}`;
+  return { profile, authData };
+};
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const profileId = (await params).slug?.[0];
+  const data = await getProfileAndAuthDataOrRedirect(profileId);
+  return { title: data.profile.username };
+}
+
+export default async function Profile({ params }: Props) {
+  const profileId = (await params).slug?.[0];
+  const data = await getProfileAndAuthDataOrRedirect(profileId);
+  const { profile, authData } = data;
+
+  const postsUrl = `/posts?author=${profile.id}`;
 
   return (
     <>
       <Header>
-        <UserProfile user={user} />
+        <UserProfile user={profile} />
       </Header>
       <main>
         <PostsWrapper postsUrl={postsUrl} authData={authData} />
