@@ -6,9 +6,7 @@ export function Header({
   ...props
 }: React.ComponentProps<'header'>) {
   return (
-    <header
-      {...props}
-      className={cn('max-w-sm mx-auto my-8 text-center', className)}>
+    <header {...props} className={cn('my-8 text-center', className)}>
       {children}
     </header>
   );
