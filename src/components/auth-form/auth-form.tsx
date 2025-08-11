@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
   DynamicForm,
   DynamicFormProps,
@@ -15,37 +16,36 @@ import {
   updateUserFormAttrs,
 } from './auth-form.data';
 import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
+import { LogIn, UserPen, UserPlus, UserCheck } from 'lucide-react';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
 import { AuthFormProps } from './auth-form.types';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { AxiosRequestConfig } from 'axios';
 import { AuthResData } from '@/types';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { Button } from '../ui/button';
 
-export function AuthForm({
-  formLabelId,
-  className,
-  formType,
-  user,
-  onSuccess,
-}: AuthFormProps) {
+export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
 
-  const { authData, signin } = useAuthData();
-  const { authUrl, authAxios } = authData;
+  const {
+    authData: { authAxios, authUrl, user },
+    signout,
+    signin,
+  } = useAuthData();
 
   let formData: {
     props: {
       submitterLabel: DynamicFormProps['submitterLabel'];
+      submitterIcon: DynamicFormProps['submitterIcon'];
       formSchema: DynamicFormProps['formSchema'];
       formAttrs: DynamicFormProps['formAttrs'];
     };
-    showToast: (username: string) => void;
     reqConfig: AxiosRequestConfig;
+    redirectUrl: string;
   };
   if (formType === 'signin') {
     formData = {
@@ -53,40 +53,44 @@ export function AuthForm({
         submitterLabel: { idle: 'Sign in', submitting: 'Signing in...' },
         formSchema: createSchema(signinFormAttrs),
         formAttrs: signinFormAttrs,
+        submitterIcon: <LogIn />,
       },
-      showToast: (username: string) =>
-        toast.success(`Hello, @${username}!`, {
-          description: `You have signed in successfully`,
-        }),
       reqConfig: { url: `${authUrl}/signin`, method: 'post', baseURL: '' },
+      redirectUrl: '/',
     };
-  } else if (user) {
+  } else if (formType === 'signup') {
+    formData = {
+      props: {
+        submitterLabel: { idle: 'Sign up', submitting: 'Signing up...' },
+        formSchema: refineSignupSchema(createSchema(signupFormAttrs)),
+        formAttrs: signupFormAttrs,
+        submitterIcon: <UserPlus />,
+      },
+      reqConfig: { url: `${authUrl}/signup`, method: 'post', baseURL: '' },
+      redirectUrl: '/',
+    };
+  } else if (formType === 'update' && user) {
     formData = {
       props: {
         formSchema: refineSignupSchema(createSchema(updateUserFormAttrs)),
         submitterLabel: { idle: 'Update', submitting: 'Updating...' },
         formAttrs: injectDefaults(updateUserFormAttrs, user),
+        submitterIcon: <UserPen />,
       },
-      showToast: (username: string) =>
-        toast.success(`@${username} updated`, {
-          description: 'Your profile is updated successfully',
-        }),
       reqConfig: { url: `/users/${user.id}`, method: 'patch' },
+      redirectUrl: '/profile',
     };
   } else {
-    formData = {
-      props: {
-        formAttrs: signupFormAttrs,
-        formSchema: refineSignupSchema(createSchema(signupFormAttrs)),
-        submitterLabel: { idle: 'Sign up', submitting: 'Signing up...' },
-      },
-      showToast: (username: string) =>
-        toast.success(`Hello, @${username}!`, {
-          description: `You have signed up successfully`,
-        }),
-      reqConfig: { url: `${authUrl}/signup`, method: 'post', baseURL: '' },
-    };
+    signout();
+    throw Error('Invalid `AuthForm` usage');
   }
+
+  const handleSignin = (data: AuthResData, redirectUrl: string) => {
+    setErrorMessage('');
+    signin(data);
+    onSuccess?.();
+    router.replace(redirectUrl);
+  };
 
   const handleSubmit: DynamicFormSubmitHandler<
     z.infer<typeof formData.props.formSchema>
@@ -94,12 +98,11 @@ export function AuthForm({
     try {
       formData.reqConfig.data = values;
       const { data } = await authAxios<AuthResData>(formData.reqConfig);
-      setErrorMessage('');
       hookForm.reset();
-      signin(data);
-      if (onSuccess) onSuccess();
-      else router.replace('/');
-      formData.showToast(values.username || user?.username || 'user');
+      handleSignin(data, formData.redirectUrl);
+      toast.success(`Hello, @${data.user.username}!`, {
+        description: `You have signed up successfully`,
+      });
     } catch (error) {
       setErrorMessage(
         parseAxiosAPIError(error, hookForm).message ||
@@ -108,19 +111,16 @@ export function AuthForm({
     }
   };
 
-  const signInAsGuest = async () => {
+  const signinAsGuest = async () => {
     try {
       const { data } = await authAxios<AuthResData>({
         url: `${authUrl}/guest`,
         method: 'post',
         baseURL: '',
       });
-      setErrorMessage('');
-      signin(data);
-      if (onSuccess) onSuccess();
-      else router.replace('/');
-      toast.success(`Hello, Guest!`, {
-        description: `You have signed in as a guest successfully`,
+      handleSignin(data, '/');
+      toast.success(`Hello, @${data.user.username}!`, {
+        description: 'You have signed in as a guest successfully',
       });
     } catch (error) {
       setErrorMessage(
@@ -130,21 +130,32 @@ export function AuthForm({
   };
 
   return (
-    <div className={cn('px-4 max-w-md mx-auto mt-6 space-y-4', className)}>
-      {!user && (
-        <div className='text-center flex justify-center *:grow'>
-          <Button type='button' onClick={signInAsGuest}>
-            Sign-in as a guest!
-          </Button>
-        </div>
-      )}
+    <div className={cn('px-4 max-w-md mx-auto mt-6', className)}>
       <ErrorMessage>{errorMessage}</ErrorMessage>
       <DynamicForm
-        aria-labelledby={formLabelId}
+        aria-label={`${formType}${formType === 'update' ? ' user' : ''} form`}
         submitterClassName='w-full'
         onSubmit={handleSubmit}
         {...formData.props}
       />
+      {formType !== 'update' && (
+        <div className='text-center space-y-2 *:flex *:w-full pt-6 mt-6 border-t border-muted'>
+          <Button type='button' variant='outline' asChild>
+            {formType === 'signin' ? (
+              <Link href='/signup' className='p-0'>
+                <UserPlus /> Sign up
+              </Link>
+            ) : (
+              <Link href='/signin' className='p-0'>
+                <LogIn /> Sign in
+              </Link>
+            )}
+          </Button>
+          <Button type='button' variant='outline' onClick={signinAsGuest}>
+            <UserCheck /> Sign-in as a guest!
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

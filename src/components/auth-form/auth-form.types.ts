@@ -1,11 +1,7 @@
-import { User } from '@/types';
-
-export type FormType = 'signin' | 'signup';
+export type FormType = 'signin' | 'signup' | 'update';
 
 export interface AuthFormProps {
   onSuccess?: () => void;
-  formLabelId: string;
   formType: FormType;
-  user?: User | null;
   className?: string;
 }

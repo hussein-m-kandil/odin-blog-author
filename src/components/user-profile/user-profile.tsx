@@ -1,33 +1,29 @@
 'use client';
 
 import React from 'react';
-import { AuthForm, AuthFormProps } from '@/components/auth-form';
 import { UserAvatar } from '@/components/user-avatar';
 import { useDialog } from '@/contexts/dialog-context';
 import { Muted } from '@/components/typography/muted';
 import { Lead } from '@/components/typography/lead';
+import { AuthForm } from '@/components/auth-form';
 import { H1 } from '@/components/typography/h1';
-import { useRouter } from 'next/navigation';
 import { Edit3 } from 'lucide-react';
 import { User } from '@/types';
 
 export function UserProfile({ user }: { user: User }) {
   const { showDialog, hideDialog } = useDialog();
-  const router = useRouter();
-  const id = React.useId();
-
-  const editFormProps: AuthFormProps = {
-    onSuccess: () => (hideDialog(), router.refresh()),
-    formLabelId: `edit-profile-form-${id}`,
-    formType: 'signup',
-    user,
-  };
 
   const editProfile = () => {
     showDialog({
-      description: 'Edit your profile while considering all fields as optional',
-      title: <span id={editFormProps.formLabelId}>Edit Profile</span>,
-      body: <AuthForm {...editFormProps} className='w-full mt-0' />,
+      title: 'Edit Profile',
+      description: 'All fields are optional',
+      body: (
+        <AuthForm
+          className='w-full mt-0'
+          onSuccess={hideDialog}
+          formType='update'
+        />
+      ),
     });
   };
 

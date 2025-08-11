@@ -26,6 +26,7 @@ import { axiosMock } from '@/__mocks__/axios';
 
 const onSuccess = vi.fn();
 const routerMethodMock = vi.fn();
+const getInitAuthDataMock = vi.fn(() => initAuthData);
 
 vi.unmock('next/navigation'); // This will be hoisted to unmock the test setup mock
 
@@ -49,7 +50,7 @@ const setup = async (props: AuthFormProps) => {
           submittingOpts: { name: /signing ?in/i },
           entries: Object.entries(signinFormAttrs),
         }
-      : props.user
+      : props.formType === 'update'
       ? {
           submitterOpts: { name: /(update)/i },
           submittingOpts: { name: /updating/i },
@@ -65,7 +66,7 @@ const setup = async (props: AuthFormProps) => {
     data,
     user,
     ...render(
-      <AuthProvider initAuthData={initAuthData}>
+      <AuthProvider initAuthData={getInitAuthDataMock()}>
         <AuthForm {...props} />
       </AuthProvider>
     ),
@@ -80,7 +81,7 @@ describe(`<AuthForm />`, () => {
   );
 
   for (const formType of ['signin', 'signup'] as FormType[]) {
-    const props = { formType, formLabelId: `test-${formType}-form` };
+    const props = { formType };
 
     describe(formType, () => {
       it('should render a form with inputs', async () => {
@@ -114,15 +115,49 @@ describe(`<AuthForm />`, () => {
         const { container } = await setup({ ...props, className });
         expect(container.firstElementChild).toHaveClass(className);
       });
+
+      it('should have a guest sign-in button', async () => {
+        await setup(props);
+        expect(
+          screen.getByRole('button', { name: /sign-in .*guest/i })
+        ).toHaveAttribute('type', 'button');
+      });
+
+      if (formType === 'signin') {
+        it('should have a sign-up page link', async () => {
+          await setup(props);
+          expect(
+            screen.getByRole('link', { name: /sign ?up/i })
+          ).toHaveAttribute('href', '/signup');
+        });
+      } else if (formType === 'signup') {
+        it('should have a sign-in page link', async () => {
+          await setup(props);
+          expect(
+            screen.getByRole('link', { name: /sign ?in/i })
+          ).toHaveAttribute('href', '/signin');
+        });
+      }
     });
   }
 
   const updateUserFormProps: AuthFormProps = {
-    formLabelId: 'test-update-user-form',
-    formType: 'signup',
-    user: author,
+    formType: 'update',
     onSuccess,
   };
+
+  it('should not have a sign-up nor a sign-in page links', async () => {
+    await setup(updateUserFormProps);
+    expect(screen.queryByRole('link', { name: /sign ?up/i })).toBeNull();
+    expect(screen.queryByRole('link', { name: /sign ?in/i })).toBeNull();
+  });
+
+  it('should not have a guest sign-in button', async () => {
+    await setup(updateUserFormProps);
+    expect(
+      screen.queryByRole('button', { name: /sign-in .*guest/i })
+    ).toBeNull();
+  });
 
   it('should display the given user data in the form', async () => {
     const { data } = await setup(updateUserFormProps);
@@ -156,24 +191,24 @@ describe(`<AuthForm />`, () => {
     expect(axiosMock.history.patch.at(-1)?.url).toMatch(new RegExp(author.id));
   });
 
-  it('should call the given `onSuccess` and not redirect the user', async () => {
+  it('should redirect the user and call the given an `onSuccess`', async () => {
     const { data, user } = await setup(updateUserFormProps);
     await user.click(screen.getByRole('button', data.submitterOpts));
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', data.submittingOpts)
     );
-    expect(routerMethodMock).not.toHaveBeenCalled();
+    expect(routerMethodMock).toHaveBeenCalled();
+    expect(routerMethodMock).toHaveBeenCalledOnce();
   });
 
-  it('should redirect the user if not given an `onSuccess`', async () => {
-    const { data, user } = await setup({
-      ...updateUserFormProps,
-      onSuccess: undefined,
-    });
-    await user.click(screen.getByRole('button', data.submitterOpts));
-    await waitForElementToBeRemoved(() =>
-      screen.getByRole('button', data.submittingOpts)
+  it('should throw if `formType` is `update` and could not fin the user data', async () => {
+    getInitAuthDataMock.mockImplementationOnce(() => ({
+      ...initAuthData,
+      token: '',
+      user: null,
+    }));
+    expect(() => setup(updateUserFormProps)).rejects.toThrowError(
+      /invalid .*usage/i
     );
-    expect(routerMethodMock).toHaveBeenCalledOnce();
   });
 });
