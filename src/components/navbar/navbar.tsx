@@ -13,7 +13,7 @@ import {
   Home,
   LogIn,
   LogOut,
-  UserPen,
+  UserPlus,
   UserIcon,
   PenSquare,
 } from 'lucide-react';
@@ -172,7 +172,7 @@ export function Navbar() {
                   <>
                     <CustomMenuItem>
                       <Link href='/signup'>
-                        <UserPen /> Sign up
+                        <UserPlus /> Sign up
                       </Link>
                     </CustomMenuItem>
                     <CustomMenuItem>
