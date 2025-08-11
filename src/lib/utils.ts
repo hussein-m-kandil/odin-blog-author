@@ -19,14 +19,6 @@ export function loadSupabaseImg({
   return url.href;
 }
 
-export function abbreviateFullName(fullname: string) {
-  const names = fullname.split(' ');
-  const abbrev = `${names[0][0]}${
-    names.length > 1 ? names[names.length - 1][0] : ''
-  }`.toUpperCase();
-  return abbrev;
-}
-
 export const isObject = (x: unknown): x is Record<string, unknown> => {
   return typeof x === 'object' && x !== null && !Array.isArray(x);
 };

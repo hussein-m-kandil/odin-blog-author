@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { abbreviateFullName } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { User } from '@/types';
 
 export function UserAvatar({
@@ -10,14 +10,14 @@ export function UserAvatar({
   user?: User | null;
 }) {
   return (
-    <Avatar className={className}>
+    <Avatar className={cn('text-lg', className)}>
       {user ? (
         <>
           <AvatarImage src={user.avatar || ''} alt={`@${user.username}`} />
-          <AvatarFallback>{abbreviateFullName(user.fullname)}</AvatarFallback>
+          <AvatarFallback>{user.fullname[0]?.toUpperCase()}</AvatarFallback>
         </>
       ) : (
-        <AvatarFallback className='text-lg'>?</AvatarFallback>
+        <AvatarFallback>?</AvatarFallback>
       )}
     </Avatar>
   );
