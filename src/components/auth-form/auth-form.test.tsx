@@ -46,7 +46,7 @@ const setup = async (props: AuthFormProps) => {
   const data =
     props.formType === 'signin'
       ? {
-          submitterOpts: { name: /(sign ?in)/i },
+          submitterOpts: { name: /^sign ?in$/i },
           submittingOpts: { name: /signing ?in/i },
           entries: Object.entries(signinFormAttrs),
         }
@@ -57,7 +57,7 @@ const setup = async (props: AuthFormProps) => {
           entries: Object.entries(injectDefaults(updateUserFormAttrs, author)),
         }
       : {
-          submitterOpts: { name: /(sign ?up)/i },
+          submitterOpts: { name: /^sign ?up$/i },
           submittingOpts: { name: /signing ?up/i },
           entries: Object.entries(signupFormAttrs),
         };
@@ -96,7 +96,7 @@ describe(`<AuthForm />`, () => {
         }
       });
 
-      it('should not submit with empty fields', async () => {
+      it('should not submit with empty, required fields', async () => {
         const { data, user } = await setup(props);
         for (const entry of data.entries) {
           const inp = screen.getByLabelText(entry[1].label) as HTMLInputElement;
@@ -105,8 +105,11 @@ describe(`<AuthForm />`, () => {
         const submitter = screen.getByRole('button', data.submitterOpts);
         await user.click(submitter);
         for (const entry of data.entries) {
-          const inp = screen.getByLabelText(entry[1].label) as HTMLInputElement;
-          expect(inp.ariaInvalid).toBe('true');
+          const { label } = entry[1];
+          if (/^!(bio)$/i.test(label)) {
+            const inp = screen.getByLabelText(label) as HTMLInputElement;
+            expect(inp.ariaInvalid).toBe('true');
+          }
         }
       });
 
@@ -119,7 +122,7 @@ describe(`<AuthForm />`, () => {
       it('should have a guest sign-in button', async () => {
         await setup(props);
         expect(
-          screen.getByRole('button', { name: /sign-in .*guest/i })
+          screen.getByRole('button', { name: /sign in .*guest/i })
         ).toHaveAttribute('type', 'button');
       });
 

@@ -61,6 +61,13 @@ export const signupFormAttrs: DynamicFormAttrs = {
       message: 'Full name must be at least 3 characters.',
     }),
   },
+  bio: {
+    type: 'textarea',
+    defaultValue: '',
+    label: 'Bio',
+    placeholder: 'From nowhere land with love...',
+    schema: z.string().trim().optional(),
+  },
 };
 
 export const updateUserFormAttrs = Object.fromEntries(
@@ -68,7 +75,12 @@ export const updateUserFormAttrs = Object.fromEntries(
     name,
     {
       ...attrs,
-      schema: attrs.schema.or(z.literal('').optional()),
+      schema: attrs.schema.isOptional()
+        ? attrs.schema
+        : z.preprocess(
+            (v) => (v === '' ? undefined : v),
+            attrs.schema.optional()
+          ),
     },
   ])
 );

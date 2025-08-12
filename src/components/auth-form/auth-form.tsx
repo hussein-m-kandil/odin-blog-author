@@ -100,9 +100,15 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
       const { data } = await authAxios<AuthResData>(formData.reqConfig);
       hookForm.reset();
       handleSignin(data, formData.redirectUrl);
-      toast.success(`Hello, @${data.user.username}!`, {
-        description: `You have signed up successfully`,
-      });
+      if (formType === 'update') {
+        toast.success('Profile updated', {
+          description: `You have updated your profile successfully`,
+        });
+      } else {
+        toast.success(`Hello, @${data.user.username}!`, {
+          description: `You have signed up successfully`,
+        });
+      }
     } catch (error) {
       setErrorMessage(
         parseAxiosAPIError(error, hookForm).message ||
@@ -111,7 +117,7 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
     }
   };
 
-  const signinAsGuest = async () => {
+  const signInGuest = async () => {
     try {
       const { data } = await authAxios<AuthResData>({
         url: `${authUrl}/guest`,
@@ -120,7 +126,7 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
       });
       handleSignin(data, '/');
       toast.success(`Hello, @${data.user.username}!`, {
-        description: 'You have signed in as a guest successfully',
+        description: 'You have signed in as guest successfully',
       });
     } catch (error) {
       setErrorMessage(
@@ -151,8 +157,8 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
               </Link>
             )}
           </Button>
-          <Button type='button' variant='outline' onClick={signinAsGuest}>
-            <UserCheck /> Sign-in as a guest!
+          <Button type='button' variant='outline' onClick={signInGuest}>
+            <UserCheck /> Sign in as guest
           </Button>
         </div>
       )}
