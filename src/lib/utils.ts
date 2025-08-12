@@ -90,7 +90,7 @@ export const parseAxiosAPIError = (
       if (hookForm && Array.isArray(data) && data.every(isIssue)) {
         const { formErrors, fieldErrors } = parseIssues(data);
         showFieldErrors(hookForm, fieldErrors);
-        if (formErrors.length) result.message = formErrors[0];
+        result.message = formErrors[0] || 'Update your data and try again';
       } else if (isErrorResponseWithStringErrorMessage(data)) {
         result.message = data.error.message;
       } else if (isErrorResponseWithStringError(data)) {
