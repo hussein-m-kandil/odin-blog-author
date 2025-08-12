@@ -18,6 +18,8 @@ const formatDateToNow = (date: DateT) => {
   return `${amount}${unit.slice(0, /month/i.test(unit) ? 2 : 1)}`;
 };
 
+const UPDATE_PERIOD = 2 * 60 * 60 * 1000;
+
 export function FormattedDate({
   createdAt,
   updatedAt,
@@ -28,21 +30,28 @@ export function FormattedDate({
   updatedAt?: DateT;
 }) {
   const formattedCreatedAt = format(createdAt, LONG_FORMAT);
+  const humanizedCreatedAt = formatDateToNow(createdAt);
 
   let updateTimeElement;
-  if (updatedAt && differenceInMilliseconds(updatedAt, createdAt) > 59 * 1000) {
+  if (
+    updatedAt &&
+    differenceInMilliseconds(updatedAt, createdAt) > UPDATE_PERIOD
+  ) {
     const formattedUpdatedAt = format(updatedAt, LONG_FORMAT);
-    updateTimeElement = (
-      <>
-        <span>.</span>
-        <time
-          suppressHydrationWarning
-          title={formattedUpdatedAt}
-          dateTime={formattedUpdatedAt}>
-          updated {formatDateToNow(updatedAt)}
-        </time>
-      </>
-    );
+    const humanizedUpdatedAt = formatDateToNow(updatedAt);
+    if (humanizedUpdatedAt !== humanizedCreatedAt) {
+      updateTimeElement = (
+        <>
+          <span>.</span>
+          <time
+            suppressHydrationWarning
+            title={formattedUpdatedAt}
+            dateTime={formattedUpdatedAt}>
+            updated {humanizedUpdatedAt}
+          </time>
+        </>
+      );
+    }
   }
 
   return (
@@ -57,7 +66,7 @@ export function FormattedDate({
         suppressHydrationWarning
         title={formattedCreatedAt}
         dateTime={formattedCreatedAt}>
-        {formatDateToNow(createdAt)}
+        {humanizedCreatedAt}
       </time>
       {updateTimeElement}
     </span>

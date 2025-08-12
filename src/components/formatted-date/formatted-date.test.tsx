@@ -28,8 +28,8 @@ describe('<FormattedDate />', () => {
     ).toStrictEqual(removeSecondsFromISODate(createdAt));
   });
 
-  it('should display the given update date if it is a minute after the creation date', () => {
-    const createdAt = new Date(Date.now() - 65 * 1000).toISOString();
+  it('should display the given update date if it is more than 2 hours after the creation date', () => {
+    const createdAt = new Date(Date.now() - 2.5 * 60 * 60 * 1000).toISOString();
     const updatedAt = new Date().toISOString();
     render(<FormattedDate createdAt={createdAt} updatedAt={updatedAt} />);
     expect(
@@ -41,8 +41,10 @@ describe('<FormattedDate />', () => {
     ).toStrictEqual(removeSecondsFromISODate(updatedAt));
   });
 
-  it('should not display the given update date if it is less than a minute after the creation date', () => {
-    const createdAt = new Date(Date.now() - 55 * 1000).toISOString();
+  it('should not display the given update date if it is less than 2 hours after the creation date', () => {
+    const createdAt = new Date(
+      Date.now() - 1.95 * 60 * 60 * 1000
+    ).toISOString();
     const updatedAt = new Date().toISOString();
     render(<FormattedDate createdAt={createdAt} updatedAt={updatedAt} />);
     expect(screen.getAllByRole('time')).toHaveLength(1);
