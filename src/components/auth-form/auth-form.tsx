@@ -19,11 +19,12 @@ import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { LogIn, UserPen, UserPlus, UserCheck } from 'lucide-react';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
+import { ImageForm } from '@/components/image-form';
 import { AuthFormProps } from './auth-form.types';
 import { Button } from '@/components/ui/button';
+import { AuthResData, Image } from '@/types';
 import { useRouter } from 'next/navigation';
 import { AxiosRequestConfig } from 'axios';
-import { AuthResData } from '@/types';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -36,6 +37,8 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
     signout,
     signin,
   } = useAuthData();
+
+  const [image, setImage] = React.useState<Image | null>(user?.avatar || null);
 
   let formData: {
     props: {
@@ -85,7 +88,7 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
     throw Error('Invalid `AuthForm` usage');
   }
 
-  const handleSignin = (data: AuthResData, redirectUrl: string) => {
+  const handleSuccess = (data: AuthResData, redirectUrl: string) => {
     setErrorMessage('');
     signin(data);
     onSuccess?.();
@@ -96,10 +99,12 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
     z.infer<typeof formData.props.formSchema>
   > = async (hookForm, values) => {
     try {
-      formData.reqConfig.data = values;
+      formData.reqConfig.data = image
+        ? { ...values, avatar: image.id }
+        : values;
       const { data } = await authAxios<AuthResData>(formData.reqConfig);
       hookForm.reset();
-      handleSignin(data, formData.redirectUrl);
+      handleSuccess(data, formData.redirectUrl);
       if (formType === 'update') {
         toast.success('Profile updated', {
           description: `You have updated your profile successfully`,
@@ -124,7 +129,7 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
         method: 'post',
         baseURL: '',
       });
-      handleSignin(data, '/');
+      handleSuccess(data, '/');
       toast.success(`Hello, @${data.user.username}!`, {
         description: 'You have signed in as guest successfully',
       });
@@ -138,6 +143,9 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
   return (
     <div className={cn('px-4 max-w-md mx-auto mt-6', className)}>
       <ErrorMessage>{errorMessage}</ErrorMessage>
+      {formType === 'update' && (
+        <ImageForm image={image} onSuccess={(img) => setImage(img)} />
+      )}
       <DynamicForm
         aria-label={`${formType}${formType === 'update' ? ' user' : ''} form`}
         submitterClassName='w-full'
