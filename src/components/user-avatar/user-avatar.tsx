@@ -9,16 +9,30 @@ export function UserAvatar({
   className?: string;
   user?: User | null;
 }) {
-  return (
-    <Avatar className={cn('text-lg', className)}>
-      {user ? (
-        <>
-          <AvatarImage src={user.avatar || ''} alt={`@${user.username}`} />
-          <AvatarFallback>{user.fullname[0]?.toUpperCase()}</AvatarFallback>
-        </>
-      ) : (
+  const defaultCN = cn('text-lg', className);
+
+  if (!user) {
+    return (
+      <Avatar className={defaultCN}>
         <AvatarFallback>?</AvatarFallback>
-      )}
+      </Avatar>
+    );
+  }
+
+  let src;
+  if (user.avatar) {
+    const srcUrl = new URL(user.avatar.src);
+    // Use image update time to revalidate the "painful" browser-cache ;)
+    srcUrl.searchParams.set('updatedAt', user.avatar.updatedAt);
+    src = srcUrl.href;
+  }
+
+  const alt = src ? `${user.username} avatar` : '';
+
+  return (
+    <Avatar className={defaultCN}>
+      <AvatarImage src={src} alt={alt} className='object-cover' />
+      <AvatarFallback>{user.fullname[0].toUpperCase()}</AvatarFallback>
     </Avatar>
   );
 }
