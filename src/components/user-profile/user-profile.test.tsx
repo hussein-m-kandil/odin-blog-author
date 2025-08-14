@@ -29,28 +29,28 @@ describe('<UserProfile />', () => {
     const abbrev = `${name[0]}${
       (name.includes(' ') && name.split(' ').at(-1)?.[0]) || ''
     }`.toUpperCase();
-    render(<UserProfileWrapper user={author} />);
+    render(<UserProfileWrapper owner={author} />);
     expect(screen.getByText(abbrev)).toBeInTheDocument();
   });
 
   it('should display user fullname', () => {
-    render(<UserProfileWrapper user={author} />);
+    render(<UserProfileWrapper owner={author} />);
     expect(screen.getByText(author.fullname)).toBeInTheDocument();
   });
 
   it('should display user username', () => {
-    render(<UserProfileWrapper user={author} />);
+    render(<UserProfileWrapper owner={author} />);
     expect(screen.getByText(new RegExp(author.username))).toBeInTheDocument();
   });
 
   it('should display user bio', () => {
     const bio = 'Test bio...';
-    render(<UserProfileWrapper user={{ ...author, bio }} />);
+    render(<UserProfileWrapper owner={{ ...author, bio }} />);
     expect(screen.getByText(bio)).toBeInTheDocument();
   });
 
   it('should show edit profile button', () => {
-    render(<UserProfileWrapper user={author} />);
+    render(<UserProfileWrapper owner={author} />);
     expect(
       screen.getByRole('button', { name: /edit profile/i })
     ).toBeInTheDocument();
@@ -58,13 +58,13 @@ describe('<UserProfile />', () => {
 
   it('should show a dialog after clicking on edit profile button', async () => {
     const user = userEvent.setup();
-    render(<UserProfileWrapper user={author} />);
+    render(<UserProfileWrapper owner={author} />);
     await user.click(screen.getByRole('button', { name: /edit profile/i }));
     expect(showDialog).toHaveBeenCalledOnce();
   });
 
   it('should show edit avatar button', () => {
-    render(<UserProfileWrapper user={author} />);
+    render(<UserProfileWrapper owner={author} />);
     expect(
       screen.getByRole('button', { name: /edit avatar/i })
     ).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('<UserProfile />', () => {
 
   it('should show a dialog after clicking on edit avatar button', async () => {
     const user = userEvent.setup();
-    render(<UserProfileWrapper user={author} />);
+    render(<UserProfileWrapper owner={author} />);
     await user.click(screen.getByRole('button', { name: /edit avatar/i }));
     expect(showDialog).toHaveBeenCalledOnce();
   });
@@ -82,7 +82,7 @@ describe('<UserProfile />', () => {
       ...initAuthData,
       user: { ...author, id: randomUUID },
     }));
-    render(<UserProfileWrapper user={author} />);
+    render(<UserProfileWrapper owner={author} />);
     expect(screen.queryByRole('button', { name: /edit profile/i })).toBeNull();
   });
 
@@ -91,7 +91,7 @@ describe('<UserProfile />', () => {
       ...initAuthData,
       user: { ...author, id: randomUUID },
     }));
-    render(<UserProfileWrapper user={author} />);
+    render(<UserProfileWrapper owner={author} />);
     expect(screen.queryByRole('button', { name: /edit avatar/i })).toBeNull();
   });
 });

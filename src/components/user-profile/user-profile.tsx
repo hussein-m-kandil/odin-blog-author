@@ -17,7 +17,7 @@ import { AuthResData, User } from '@/types';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-export function UserProfile({ user: owner }: { user: User }) {
+export function UserProfile({ owner }: { owner: User }) {
   const { showDialog, hideDialog } = useDialog();
   const router = useRouter();
   const {

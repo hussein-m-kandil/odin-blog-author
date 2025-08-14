@@ -11,36 +11,36 @@ type Props = {
   params: Promise<{ slug?: string[] }>;
 };
 
-const getProfileAndAuthDataOrRedirect = async (profileId?: string) => {
+const getOwnerAndAuthDataOrRedirect = async (ownerId?: string) => {
   const authData = await getServerAuthData();
   const { authFetch } = authData;
 
-  const profile = profileId
-    ? await authFetch<User>(`/users/${profileId}`)
+  const owner = ownerId
+    ? await authFetch<User>(`/users/${ownerId}`)
     : authData.user;
 
-  if (!profile) return redirect('/signin');
+  if (!owner) return redirect('/signin');
 
-  return { profile, authData };
+  return { owner, authData };
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const profileId = (await params).slug?.[0];
-  const data = await getProfileAndAuthDataOrRedirect(profileId);
-  return { title: data.profile.username };
+  const ownerId = (await params).slug?.[0];
+  const data = await getOwnerAndAuthDataOrRedirect(ownerId);
+  return { title: data.owner.username };
 }
 
 export default async function Profile({ params }: Props) {
-  const profileId = (await params).slug?.[0];
-  const data = await getProfileAndAuthDataOrRedirect(profileId);
-  const { profile, authData } = data;
+  const ownerId = (await params).slug?.[0];
+  const data = await getOwnerAndAuthDataOrRedirect(ownerId);
+  const { owner, authData } = data;
 
-  const postsUrl = `/posts?author=${profile.id}`;
+  const postsUrl = `/posts?author=${owner.id}`;
 
   return (
     <>
       <Header>
-        <UserProfile user={profile} />
+        <UserProfile owner={owner} />
       </Header>
       <main>
         <PostsWrapper postsUrl={postsUrl} authData={authData} />
