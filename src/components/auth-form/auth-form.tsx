@@ -19,12 +19,11 @@ import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { LogIn, UserPen, UserPlus, UserCheck } from 'lucide-react';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
-import { ImageForm } from '@/components/image-form';
 import { AuthFormProps } from './auth-form.types';
 import { Button } from '@/components/ui/button';
-import { AuthResData, Image } from '@/types';
 import { useRouter } from 'next/navigation';
 import { AxiosRequestConfig } from 'axios';
+import { AuthResData } from '@/types';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -37,8 +36,6 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
     signout,
     signin,
   } = useAuthData();
-
-  const [image, setImage] = React.useState<Image | null>(user?.avatar || null);
 
   let formData: {
     props: {
@@ -99,9 +96,7 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
     z.infer<typeof formData.props.formSchema>
   > = async (hookForm, values) => {
     try {
-      formData.reqConfig.data = image
-        ? { ...values, avatar: image.id }
-        : values;
+      formData.reqConfig.data = values;
       const { data } = await authAxios<AuthResData>(formData.reqConfig);
       hookForm.reset();
       handleSuccess(data, formData.redirectUrl);
@@ -143,9 +138,6 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
   return (
     <div className={cn('px-4 max-w-md mx-auto mt-6', className)}>
       <ErrorMessage>{errorMessage}</ErrorMessage>
-      {formType === 'update' && (
-        <ImageForm image={image} onSuccess={(img) => setImage(img)} />
-      )}
       <DynamicForm
         aria-label={`${formType}${formType === 'update' ? ' user' : ''} form`}
         submitterClassName='w-full'
