@@ -31,7 +31,14 @@ export function UserAvatar({
 
   return (
     <Avatar className={defaultCN}>
-      <AvatarImage src={src} alt={alt} className='object-cover' />
+      <AvatarImage
+        src={src}
+        alt={alt}
+        style={{
+          objectFit: 'cover',
+          objectPosition: `50% ${user.avatar?.yPos}%`,
+        }}
+      />
       <AvatarFallback>{user.fullname[0].toUpperCase()}</AvatarFallback>
     </Avatar>
   );
