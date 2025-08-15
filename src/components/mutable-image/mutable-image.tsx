@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { MutableImageSkeleton } from './mutable-image.skeleton';
 import { ImageToolkit } from '@/components/image-toolkit';
 import { MutableImageProps } from './mutable-image.types';
-import { cn, loadSupabaseImg } from '@/lib/utils';
+import { cn, loadSupabaseImg, setURlParams } from '@/lib/utils';
 
 export function MutableImage({
   image,
@@ -43,8 +43,8 @@ export function MutableImage({
             alt={image.alt || ''}
             loader={loadSupabaseImg}
             onLoad={() => setLoading(false)}
-            src={`${image.src}${mutation ? '?now=' + Date.now() : ''}`} // Force the browser to refetch it, if under mutation
             className={cn(loading && 'absolute opacity-0 -z-50')}
+            src={setURlParams(image.src, { updatedAt: image.updatedAt })} // Use image update time to revalidate the "painful" browser-cache ;)
             sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
             style={{
               objectPosition: `50% ${image.yPos}%`,

@@ -19,6 +19,18 @@ export function loadSupabaseImg({
   return url.href;
 }
 
+export function setURlParams(
+  url: string | URL,
+  params: Record<string, string>
+) {
+  const srcUrl = url instanceof URL ? url : new URL(url);
+  const paramsEntries = Object.entries(params);
+  for (const [k, v] of paramsEntries) {
+    srcUrl.searchParams.set(k, v);
+  }
+  return srcUrl.href;
+}
+
 export const isObject = (x: unknown): x is Record<string, unknown> => {
   return typeof x === 'object' && x !== null && !Array.isArray(x);
 };

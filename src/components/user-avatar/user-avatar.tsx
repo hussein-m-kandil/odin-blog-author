@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
+import { cn, setURlParams } from '@/lib/utils';
 import { User } from '@/types';
 
 export function UserAvatar({
@@ -19,13 +19,10 @@ export function UserAvatar({
     );
   }
 
-  let src;
-  if (user.avatar) {
-    const srcUrl = new URL(user.avatar.src);
-    // Use image update time to revalidate the "painful" browser-cache ;)
-    srcUrl.searchParams.set('updatedAt', user.avatar.updatedAt);
-    src = srcUrl.href;
-  }
+  // Use image update time to revalidate the "painful" browser-cache ;)
+  const src = user.avatar
+    ? setURlParams(user.avatar.src, { updatedAt: user.avatar.updatedAt })
+    : undefined;
 
   const alt = src ? `${user.username} avatar` : '';
 
