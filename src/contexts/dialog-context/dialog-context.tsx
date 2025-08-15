@@ -17,8 +17,13 @@ export interface DialogData {
   description: React.ReactNode;
 }
 
+const initShouldHideFn: () => Promise<boolean> | boolean = () => true;
+
 export interface DialogContextValue {
-  showDialog: (data: DialogData) => void;
+  showDialog: (
+    data: DialogData,
+    shouldHideDialog?: typeof initShouldHideFn
+  ) => void;
   hideDialog: () => void;
 }
 
@@ -36,24 +41,32 @@ export function DialogProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // React interpret function state-value as state initializer/updater
+  // So, initialize/update function state-value via a wrapper function
+  const [shouldHide, setShouldHide] = React.useState(() => initShouldHideFn);
   const [dialogData, setDialogData] = React.useState<DialogData>(initData);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
-  const showDialog = (data: DialogData) => {
-    setDialogData(data);
-    setIsDialogOpen(true);
+  const contextValue: DialogContextValue = {
+    showDialog: (data: DialogData, shouldHideDialog) => {
+      setShouldHide(() => shouldHideDialog || initShouldHideFn);
+      setIsDialogOpen(true);
+      setDialogData(data);
+    },
+    hideDialog: () => setIsDialogOpen(false),
   };
 
-  const hideDialog = () => {
-    setIsDialogOpen(false);
+  const handleOpenChange = async (open: boolean) => {
+    const hide = await shouldHide();
+    setIsDialogOpen(open === false ? !hide : open);
   };
 
   return (
-    <DialogContext value={{ showDialog, hideDialog }}>
+    <DialogContext value={contextValue}>
       {children}
       <Dialog
         open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
+        onOpenChange={handleOpenChange}
         key={Date.now()}>
         <DialogContent className='sm:max-w-lg max-h-[calc(100vh-2rem)] overflow-auto'>
           <DialogHeader>
