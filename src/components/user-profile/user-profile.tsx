@@ -1,66 +1,38 @@
 'use client';
 
 import React from 'react';
-import { getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
-import { ImageForm, ImageFormProps } from '@/components/image-form';
 import { UserAvatar } from '@/components/user-avatar';
 import { useDialog } from '@/contexts/dialog-context';
 import { Muted } from '@/components/typography/muted';
 import { useAuthData } from '@/contexts/auth-context';
 import { Separator } from '@/components/ui/separator';
+import { AvatarForm } from '@/components/avatar-form';
 import { Lead } from '@/components/typography/lead';
 import { UserPen, ImageIcon } from 'lucide-react';
 import { AuthForm } from '@/components/auth-form';
 import { Button } from '@/components/ui/button';
 import { H1 } from '@/components/typography/h1';
-import { AuthResData, User } from '@/types';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { User } from '@/types';
 
 export function UserProfile({ owner }: { owner: User }) {
-  const { showDialog, hideDialog } = useDialog();
   const router = useRouter();
+  const { showDialog, hideDialog } = useDialog();
   const {
-    authData: { authAxios, user },
-    signin,
+    authData: { user },
   } = useAuthData();
 
   const ownedByCurrentUser = user && user.id === owner.id;
 
-  const saveAvatar: ImageFormProps['onSuccess'] = (image) => {
-    authAxios
-      .patch<AuthResData>(`/users/${owner.id}`, { avatar: image?.id })
-      .then(({ data }) => {
-        signin(data);
-        hideDialog();
-        router.refresh();
-        const verb = image ? 'updated' : 'deleted';
-        const description = `Your avatar is ${verb} successfully`;
-        toast.success(`Avatar ${verb}`, { description });
-      })
-      .catch((error) => {
-        const description =
-          parseAxiosAPIError(error).message || getUnknownErrorMessage(error);
-        toast.error('Could not save your uploaded avatar', {
-          action: { label: 'Try again', onClick: () => saveAvatar?.(image) },
-          duration: Infinity,
-          description,
-        });
-      });
-  };
-
   const editAvatar = () => {
-    showDialog({
-      title: 'Edit Avatar',
-      description: 'Choose an image, click upload, be patient, enjoy.',
-      body: (
-        <ImageForm
-          // className='w-full mt-0'
-          image={owner.avatar}
-          onSuccess={saveAvatar}
-        />
-      ),
-    });
+    showDialog(
+      {
+        title: 'Edit Avatar',
+        description: 'Choose an image, click upload, be patient, enjoy.',
+        body: <AvatarForm initAvatar={owner.avatar} owner={owner} />,
+      },
+      () => (router.refresh(), true)
+    );
   };
 
   const editProfile = () => {
