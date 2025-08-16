@@ -55,7 +55,13 @@ export function Providers({
           <DialogProvider>{children}</DialogProvider>
         </AuthProvider>
       </QueryClientProvider>
-      <Toaster expand visibleToasts={3} richColors closeButton />
+      <Toaster
+        expand
+        richColors
+        closeButton
+        visibleToasts={3}
+        style={{ pointerEvents: 'auto' }}
+      />
     </ThemeProvider>
   );
 }

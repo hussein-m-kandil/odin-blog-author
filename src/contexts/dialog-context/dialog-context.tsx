@@ -5,8 +5,9 @@ import {
   Dialog,
   DialogTitle,
   DialogHeader,
-  DialogContent,
   DialogFooter,
+  DialogOverlay,
+  DialogContent,
   DialogDescription,
 } from '@/components/ui/dialog';
 
@@ -47,6 +48,8 @@ export function DialogProvider({
   const [dialogData, setDialogData] = React.useState<DialogData>(initData);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
+  const overlayRef = React.useRef<HTMLDivElement>(null);
+
   const contextValue: DialogContextValue = {
     showDialog: (data: DialogData, shouldHideDialog) => {
       setShouldHide(() => shouldHideDialog || initShouldHideFn);
@@ -61,23 +64,37 @@ export function DialogProvider({
     setIsDialogOpen(open === false ? !hide : open);
   };
 
+  const handleOverlayInteraction: React.ComponentProps<
+    typeof DialogContent
+  >['onInteractOutside'] = (e) => {
+    const overlay = overlayRef.current;
+    if (overlay && !overlay.isEqualNode(e.target as Node)) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <DialogContext value={contextValue}>
       {children}
       <Dialog
+        key={Date.now()}
         open={isDialogOpen}
-        onOpenChange={handleOpenChange}
-        key={Date.now()}>
-        <DialogContent className='sm:max-w-lg max-h-[calc(100vh-2rem)] overflow-auto'>
-          <DialogHeader>
-            <DialogTitle className='text-xl font-bold'>
-              {dialogData.title}
-            </DialogTitle>
-            <DialogDescription>{dialogData.description}</DialogDescription>
-          </DialogHeader>
-          {dialogData.body}
-          <DialogFooter>{dialogData.footer}</DialogFooter>
-        </DialogContent>
+        onOpenChange={handleOpenChange}>
+        <DialogOverlay ref={overlayRef}>
+          <DialogContent
+            onInteractOutside={handleOverlayInteraction}
+            onPointerDownOutside={handleOverlayInteraction}
+            className='sm:max-w-lg max-h-[calc(100vh-2rem)] overflow-auto'>
+            <DialogHeader>
+              <DialogTitle className='text-xl font-bold'>
+                {dialogData.title}
+              </DialogTitle>
+              <DialogDescription>{dialogData.description}</DialogDescription>
+            </DialogHeader>
+            {dialogData.body}
+            <DialogFooter>{dialogData.footer}</DialogFooter>
+          </DialogContent>
+        </DialogOverlay>
       </Dialog>
     </DialogContext>
   );
