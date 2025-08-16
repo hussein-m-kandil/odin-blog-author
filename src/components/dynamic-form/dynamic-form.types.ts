@@ -27,6 +27,7 @@ export type SubmitterLabel = {
 export interface DynamicFormProps
   extends Omit<React.ComponentProps<'form'>, 'onSubmit'> {
   onSubmit: DynamicFormSubmitHandler<object>;
+  hookFormRef?: React.Ref<UseFormReturn>;
   submitterIcon?: React.ReactNode;
   submitterLabel?: SubmitterLabel;
   formSchema: DynamicFormSchema;

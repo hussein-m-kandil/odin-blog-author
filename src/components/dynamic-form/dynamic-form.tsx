@@ -32,6 +32,7 @@ export function DynamicForm({
   className,
   onSubmit,
   children,
+  hookFormRef,
   ...formProps
 }: DynamicFormProps) {
   const hookForm = useForm<z.infer<typeof formSchema>>({
@@ -43,6 +44,8 @@ export function DynamicForm({
       ])
     ),
   });
+
+  React.useImperativeHandle(hookFormRef, () => hookForm, [hookForm]);
 
   const handleSubmit = hookForm.handleSubmit((...args) => {
     return onSubmit(hookForm, ...args);
