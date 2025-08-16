@@ -4,6 +4,7 @@ import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/auth-context';
 import { UserProfile } from './user-profile';
+import UserProfileSkeleton from './user-profile.skeleton';
 
 const randomUUID = crypto.randomUUID();
 
@@ -93,5 +94,19 @@ describe('<UserProfile />', () => {
     }));
     render(<UserProfileWrapper owner={author} />);
     expect(screen.queryByRole('button', { name: /edit avatar/i })).toBeNull();
+  });
+});
+
+describe('<UserProfileSkeleton />', () => {
+  it('should have the given class', () => {
+    const className = 'test-class';
+    render(<UserProfileSkeleton className={className} />);
+    expect(screen.getByLabelText(/loading/i)).toHaveClass(className);
+  });
+
+  it('should have the given id', () => {
+    const id = 'test-id';
+    render(<UserProfileSkeleton id={id} />);
+    expect(screen.getByLabelText(/loading/i)).toHaveAttribute('id', id);
   });
 });
