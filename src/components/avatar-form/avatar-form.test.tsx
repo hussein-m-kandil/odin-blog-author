@@ -6,11 +6,15 @@ import { author, initAuthData } from '@/test-utils';
 import { axiosMock } from '@/__mocks__/axios';
 import { AvatarForm } from './avatar-form';
 
+const getImageMock = vi.hoisted(() =>
+  vi.fn<() => { id: string } | null>(() => ({ id: 'blah-image' }))
+);
+
 vi.mock('@/components/image-form', async () => {
   type ImageFormProps = { onSuccess: (image: { id: string } | null) => void };
   const ImageForm = ({ onSuccess }: ImageFormProps) => {
     return (
-      <button type='button' onClick={() => onSuccess({ id: 'blah-image' })}>
+      <button type='button' onClick={() => onSuccess(getImageMock())}>
         Fake Upload
       </button>
     );
@@ -32,11 +36,19 @@ describe('<AvatarForm />', () => {
     axiosMock.onAny().reply(200, initAuthData);
   });
 
+  it('should not send PATCH request if `ImageForm` called `onSuccess` Without an image', async () => {
+    getImageMock.mockImplementationOnce(() => null);
+    const user = userEvent.setup();
+    render(<AvatarFormWrapper />);
+    await user.click(screen.getByRole('button', { name: 'Fake Upload' }));
+    expect(axiosMock.history).toHaveLength(0);
+  });
+
   it('should send PATCH request after upload, and with correct url/data', async () => {
     const user = userEvent.setup();
     render(<AvatarFormWrapper />);
     await user.click(screen.getByRole('button', { name: 'Fake Upload' }));
-    expect(axiosMock.history.patch).toHaveLength(1);
+    expect(axiosMock.history).toHaveLength(1);
     expect(axiosMock.history.patch[0].url).toMatch(
       new RegExp(`/${author.id}$`)
     );
@@ -51,7 +63,7 @@ describe('<AvatarForm />', () => {
     const user = userEvent.setup();
     render(<AvatarFormWrapper />);
     await user.click(screen.getByRole('button', { name: 'Fake Upload' }));
-    expect(axiosMock.history.patch).toHaveLength(1);
+    expect(axiosMock.history).toHaveLength(1);
     await waitFor(() => screen.getByRole('button', { name: /try/i }));
     expect(screen.getByText(/could not save/i)).toBeInTheDocument();
   });
@@ -75,7 +87,7 @@ describe('<AvatarForm />', () => {
     await user.click(screen.getByRole('button', { name: 'Fake Upload' }));
     await waitFor(() => screen.getByRole('button', { name: /try/i }));
     await user.click(screen.getByRole('button', { name: /try/i }));
-    expect(axiosMock.history.patch).toHaveLength(2);
+    expect(axiosMock.history).toHaveLength(2);
     for (const req of axiosMock.history.patch) {
       expect(req.url).toMatch(new RegExp(`/${author.id}$`));
       expect(req.data).toStrictEqual(JSON.stringify({ avatar: 'blah-image' }));
