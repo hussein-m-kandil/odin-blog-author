@@ -133,15 +133,22 @@ export function ImageForm({
       <Label id='upload-image-label' htmlFor='image'>
         Image
       </Label>
-      {uploading ? (
-        <MutableImageSkeleton />
-      ) : (
-        <MutableImage
-          image={image}
-          mutation={{ update: updateImageData, delete: deleteImage }}
-        />
-      )}
-      {uploadPercent >= 0 && <Progress value={uploadPercent} />}
+      <div className='relative'>
+        {uploading ? (
+          <MutableImageSkeleton />
+        ) : (
+          <MutableImage
+            image={image}
+            mutation={{ update: updateImageData, delete: deleteImage }}
+          />
+        )}
+        {uploadPercent >= 0 && (
+          <Progress
+            value={uploadPercent}
+            className='absolute bottom-0 w-full rounded-none shadow'
+          />
+        )}
+      </div>
       <div className='mt-2 flex justify-between space-x-2'>
         <Input
           id='image'
