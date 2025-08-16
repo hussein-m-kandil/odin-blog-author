@@ -5,7 +5,6 @@ import { QueryError } from '@/components/query-error';
 import { Button } from '@/components/ui/button';
 import { PanelLeftClose } from 'lucide-react';
 import { AuthResData } from '@/types';
-import { toast } from 'sonner';
 
 type Avatar = ImageFormProps['image'];
 
@@ -45,9 +44,6 @@ export function AvatarForm({
       .then(({ data }) => {
         setErrorMessage('');
         signin(data);
-        const verb = image ? 'updated' : 'deleted';
-        const description = `Your avatar is ${verb} successfully`;
-        toast.success(`Avatar ${verb}`, { description });
       })
       .catch(() => {
         updateAvatarInAuthData(image);
