@@ -2,10 +2,11 @@
 
 import React from 'react';
 import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
-import { PostCard, PostCardSkeleton } from '@/components/post-card';
+import { PostCard } from '@/components/post-card';
 import { useAuthData } from '@/contexts/auth-context';
 import { QueryError } from '@/components/query-error';
 import { InView } from 'react-intersection-observer';
+import { PostsSkeleton } from './posts.skeleton';
 import { Button } from '@/components/ui/button';
 import { P } from '@/components/typography/';
 import { Loader } from 'lucide-react';
@@ -52,12 +53,14 @@ export function Posts({ postsUrl }: { postsUrl: string }) {
 
   const isFetchDisabled = !hasNextPage || isFetching || isFetchingNextPage;
 
+  if (isPending) {
+    return <PostsSkeleton />;
+  }
+
   return (
     <>
       <div className='flex flex-wrap justify-center grow gap-8 px-4 *:sm:max-w-xl *:lg:max-w-md'>
-        {isPending ? (
-          Array.from({ length: 3 }).map((_, i) => <PostCardSkeleton key={i} />)
-        ) : isLoadingError || !Array.isArray(data.pages[0]) ? (
+        {isLoadingError || !Array.isArray(data.pages[0]) ? (
           <QueryError onRefetch={refetch}>
             Sorry, we could not load any posts
           </QueryError>

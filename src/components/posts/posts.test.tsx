@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { axiosMock } from '@/__mocks__/axios';
 import { Posts } from './posts';
 import { AuthProvider } from '@/contexts/auth-context';
+import PostsSkeleton from './posts.skeleton';
 
 mockDialogContext();
 
@@ -73,5 +74,32 @@ describe('<Posts />', () => {
     for (const post of posts) {
       expect(screen.getByText(post.title)).toBeInTheDocument();
     }
+  });
+});
+
+describe('<PostsSkeleton />', () => {
+  it('should have the given class', () => {
+    const className = 'test-class';
+    const { container } = render(<PostsSkeleton className={className} />);
+    expect(container.firstElementChild).toHaveClass(className);
+  });
+
+  it('should have the given id', () => {
+    const id = 'test-id';
+    const { container } = render(<PostsSkeleton id={id} />);
+    expect(container.firstElementChild).toHaveAttribute('id', id);
+  });
+
+  it('should display 3 card-skeletons bay default', () => {
+    const { container } = render(<PostsSkeleton />);
+    expect((container.firstElementChild as Element).children).toHaveLength(3);
+  });
+
+  it('should displayed card-skeletons matches the given count', () => {
+    const count = 5;
+    const { container } = render(<PostsSkeleton count={count} />);
+    expect((container.firstElementChild as Element).children).toHaveLength(
+      count
+    );
   });
 });
