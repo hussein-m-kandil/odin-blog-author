@@ -34,7 +34,7 @@ describe('<AvatarForm />', () => {
 
   it('should send PATCH request after upload, and with correct url/data', async () => {
     const user = userEvent.setup();
-    render(<AvatarFormWrapper initAvatar={null} />);
+    render(<AvatarFormWrapper />);
     await user.click(screen.getByRole('button', { name: 'Fake Upload' }));
     expect(axiosMock.history.patch).toHaveLength(1);
     expect(axiosMock.history.patch[0].url).toMatch(
@@ -49,7 +49,7 @@ describe('<AvatarForm />', () => {
     axiosMock.reset();
     axiosMock.onAny().networkError();
     const user = userEvent.setup();
-    render(<AvatarFormWrapper initAvatar={null} />);
+    render(<AvatarFormWrapper />);
     await user.click(screen.getByRole('button', { name: 'Fake Upload' }));
     expect(axiosMock.history.patch).toHaveLength(1);
     await waitFor(() => screen.getByRole('button', { name: /try/i }));
@@ -60,7 +60,7 @@ describe('<AvatarForm />', () => {
     axiosMock.reset();
     axiosMock.onAny().reply(400);
     const user = userEvent.setup();
-    render(<AvatarFormWrapper initAvatar={null} />);
+    render(<AvatarFormWrapper />);
     await user.click(screen.getByRole('button', { name: 'Fake Upload' }));
     expect(axiosMock.history.patch).toHaveLength(1);
     await waitFor(() => screen.getByRole('button', { name: /try/i }));
@@ -71,7 +71,7 @@ describe('<AvatarForm />', () => {
     axiosMock.reset();
     axiosMock.onAny().networkError();
     const user = userEvent.setup();
-    render(<AvatarFormWrapper initAvatar={null} />);
+    render(<AvatarFormWrapper />);
     await user.click(screen.getByRole('button', { name: 'Fake Upload' }));
     await waitFor(() => screen.getByRole('button', { name: /try/i }));
     await user.click(screen.getByRole('button', { name: /try/i }));

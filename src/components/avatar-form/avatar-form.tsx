@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 
 type Avatar = ImageFormProps['image'];
 
-export function AvatarForm({ initAvatar }: { initAvatar: Avatar }) {
+export function AvatarForm({ initAvatar = null }: { initAvatar?: Avatar }) {
   const [avatar, setAvatar] = React.useState<Avatar>(initAvatar);
   const [errorMessage, setErrorMessage] = React.useState('');
   const { authData, signin, signout } = useAuthData();
