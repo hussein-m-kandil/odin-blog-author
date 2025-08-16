@@ -92,20 +92,32 @@ export function Navbar() {
     });
   };
 
+  const shouldUnmountPostFormRef = React.useRef<() => Promise<boolean>>(null);
+
   const postFormProps = {
     'aria-labelledby': `create-post-form-${id}`,
+    shouldUnmountRef: shouldUnmountPostFormRef,
     onSuccess: hideDialog,
     title: 'Create Post',
   };
 
   const showPostFormDialog = () => {
-    showDialog({
-      title: (
-        <span id={postFormProps['aria-labelledby']}>{postFormProps.title}</span>
-      ),
-      description: 'Use the following form to create a new post.',
-      body: <PostForm {...postFormProps} />,
-    });
+    showDialog(
+      {
+        title: (
+          <span id={postFormProps['aria-labelledby']}>
+            {postFormProps.title}
+          </span>
+        ),
+        description: 'Use the following form to create a new post.',
+        body: <PostForm {...postFormProps} />,
+      },
+      () => {
+        const shouldUnmount = shouldUnmountPostFormRef.current;
+        if (shouldUnmount) return shouldUnmount();
+        return true;
+      }
+    );
   };
 
   const btnProps: React.ComponentProps<'button'> = {

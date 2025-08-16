@@ -15,7 +15,10 @@ import { axiosMock } from '@/__mocks__/axios';
 import { PostForm } from './post-form';
 import { Post } from '@/types';
 
-const PostFormWrapper = (props: React.ComponentProps<typeof PostForm>) => {
+const PostFormWrapper = (
+  props: Omit<React.ComponentProps<typeof PostForm>, 'shouldUnmountRef'>
+) => {
+  const shouldUnmountRef = React.useRef<() => Promise<boolean>>(null);
   return (
     <QueryClientProvider
       client={
@@ -24,7 +27,7 @@ const PostFormWrapper = (props: React.ComponentProps<typeof PostForm>) => {
         })
       }>
       <AuthProvider initAuthData={initAuthData}>
-        <PostForm {...props} />
+        <PostForm {...props} shouldUnmountRef={shouldUnmountRef} />
       </AuthProvider>
     </QueryClientProvider>
   );

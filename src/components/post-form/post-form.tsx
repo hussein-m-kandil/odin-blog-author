@@ -6,25 +6,43 @@ import {
   DynamicFormSubmitHandler,
 } from '@/components/dynamic-form';
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
+import { Query, useMutation, useQueryClient } from '@tanstack/react-query';
 import { parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { PostFormProps, NewPostInput } from './post-form.types';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
 import { ImageForm } from '@/components/image-form';
 import { Querybox } from '@/components/querybox';
+import { UseFormReturn } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { Tag, Image, Post } from '@/types';
 import { Tags } from '@/components/tags';
 import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
 
 const MAX_TAGS_NUM = 7;
 
-export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
+const getInvalidateQueryPredicate = (post?: Post) => {
+  return ({ queryKey }: Query) => {
+    return (
+      queryKey[0] === 'posts' ||
+      (!!post && queryKey[0] === 'post' && queryKey[1] === post.id)
+    );
+  };
+};
+
+export function PostForm({
+  post,
+  onSuccess,
+  shouldUnmountRef,
+  ...formProps
+}: PostFormProps) {
+  const postTags = React.useMemo(() => {
+    return post?.tags.map((t) => t.name) || [];
+  }, [post]);
+
   const [image, setImage] = React.useState<Image | null>(post?.image || null);
-  const [tags, setTags] = React.useState<string[]>(
-    post?.tags.map((t) => t.name) || []
-  );
+  const [tags, setTags] = React.useState<string[]>(postTags);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [tagsError, setTagsError] = React.useState('');
   const router = useRouter();
@@ -32,20 +50,12 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
     authData: { authAxios },
   } = useAuthData();
 
+  const discardWarningIdRef = React.useRef<number | string>(null);
+  const hookFormRef = React.useRef<UseFormReturn>(null);
+
   const isUpdate = !!post;
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
-
-  const isPostSavedRef = React.useRef(isUpdate);
-
-  React.useEffect(() => {
-    return () => {
-      const isImageForNotSavedPost = !isPostSavedRef.current && image;
-      if (isImageForNotSavedPost) {
-        authAxios.delete(`/images/${image.id}`).catch();
-      }
-    };
-  }, [authAxios, image]);
 
   const queryClient = useQueryClient();
 
@@ -65,14 +75,8 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
     onSuccess: async (resPost, [hookForm]) => {
       hookForm.reset();
       setErrorMessage('');
-      isPostSavedRef.current = true;
       await queryClient.invalidateQueries({
-        predicate: ({ queryKey }) => {
-          return (
-            queryKey[0] === 'posts' ||
-            (isUpdate && queryKey[0] === 'post' && queryKey[1] === post.id)
-          );
-        },
+        predicate: getInvalidateQueryPredicate(post),
       });
       onSuccess?.();
       if (!isUpdate) router.push(`/${resPost.id}`);
@@ -84,6 +88,70 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
       );
     },
   });
+
+  React.useImperativeHandle(
+    shouldUnmountRef,
+    () => {
+      return () =>
+        new Promise((resolve) => {
+          if (discardWarningIdRef.current !== null) {
+            toast.dismiss(discardWarningIdRef.current);
+          }
+          if (image && isUpdate && !!post.image) {
+            queryClient.invalidateQueries({
+              predicate: getInvalidateQueryPredicate(post),
+            });
+          }
+          const textFieldNames = Object.entries(postFormAttrs)
+            .filter((attr) => attr[1].type === 'text')
+            .map(([name]) => name);
+          let isFormDirty = false;
+          if (hookFormRef.current) {
+            for (const name of textFieldNames) {
+              isFormDirty = hookFormRef.current.getFieldState(name).isDirty;
+              if (isFormDirty) break;
+            }
+          }
+          const hasNotSavedImage = image && (!isUpdate || !post.image);
+          const hasNewTags =
+            tags.length && JSON.stringify(postTags) !== JSON.stringify(tags);
+          if (!isFormDirty && !hasNotSavedImage && !hasNewTags) {
+            return resolve(true);
+          }
+          discardWarningIdRef.current = toast.warning(
+            'Your changes will not be saved!',
+            {
+              duration: Infinity,
+              classNames: {
+                toast: 'flex-wrap!',
+                cancelButton: 'justify-center! h-auto! basis-3/7! p-1!',
+                actionButton: 'justify-center! h-auto! basis-3/7! p-1!',
+              },
+              action: { label: 'Keep', onClick: () => resolve(false) },
+              cancel: {
+                label: 'Discard',
+                onClick: () => {
+                  if (hasNotSavedImage) {
+                    authAxios.delete(`/images/${image.id}`).catch();
+                  }
+                  resolve(true);
+                },
+              },
+            }
+          );
+        });
+    },
+    [
+      postFormAttrs,
+      queryClient,
+      authAxios,
+      postTags,
+      isUpdate,
+      image,
+      post,
+      tags,
+    ]
+  );
 
   const validateTag = (value: string) => /^\w*$/.test(value);
   const searchTags = async (searchValue: string) => {
@@ -111,6 +179,7 @@ export function PostForm({ post, onSuccess, ...formProps }: PostFormProps) {
       <ImageForm image={image} onSuccess={(img) => setImage(img)} />
       <DynamicForm
         {...formProps}
+        hookFormRef={hookFormRef}
         formAttrs={postFormAttrs}
         formSchema={postFormSchema}
         submitterClassName='w-full'

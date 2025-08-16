@@ -19,20 +19,29 @@ export function PostOptionsMenu({
   post: Post;
 }) {
   const { showDialog, hideDialog } = useDialog();
+  const shouldUnmountPostFormRef = React.useRef<() => Promise<boolean>>(null);
 
   const showUpdateForm = () => {
     const titleId = `post-opts-update-form-${post.id}`;
-    showDialog({
-      body: (
-        <PostForm
-          post={post}
-          onSuccess={hideDialog}
-          aria-labelledby={titleId}
-        />
-      ),
-      title: <span id={titleId}>Update Post</span>,
-      description: 'Do whatever updates on the post, then click "update".',
-    });
+    showDialog(
+      {
+        body: (
+          <PostForm
+            post={post}
+            onSuccess={hideDialog}
+            aria-labelledby={titleId}
+            shouldUnmountRef={shouldUnmountPostFormRef}
+          />
+        ),
+        title: <span id={titleId}>Update Post</span>,
+        description: 'Do whatever updates on the post, then click "update".',
+      },
+      () => {
+        const shouldUnmount = shouldUnmountPostFormRef.current;
+        if (shouldUnmount) return shouldUnmount();
+        return true;
+      }
+    );
   };
 
   const showDeleteForm = () => {
