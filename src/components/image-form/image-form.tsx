@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
-import { MutableImage } from '@/components/mutable-image';
+import { MutableImage, MutableImageSkeleton } from '@/components/mutable-image';
 import { useAuthData } from '@/contexts/auth-context';
 import { ImageFormProps } from './image-form.types';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Loader, Upload } from 'lucide-react';
 import { Label } from '@/components/ui/label';
@@ -20,6 +21,7 @@ export function ImageForm({
   className,
   ...props
 }: ImageFormProps) {
+  const [uploadPercent, setUploadPercent] = React.useState(-1);
   const [uploading, setUploading] = React.useState(false);
   const [file, setFile] = React.useState<File | null>();
 
@@ -48,7 +50,15 @@ export function ImageForm({
         setUploading(true);
         const body = new FormData();
         body.set('image', file);
-        const { data } = await authAxios[method]<ImageType>(url, body);
+        const { data } = await authAxios[method]<ImageType>(url, body, {
+          onUploadProgress: ({ loaded, total }) => {
+            if (loaded && total) {
+              const intProgressPercent = Math.floor((loaded / total) * 100);
+              const newUploadPercent = (intProgressPercent % 100) - 1;
+              setUploadPercent(newUploadPercent);
+            }
+          },
+        });
         (e.target as HTMLFormElement).reset();
         setFile(null);
         toast.success('Upload succeeded', {
@@ -123,10 +133,15 @@ export function ImageForm({
       <Label id='upload-image-label' htmlFor='image'>
         Image
       </Label>
-      <MutableImage
-        mutation={{ update: updateImageData, delete: deleteImage }}
-        image={image}
-      />
+      {uploading ? (
+        <MutableImageSkeleton />
+      ) : (
+        <MutableImage
+          image={image}
+          mutation={{ update: updateImageData, delete: deleteImage }}
+        />
+      )}
+      {uploadPercent >= 0 && <Progress value={uploadPercent} />}
       <div className='mt-2 flex justify-between space-x-2'>
         <Input
           id='image'
