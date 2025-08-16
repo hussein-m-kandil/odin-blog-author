@@ -29,7 +29,7 @@ export function UserProfile({ owner }: { owner: User }) {
       {
         title: 'Edit Avatar',
         description: 'Choose an image, click upload, be patient, enjoy.',
-        body: <AvatarForm initAvatar={owner.avatar} owner={owner} />,
+        body: <AvatarForm initAvatar={owner.avatar} />,
       },
       () => (router.refresh(), true)
     );
