@@ -60,7 +60,7 @@ export function AvatarForm({
           {errorMessage}
         </QueryError>
       )}
-      <ImageForm image={avatar} onSuccess={saveAvatar} />
+      <ImageForm image={avatar} label='Avatar' onSuccess={saveAvatar} />
       {onClose && (
         <Button
           type='button'
