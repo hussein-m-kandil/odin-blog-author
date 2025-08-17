@@ -15,6 +15,7 @@ import { AxiosResponse } from 'axios';
 import { toast } from 'sonner';
 
 export function ImageForm({
+  label = 'Image',
   uploadingRef,
   className,
   onSuccess,
@@ -132,10 +133,8 @@ export function ImageForm({
       {...props}
       onSubmit={handleSubmit}
       aria-label={`${verb} image`}
-      className={cn('w-full my-4', className)}>
-      <Label id='upload-image-label' htmlFor='image'>
-        Image
-      </Label>
+      className={cn('w-full my-4 space-y-2', className)}>
+      <Label htmlFor='image'>{label}</Label>
       <div className='relative'>
         {uploading ? (
           <MutableImageSkeleton />
@@ -152,26 +151,26 @@ export function ImageForm({
           />
         )}
       </div>
-      <div className='mt-2 flex justify-between space-x-2'>
-        <Input
-          id='image'
-          type='file'
-          name='image'
-          disabled={uploading}
-          onChange={(e) => setFile(e.target.files?.[0])}
-        />
-        <Button size='icon' type='submit' disabled={!file || uploading}>
-          {uploading ? (
-            <Loader
-              aria-label='Uploading'
-              className='inline-block animate-spin'
-            />
-          ) : (
-            <Upload className='inline-block' />
-          )}
-          <span className='sr-only'>{verb}</span>
-        </Button>
-      </div>
+      <Input
+        id='image'
+        type='file'
+        name='image'
+        disabled={uploading}
+        onChange={(e) => setFile(e.target.files?.[0])}
+      />
+      <Button type='submit' className='w-full' disabled={!file || uploading}>
+        {uploading ? (
+          <Loader
+            aria-label='Uploading'
+            className='inline-block animate-spin'
+          />
+        ) : (
+          <Upload className='inline-block' />
+        )}
+        <span>
+          {verb} {label.toLowerCase()}
+        </span>
+      </Button>
     </form>
   );
 }

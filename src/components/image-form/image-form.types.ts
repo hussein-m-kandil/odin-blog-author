@@ -6,4 +6,5 @@ export interface ImageFormProps
   onSuccess?: (image: Image | null) => void;
   onFailed?: (error: unknown) => void;
   image?: Image | null;
+  label?: string;
 }
