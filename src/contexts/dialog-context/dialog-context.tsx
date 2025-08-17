@@ -84,7 +84,7 @@ export function DialogProvider({
           <DialogContent
             onInteractOutside={handleOverlayInteraction}
             onPointerDownOutside={handleOverlayInteraction}
-            className='sm:max-w-lg max-h-[calc(100vh-2rem)] overflow-auto'>
+            className='sm:max-w-lg max-h-[calc(100vh-2rem)] overflow-auto gap-0'>
             <DialogHeader>
               <DialogTitle className='text-xl font-bold'>
                 {dialogData.title}
@@ -92,7 +92,9 @@ export function DialogProvider({
               <DialogDescription>{dialogData.description}</DialogDescription>
             </DialogHeader>
             {dialogData.body}
-            <DialogFooter>{dialogData.footer}</DialogFooter>
+            {dialogData.footer && (
+              <DialogFooter>{dialogData.footer}</DialogFooter>
+            )}
           </DialogContent>
         </DialogOverlay>
       </Dialog>
