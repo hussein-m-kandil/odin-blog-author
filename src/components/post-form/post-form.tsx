@@ -13,11 +13,11 @@ import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
 import { ImageForm } from '@/components/image-form';
 import { Querybox } from '@/components/querybox';
+import { Plus, PencilLine } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { Tag, Image, Post } from '@/types';
 import { Tags } from '@/components/tags';
-import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MAX_TAGS_NUM = 7;
@@ -192,6 +192,7 @@ export function PostForm({
         formAttrs={postFormAttrs}
         formSchema={postFormSchema}
         submitterClassName='w-full'
+        submitterIcon={<PencilLine />}
         submitterLabel={
           isUpdate
             ? { idle: 'Update Post', submitting: 'Updating...' }
