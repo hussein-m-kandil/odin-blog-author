@@ -51,6 +51,7 @@ export function PostForm({
   } = useAuthData();
 
   const discardWarningIdRef = React.useRef<number | string>(null);
+  const imageUploadingRef = React.useRef<boolean>(false);
   const hookFormRef = React.useRef<UseFormReturn>(null);
 
   const isUpdate = !!post;
@@ -94,6 +95,10 @@ export function PostForm({
     () => {
       return () =>
         new Promise((resolve) => {
+          if (imageUploadingRef.current) {
+            toast.warning('Please wait until the image finishes uploading!');
+            return resolve(false);
+          }
           if (discardWarningIdRef.current !== null) {
             toast.dismiss(discardWarningIdRef.current);
           }
@@ -176,7 +181,11 @@ export function PostForm({
   return (
     <div>
       <ErrorMessage>{errorMessage}</ErrorMessage>
-      <ImageForm image={image} onSuccess={(img) => setImage(img)} />
+      <ImageForm
+        image={image}
+        uploadingRef={imageUploadingRef}
+        onSuccess={(img) => setImage(img)}
+      />
       <DynamicForm
         {...formProps}
         hookFormRef={hookFormRef}
