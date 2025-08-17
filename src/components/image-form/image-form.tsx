@@ -15,10 +15,11 @@ import { AxiosResponse } from 'axios';
 import { toast } from 'sonner';
 
 export function ImageForm({
-  image,
-  onFailed,
-  onSuccess,
+  uploadingRef,
   className,
+  onSuccess,
+  onFailed,
+  image,
   ...props
 }: ImageFormProps) {
   const [uploadPercent, setUploadPercent] = React.useState(-1);
@@ -28,6 +29,8 @@ export function ImageForm({
   const {
     authData: { authAxios },
   } = useAuthData();
+
+  React.useImperativeHandle(uploadingRef, () => uploading, [uploading]);
 
   const endpoint = '/images';
   const updating = !!image;
