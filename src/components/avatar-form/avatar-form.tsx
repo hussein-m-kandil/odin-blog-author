@@ -2,12 +2,20 @@ import React from 'react';
 import { ImageForm, ImageFormProps } from '@/components/image-form';
 import { useAuthData } from '@/contexts/auth-context';
 import { QueryError } from '@/components/query-error';
+import { Button } from '@/components/ui/button';
+import { PanelLeftClose } from 'lucide-react';
 import { AuthResData } from '@/types';
 import { toast } from 'sonner';
 
 type Avatar = ImageFormProps['image'];
 
-export function AvatarForm({ initAvatar = null }: { initAvatar?: Avatar }) {
+export function AvatarForm({
+  initAvatar = null,
+  onClose,
+}: {
+  initAvatar?: Avatar;
+  onClose?: () => void;
+}) {
   const [avatar, setAvatar] = React.useState<Avatar>(initAvatar);
   const [errorMessage, setErrorMessage] = React.useState('');
   const { authData, signin, signout } = useAuthData();
@@ -55,6 +63,15 @@ export function AvatarForm({ initAvatar = null }: { initAvatar?: Avatar }) {
         </QueryError>
       )}
       <ImageForm image={avatar} onSuccess={saveAvatar} />
+      {onClose && (
+        <Button
+          type='button'
+          variant='outline'
+          className='w-full'
+          onClick={onClose}>
+          <PanelLeftClose /> Close
+        </Button>
+      )}
     </div>
   );
 }

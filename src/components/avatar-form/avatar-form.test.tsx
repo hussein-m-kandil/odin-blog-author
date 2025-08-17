@@ -81,4 +81,22 @@ describe('<AvatarForm />', () => {
       expect(req.data).toStrictEqual(JSON.stringify({ avatar: 'blah-image' }));
     }
   });
+
+  it('should not display the close button if not given `onClose` prop', () => {
+    render(<AvatarFormWrapper />);
+    expect(screen.queryByRole('button', { name: /close/i })).toBeNull();
+  });
+
+  it('should display the close button if not given `onClose` prop', () => {
+    render(<AvatarFormWrapper onClose={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
+  });
+
+  it('should call the given `onClose` after clicking the close button', async () => {
+    const onCloseMock = vi.fn();
+    const user = userEvent.setup();
+    render(<AvatarFormWrapper onClose={onCloseMock} />);
+    await user.click(screen.getByRole('button', { name: /close/i }));
+    expect(onCloseMock).toHaveBeenCalledOnce();
+  });
 });

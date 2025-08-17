@@ -29,7 +29,12 @@ export function UserProfile({ owner }: { owner: User }) {
       {
         title: 'Edit Avatar',
         description: 'Choose an image, click upload, be patient, enjoy.',
-        body: <AvatarForm initAvatar={owner.avatar} />,
+        body: (
+          <AvatarForm
+            initAvatar={owner.avatar}
+            onClose={() => (router.refresh(), hideDialog())}
+          />
+        ),
       },
       () => (router.refresh(), true)
     );
