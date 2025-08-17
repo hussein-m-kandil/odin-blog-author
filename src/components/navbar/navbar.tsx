@@ -15,7 +15,7 @@ import {
   LogOut,
   UserPlus,
   UserIcon,
-  PenSquare,
+  PencilLine,
 } from 'lucide-react';
 import { cn, getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
 import { useDialog } from '@/contexts/dialog-context/';
@@ -157,7 +157,7 @@ export function Navbar() {
                         {...btnProps}
                         title={postFormProps.title}
                         onClick={showPostFormDialog}>
-                        <PenSquare /> New Post
+                        <PencilLine /> New Post
                       </button>
                     </CustomMenuItem>
                     <CustomMenuItem>
