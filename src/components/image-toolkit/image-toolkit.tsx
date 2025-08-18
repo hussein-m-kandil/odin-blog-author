@@ -16,7 +16,7 @@ const getImgYPos = (img: HTMLImageElement) => {
   const matches = (img.style.objectPosition || '50% 50%')
     .matchAll(/\d+/g)
     .toArray()
-    .map((m) => m[0]);
+    .map(([match]) => match);
   return Number(matches[matches.length - 1]);
 };
 
@@ -65,7 +65,7 @@ export function ImageToolkit({
   };
 
   const updateImage = React.useCallback(() => {
-    onUpdate?.({
+    onUpdate({
       ...image,
       yPos: imgRef.current ? getImgYPos(imgRef.current) : image.yPos,
     });
@@ -73,7 +73,7 @@ export function ImageToolkit({
   }, [image, imgRef, onUpdate, resetMode]);
 
   const deleteImage = React.useCallback(() => {
-    onDelete?.(image);
+    onDelete(image);
     resetMode();
   }, [image, onDelete, resetMode]);
 
