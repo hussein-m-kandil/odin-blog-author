@@ -34,15 +34,18 @@ export interface ServerAuthData extends BaseAuthData {
   authFetch: <T>(pathname: string, init?: RequestInit) => Promise<T>;
 }
 
-export interface Image {
-  id: string;
-  src: string;
-  alt: string;
-  owner: User;
-  info: string;
-  size: number;
+export interface ImageBase {
   xPos: number;
   yPos: number;
+  info: string;
+  alt: string;
+  src: string;
+}
+
+export interface Image extends ImageBase {
+  id: string;
+  owner: User;
+  size: number;
   order: number;
   scale: number;
   width: number;
@@ -52,6 +55,8 @@ export interface Image {
   createdAt: string;
   updatedAt: string;
 }
+
+export type NewImage = Partial<Image> & ImageBase;
 
 export interface Tag {
   id: string;
