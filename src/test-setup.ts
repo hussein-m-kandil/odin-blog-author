@@ -23,6 +23,8 @@ const observe = vi.fn();
 const unobserve = vi.fn();
 const disconnect = vi.fn();
 const takeRecords = vi.fn();
+const revokeObjectURL = vi.fn();
+const createObjectURL = vi.fn(() => 'blob://file.ext');
 
 beforeAll(() => {
   vi.stubGlobal(
@@ -33,6 +35,8 @@ beforeAll(() => {
     'IntersectionObserver',
     vi.fn(() => ({ disconnect, observe, takeRecords, unobserve }))
   );
+  URL.createObjectURL = createObjectURL;
+  URL.revokeObjectURL = revokeObjectURL;
 });
 
 beforeEach(() => {
@@ -43,6 +47,8 @@ beforeEach(() => {
 afterEach(() => {
   Object.values(nextRouterMock).forEach((mockFn) => mockFn.mockReset());
   resetIntersectionMocking();
+  createObjectURL.mockReset();
+  revokeObjectURL.mockReset();
   disconnect.mockReset();
   unobserve.mockReset();
   observe.mockReset();
