@@ -60,7 +60,7 @@ describe('<ImageForm />', () => {
     render(<ImageFormWrapper onFailed={onFailed} onSuccess={onSuccess} />);
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText('Image'), file);
-    await user.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button', { name: /upload/i }));
     await waitForElementToBeRemoved(() => screen.getByLabelText(/uploading/i));
     expect(onFailed).toHaveBeenCalledOnce();
     expect(onSuccess).not.toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('<ImageForm />', () => {
     render(<ImageFormWrapper onFailed={onFailed} onSuccess={onSuccess} />);
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText('Image'), file);
-    await user.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button', { name: /upload/i }));
     await waitForElementToBeRemoved(() => screen.getByLabelText(/uploading/i));
     expect(onFailed).toHaveBeenCalledOnce();
     expect(onSuccess).not.toHaveBeenCalled();
@@ -85,7 +85,7 @@ describe('<ImageForm />', () => {
     render(<ImageFormWrapper onFailed={onFailed} onSuccess={onSuccess} />);
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText('Image'), file);
-    await user.click(screen.getByRole('button'));
+    await user.click(screen.getByRole('button', { name: /upload/i }));
     await waitForElementToBeRemoved(() => screen.getByLabelText(/uploading/i));
     expect(onFailed).not.toHaveBeenCalled();
     expect(onSuccess.mock.calls[0][0]).toEqual(image);
