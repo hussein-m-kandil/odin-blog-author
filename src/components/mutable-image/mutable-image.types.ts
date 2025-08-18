@@ -1,11 +1,12 @@
 import { Image } from '@/types';
+import { ImageToolkitProps } from '@/components/image-toolkit';
 
 export interface ImageMutation {
-  update: (updatedImage: Image) => void;
-  delete: (image: Image) => void;
+  update: ImageToolkitProps['onUpdate'];
+  delete: ImageToolkitProps['onDelete'];
 }
 
 export interface MutableImageProps extends React.ComponentProps<'div'> {
-  mutation?: ImageMutation;
   image?: Image | null;
+  mutation?: ImageMutation;
 }
