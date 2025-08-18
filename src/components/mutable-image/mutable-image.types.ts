@@ -1,4 +1,4 @@
-import { Image } from '@/types';
+import { NewImage } from '@/types';
 import { ImageToolkitProps } from '@/components/image-toolkit';
 
 export interface ImageMutation {
@@ -7,6 +7,6 @@ export interface ImageMutation {
 }
 
 export interface MutableImageProps extends React.ComponentProps<'div'> {
-  image?: Image | null;
+  image?: NewImage | null;
   mutation?: ImageMutation;
 }

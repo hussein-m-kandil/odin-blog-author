@@ -1,10 +1,10 @@
-import { Image } from '@/types';
+import { NewImage } from '@/types';
 
 export interface ImageToolkitProps {
   imgRef: React.RefObject<HTMLImageElement | null>;
-  onUpdate: (updatedImage: Image) => void;
-  onDelete: (image: Image) => void;
+  onUpdate: (updatedImage: NewImage) => void;
+  onDelete: (image: NewImage) => void;
   onEnterUpdate?: () => void;
   onEnterDelete?: () => void;
-  image: Image;
+  image: NewImage;
 }

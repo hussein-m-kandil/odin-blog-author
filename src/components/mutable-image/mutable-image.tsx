@@ -44,8 +44,12 @@ export function MutableImage({
             loader={loadSupabaseImg}
             onLoad={() => setLoading(false)}
             className={cn(loading && 'absolute opacity-0 -z-50')}
-            src={setURlParams(image.src, { updatedAt: image.updatedAt })} // Use image update time to revalidate the "painful" browser-cache ;)
             sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+            src={
+              image.updatedAt
+                ? setURlParams(image.src, { updatedAt: image.updatedAt })
+                : image.src
+            } // Use image update time to revalidate the "painful" browser-cache ;)
             style={{
               objectPosition: `50% ${image.yPos}%`,
               objectFit: 'cover',
