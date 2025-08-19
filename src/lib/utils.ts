@@ -2,6 +2,7 @@ import logger from './logger';
 import { ImageLoaderProps, ImageLoader } from 'next/image';
 import { UseFormReturn } from 'react-hook-form';
 import { clsx, type ClassValue } from 'clsx';
+import { Image, NewImage } from '@/types';
 import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
@@ -29,6 +30,16 @@ export function setURlParams(
     srcUrl.searchParams.set(k, v);
   }
   return srcUrl.href;
+}
+
+export function getNewImageDataFromImage(image: Image): NewImage {
+  return {
+    src: setURlParams(image.src, { updatedAt: image.updatedAt }),
+    info: image.info,
+    yPos: image.yPos,
+    xPos: image.xPos,
+    alt: image.alt,
+  };
 }
 
 export const isObject = (x: unknown): x is Record<string, unknown> => {
