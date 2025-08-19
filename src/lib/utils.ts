@@ -42,6 +42,17 @@ export function getNewImageDataFromImage(image: Image): NewImage {
   };
 }
 
+export function isNewImageHasUpdates(
+  image: Image,
+  newImage: NewImage
+): boolean {
+  const newImageBefore = getNewImageDataFromImage(image);
+  return Object.keys(newImage).some((k) => {
+    const imgK = k as keyof Image;
+    return newImageBefore[imgK] !== newImage[imgK];
+  });
+}
+
 export const isObject = (x: unknown): x is Record<string, unknown> => {
   return typeof x === 'object' && x !== null && !Array.isArray(x);
 };
