@@ -56,7 +56,7 @@ export interface Image extends ImageBase {
   updatedAt: string;
 }
 
-export type NewImage = Partial<Image> & ImageBase;
+export type NewImage = Partial<Omit<Image, keyof ImageBase>> & ImageBase;
 
 export interface Tag {
   id: string;
