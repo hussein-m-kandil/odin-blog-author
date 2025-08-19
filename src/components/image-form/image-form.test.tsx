@@ -29,20 +29,20 @@ describe('<ImageForm />', () => {
 
   it('should display upload form', () => {
     render(<ImageFormWrapper />);
-    expect(screen.getByRole('form', { name: /upload/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /upload/i })).toHaveAttribute(
-      'type',
-      'submit'
-    );
+    const form = screen.getByRole('form', { name: /upload/i });
+    const submitter = screen.getByRole('button', { name: /upload/i });
+    expect(form).toBeInTheDocument();
+    expect(submitter).toBeDisabled();
+    expect(submitter).toHaveAttribute('type', 'submit');
   });
 
-  it('should display update form if given an image', () => {
+  it('should display upload form if given an image', () => {
     render(<ImageFormWrapper image={image} />);
-    expect(screen.getByRole('form', { name: /update/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /update/i })).toHaveAttribute(
-      'type',
-      'submit'
-    );
+    const form = screen.getByRole('form', { name: /update/i });
+    const submitter = screen.getByRole('button', { name: /update/i });
+    expect(form).toBeInTheDocument();
+    expect(submitter).toBeDisabled();
+    expect(submitter).toHaveAttribute('type', 'submit');
   });
 
   it('should use the given className and id', () => {
@@ -57,7 +57,7 @@ describe('<ImageForm />', () => {
   it('should call the given `onFailed` when an error have occurred', async () => {
     const user = userEvent.setup();
     axiosMock.onPost().networkError();
-    render(<ImageFormWrapper onFailed={onFailed} onSuccess={onSuccess} />);
+    render(<ImageFormWrapper onError={onFailed} onSuccess={onSuccess} />);
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText('Image'), file);
     await user.click(screen.getByRole('button', { name: /upload/i }));
@@ -70,7 +70,7 @@ describe('<ImageForm />', () => {
     const message = 'test error';
     const user = userEvent.setup();
     axiosMock.onPost().reply(400, message);
-    render(<ImageFormWrapper onFailed={onFailed} onSuccess={onSuccess} />);
+    render(<ImageFormWrapper onError={onFailed} onSuccess={onSuccess} />);
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText('Image'), file);
     await user.click(screen.getByRole('button', { name: /upload/i }));
@@ -82,7 +82,7 @@ describe('<ImageForm />', () => {
 
   it('should call the given `onSuccess` and not call `onFailed`', async () => {
     const user = userEvent.setup();
-    render(<ImageFormWrapper onFailed={onFailed} onSuccess={onSuccess} />);
+    render(<ImageFormWrapper onError={onFailed} onSuccess={onSuccess} />);
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText('Image'), file);
     await user.click(screen.getByRole('button', { name: /upload/i }));
