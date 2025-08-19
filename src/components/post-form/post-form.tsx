@@ -102,11 +102,6 @@ export function PostForm({
           if (discardWarningIdRef.current !== null) {
             toast.dismiss(discardWarningIdRef.current);
           }
-          if (image && isUpdate && !!post.image) {
-            queryClient.invalidateQueries({
-              predicate: getInvalidateQueryPredicate(post),
-            });
-          }
           const textFieldNames = Object.entries(postFormAttrs)
             .filter((attr) => attr[1].type === 'text')
             .map(([name]) => name);
@@ -146,16 +141,7 @@ export function PostForm({
           );
         });
     },
-    [
-      postFormAttrs,
-      queryClient,
-      authAxios,
-      postTags,
-      isUpdate,
-      image,
-      post,
-      tags,
-    ]
+    [postFormAttrs, authAxios, postTags, isUpdate, image, post, tags]
   );
 
   const validateTag = (value: string) => /^\w*$/.test(value);
@@ -178,13 +164,20 @@ export function PostForm({
     }
   };
 
+  const handleImageUpdate = (data: Image | null) => {
+    setImage(data);
+    queryClient.invalidateQueries({
+      predicate: getInvalidateQueryPredicate(post),
+    });
+  };
+
   return (
     <div>
       <ErrorMessage>{errorMessage}</ErrorMessage>
       <ImageForm
         image={image}
+        onSuccess={handleImageUpdate}
         uploadingRef={imageUploadingRef}
-        onSuccess={(img) => setImage(img)}
       />
       <DynamicForm
         {...formProps}
