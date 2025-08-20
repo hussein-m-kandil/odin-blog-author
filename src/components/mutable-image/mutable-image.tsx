@@ -17,55 +17,54 @@ export function MutableImage({
 
   const imgRef = React.useRef<HTMLImageElement>(null);
 
-  if (!image && !props['aria-label']) props['aria-label'] = 'Image placeholder';
-
   return (
-    <>
-      {(!image || loading) && (
+    <div
+      {...props}
+      className={cn(
+        'relative w-full aspect-video my-2 overflow-hidden',
+        className
+      )}>
+      {image ? (
+        <Image
+          fill
+          priority
+          tabIndex={0}
+          ref={imgRef}
+          alt={image.alt || ''}
+          loader={loadSupabaseImg}
+          onLoad={() => setLoading(false)}
+          className={cn(loading && 'absolute opacity-0 -z-50')}
+          sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+          src={
+            image.updatedAt
+              ? setURlParams(image.src, { updatedAt: image.updatedAt })
+              : image.src
+          } // Use image update time to revalidate the "painful" browser-cache ;)
+          style={{
+            objectPosition: `50% ${image.yPos}%`,
+            objectFit: 'cover',
+          }}
+        />
+      ) : (
         <MutableImageSkeleton
-          {...props}
-          className={cn(!image && 'animate-none', className)}
+          className='m-0 animate-none'
+          aria-label='Image placeholder'
         />
       )}
-      {image && (
-        <div
-          {...props}
-          className={cn(
-            'relative w-full aspect-video my-2 bg-muted-foreground text-background overflow-hidden',
-            className,
-            loading && 'hidden'
-          )}>
-          <Image
-            fill
-            priority
-            tabIndex={0}
-            ref={imgRef}
-            alt={image.alt || ''}
-            loader={loadSupabaseImg}
-            onLoad={() => setLoading(false)}
-            className={cn(loading && 'absolute opacity-0 -z-50')}
-            sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
-            src={
-              image.updatedAt
-                ? setURlParams(image.src, { updatedAt: image.updatedAt })
-                : image.src
-            } // Use image update time to revalidate the "painful" browser-cache ;)
-            style={{
-              objectPosition: `50% ${image.yPos}%`,
-              objectFit: 'cover',
-            }}
+      {loading ? (
+        <MutableImageSkeleton className='m-0' />
+      ) : (
+        mutation && (
+          <ImageToolkit
+            onReset={mutation.reset}
+            onDelete={mutation.delete}
+            onUpdate={mutation.update}
+            imgRef={imgRef}
+            image={image}
           />
-          {!loading && mutation && (
-            <ImageToolkit
-              onDelete={mutation.delete}
-              onUpdate={mutation.update}
-              imgRef={imgRef}
-              image={image}
-            />
-          )}
-        </div>
+        )
       )}
-    </>
+    </div>
   );
 }
 

@@ -14,7 +14,11 @@ import {
   DeleteImage,
   ImageFormProps,
 } from './image-form.types';
-import { MutableImage, MutableImageSkeleton } from '@/components/mutable-image';
+import {
+  MutableImage,
+  MutableImageProps,
+  MutableImageSkeleton,
+} from '@/components/mutable-image';
 import { uploadImage, updateImage, deleteImage } from './image-form.services';
 import { Loader, ImageUp, ImagePlus, ImageMinus } from 'lucide-react';
 import { useAuthData } from '@/contexts/auth-context';
@@ -172,14 +176,6 @@ export function ImageForm({
     setUploading(false);
   };
 
-  const updateNewImage = async (data: NewImage) => {
-    setNewImage(data);
-  };
-
-  const deleteNewImage = async () => {
-    resetNewImageData(file ? image : null);
-  };
-
   const handleFileChange: React.EventHandler<
     React.ChangeEvent<HTMLInputElement>
   > = (e) => {
@@ -193,6 +189,18 @@ export function ImageForm({
       }
     }
   };
+
+  const imageMutation: MutableImageProps['mutation'] =
+    image || newImage
+      ? {
+          update: (data) => newImage && setNewImage({ ...newImage, ...data }),
+          delete: () => resetNewImageData(file ? image : null),
+          reset: () => {
+            if (file) setNewImageData(file);
+            else resetNewImageData(image);
+          },
+        }
+      : null;
 
   const submitter = toBeDeleted
     ? {
@@ -220,10 +228,7 @@ export function ImageForm({
         {uploading ? (
           <MutableImageSkeleton />
         ) : (
-          <MutableImage
-            image={newImage}
-            mutation={{ update: updateNewImage, delete: deleteNewImage }}
-          />
+          <MutableImage image={newImage} mutation={imageMutation} />
         )}
         {uploadPercent >= 0 && (
           <Progress

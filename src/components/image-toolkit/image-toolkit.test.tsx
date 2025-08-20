@@ -8,15 +8,19 @@ import { image } from '@/test-utils';
 
 const onEnterUpdate = vi.fn();
 const onEnterDelete = vi.fn();
+const onEnterReset = vi.fn();
 const onUpdate = vi.fn();
 const onDelete = vi.fn();
+const onReset = vi.fn();
 
 const props: ImageToolkitProps = {
   imgRef: { current: new Image() },
   onEnterUpdate,
   onEnterDelete,
+  onEnterReset,
   onUpdate,
   onDelete,
+  onReset,
   image,
 };
 
@@ -40,12 +44,13 @@ function ImageToolkitWrapper() {
 afterEach(vi.clearAllMocks);
 
 describe('<ImageToolkit />', () => {
-  it('should display delete and position buttons', () => {
+  it('should display position, delete and reset buttons', () => {
     render(<ImageToolkitWrapper />);
-    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: /position/i })
     ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /reset/i })).toBeInTheDocument();
   });
 
   it('should call the given `onEnterUpdate` when clicking on position button', async () => {
@@ -144,58 +149,80 @@ describe('<ImageToolkit />', () => {
     }
   });
 
-  it('should call the given `onEnterDelete` when clicking on delete button', async () => {
-    const user = userEvent.setup();
-    render(<ImageToolkitWrapper />);
-    await user.click(screen.getByRole('button', { name: /delete/i }));
-    expect(onEnterDelete).toHaveBeenCalledOnce();
-  });
-
-  it('should display delete confirmation when clicking on the delete button', async () => {
-    const user = userEvent.setup();
-    render(<ImageToolkitWrapper />);
-    await user.click(screen.getByRole('button', { name: /delete/i }));
-    expect(screen.getByText(/delete.*\?/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /yes/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /no/i })).toBeInTheDocument();
-  });
-
-  it('should automatically focus on the No button from the delete confirmation options', async () => {
-    const user = userEvent.setup();
-    render(<ImageToolkitWrapper />);
-    await user.click(screen.getByRole('button', { name: /delete/i }));
-    expect(screen.getByRole('button', { name: /yes/i })).not.toHaveFocus();
-    expect(screen.getByRole('button', { name: /no/i })).toHaveFocus();
-    expect(onDelete).not.toHaveBeenCalledOnce();
-  });
-
-  it('should confirm the deletion when clicking on the Yes button', async () => {
-    const user = userEvent.setup();
-    render(<ImageToolkitWrapper />);
-    await user.click(screen.getByRole('button', { name: /delete/i }));
-    await user.click(screen.getByRole('button', { name: /yes/i }));
-    expect(onDelete).toHaveBeenCalledOnce();
-    await waitFor(() =>
-      expect(screen.queryByRole('button', { name: /yes/i })).toBeNull()
-    );
-    expect(screen.queryByRole('button', { name: /no/i })).toBeNull();
-  });
-
-  it('should cancel the deletion via the No button or the Escape key', async () => {
-    const user = userEvent.setup();
-    render(<ImageToolkitWrapper />);
-    const cancelFns = [
-      () => user.click(screen.getByRole('button', { name: /no/i })),
-      () => user.keyboard('{Escape}'),
+  describe('Deleting & Resetting', () => {
+    const modes = [
+      { action: 'delete', onEnter: onEnterDelete, onAct: onDelete },
+      { action: 'reset', onEnter: onEnterReset, onAct: onReset },
     ];
-    for (const cancel of cancelFns) {
-      await user.click(screen.getByRole('button', { name: /delete/i }));
-      await cancel();
-      await waitFor(() =>
-        expect(screen.queryByRole('button', { name: /yes/i })).toBeNull()
-      );
-      expect(screen.queryByRole('button', { name: /no/i })).toBeNull();
-      expect(onDelete).not.toHaveBeenCalledOnce();
+    for (const { action, onAct, onEnter } of modes) {
+      it(`should call the given ${action}-callback when clicking on ${action} button`, async () => {
+        const user = userEvent.setup();
+        render(<ImageToolkitWrapper />);
+        await user.click(
+          screen.getByRole('button', { name: new RegExp(action, 'i') })
+        );
+        expect(onEnter).toHaveBeenCalledOnce();
+      });
+
+      it(`should display ${action} confirmation when clicking on the ${action} button`, async () => {
+        const user = userEvent.setup();
+        render(<ImageToolkitWrapper />);
+        await user.click(
+          screen.getByRole('button', { name: new RegExp(action, 'i') })
+        );
+        expect(
+          screen.getByText(new RegExp(`${action}.*?`, 'i'))
+        ).toBeInTheDocument();
+        expect(
+          screen.getByRole('button', { name: /yes/i })
+        ).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /no/i })).toBeInTheDocument();
+      });
+
+      it(`should automatically focus on the No button from the ${action} confirmation options`, async () => {
+        const user = userEvent.setup();
+        render(<ImageToolkitWrapper />);
+        await user.click(
+          screen.getByRole('button', { name: new RegExp(action, 'i') })
+        );
+        expect(screen.getByRole('button', { name: /yes/i })).not.toHaveFocus();
+        expect(screen.getByRole('button', { name: /no/i })).toHaveFocus();
+        expect(onAct).not.toHaveBeenCalledOnce();
+      });
+
+      it(`should confirm the ${action} when clicking on the Yes button`, async () => {
+        const user = userEvent.setup();
+        render(<ImageToolkitWrapper />);
+        await user.click(
+          screen.getByRole('button', { name: new RegExp(action, 'i') })
+        );
+        await user.click(screen.getByRole('button', { name: /yes/i }));
+        expect(onAct).toHaveBeenCalledOnce();
+        await waitFor(() =>
+          expect(screen.queryByRole('button', { name: /yes/i })).toBeNull()
+        );
+        expect(screen.queryByRole('button', { name: /no/i })).toBeNull();
+      });
+
+      it(`should cancel the ${action} via the No button or the Escape key`, async () => {
+        const user = userEvent.setup();
+        render(<ImageToolkitWrapper />);
+        const cancelFns = [
+          () => user.click(screen.getByRole('button', { name: /no/i })),
+          () => user.keyboard('{Escape}'),
+        ];
+        for (const cancel of cancelFns) {
+          await user.click(
+            screen.getByRole('button', { name: new RegExp(action, 'i') })
+          );
+          await cancel();
+          await waitFor(() =>
+            expect(screen.queryByRole('button', { name: /yes/i })).toBeNull()
+          );
+          expect(screen.queryByRole('button', { name: /no/i })).toBeNull();
+          expect(onAct).not.toHaveBeenCalledOnce();
+        }
+      });
     }
   });
 });

@@ -26,12 +26,13 @@ vi.mock('next/image', async (importOriginal) => {
   return { default: WrappedImage, ...originalData };
 });
 
-const deleteMock = vi.fn();
 const updateMock = vi.fn();
+const deleteMock = vi.fn();
+const resetMock = vi.fn();
 
 const props: React.ComponentProps<typeof MutableImage> = {
   image,
-  mutation: { update: updateMock, delete: deleteMock },
+  mutation: { update: updateMock, delete: deleteMock, reset: resetMock },
 };
 
 const { src, alt, yPos } = image;
