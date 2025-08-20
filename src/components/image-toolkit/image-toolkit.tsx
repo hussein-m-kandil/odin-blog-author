@@ -11,9 +11,11 @@ import { useDrag } from '@/hooks/use-drag';
 import { cn } from '@/lib/utils';
 
 const CURSOR_CN = 'cursor-ns-resize';
+const DEFAULT_OBJ_POS = '50% 50%';
+const DEFAULT_OBJ_FIT = 'cover';
 
 const getImgYPos = (img: HTMLImageElement) => {
-  const matches = (img.style.objectPosition || '50% 50%')
+  const matches = (img.style.objectPosition || DEFAULT_OBJ_POS)
     .matchAll(/\d+/g)
     .toArray()
     .map(([match]) => match);
@@ -33,6 +35,19 @@ export function ImageToolkit({
   image,
 }: ImageToolkitProps) {
   const [mode, setMode] = React.useState<'idle' | 'update' | 'delete'>('idle');
+  const [initImgObjPos, setInitImgObjPos] = React.useState('');
+
+  React.useEffect(() => {
+    if (imgRef.current) {
+      if (!imgRef.current.style.objectFit) {
+        imgRef.current.style.objectFit = DEFAULT_OBJ_FIT;
+      }
+      if (!imgRef.current.style.objectPosition) {
+        imgRef.current.style.objectPosition = DEFAULT_OBJ_POS;
+      }
+      setInitImgObjPos(imgRef.current.style.objectPosition);
+    }
+  }, [imgRef]);
 
   const deleting = mode === 'delete';
   const updating = mode === 'update';
@@ -43,12 +58,14 @@ export function ImageToolkit({
       setMode('idle');
       const img = imgRef.current;
       if (img) {
-        if (options.cancelPosition) setImgYPos(img, image.yPos);
+        if (options.cancelPosition) {
+          img.style.objectPosition = initImgObjPos;
+        }
         img.classList.remove(CURSOR_CN);
         img.focus();
       }
     },
-    [imgRef, image.yPos]
+    [imgRef, initImgObjPos]
   );
 
   const enterDelete = () => {
