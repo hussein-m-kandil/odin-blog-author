@@ -116,28 +116,32 @@ describe('<ImageToolkit />', () => {
     expect(screen.queryByRole('button', { name: /cancel/i })).toBeNull();
   });
 
-  it('should cancel the positioning when clicking on the cancel button', async () => {
+  it('should cancel the positioning via the cancel button or the Escape key', async () => {
     const user = userEvent.setup();
     render(<ImageToolkitWrapper />);
-    await user.click(screen.getByRole('button', { name: /position/i }));
-    await user.click(screen.getByRole('button', { name: /cancel/i }));
-    expect(onUpdate).not.toHaveBeenCalledOnce();
-    await waitFor(() =>
-      expect(screen.queryByRole('button', { name: /save/i })).toBeNull()
-    );
-    expect(screen.queryByRole('button', { name: /cancel/i })).toBeNull();
-  });
-
-  it('should cancel the positioning when pressing the Escape key', async () => {
-    const user = userEvent.setup();
-    render(<ImageToolkitWrapper />);
-    await user.click(screen.getByRole('button', { name: /position/i }));
-    await user.keyboard('{Escape}');
-    await waitFor(() =>
-      expect(screen.queryByRole('button', { name: /save/i })).toBeNull()
-    );
-    expect(screen.queryByRole('button', { name: /cancel/i })).toBeNull();
-    expect(onUpdate).not.toHaveBeenCalledOnce();
+    const cancelFns = [
+      () => user.click(screen.getByRole('button', { name: /cancel/i })),
+      () => user.keyboard('{Escape}'),
+    ];
+    for (const cancel of cancelFns) {
+      const target = screen.getByTestId(TEST_ID) as HTMLImageElement;
+      const initialObjectPosition = target.style.objectPosition;
+      await user.click(screen.getByRole('button', { name: /position/i }));
+      await user.pointer([
+        { keys: '[MouseLeft>]', target, coords: { clientX: 0, clientY: 7 } },
+        { target, coords: { clientX: 42, clientY: 49 } },
+        { keys: '[/MouseLeft]' },
+      ]);
+      await cancel();
+      expect(onUpdate).not.toHaveBeenCalledOnce();
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: /save/i })).toBeNull()
+      );
+      expect(screen.queryByRole('button', { name: /cancel/i })).toBeNull();
+      expect(screen.getByTestId(TEST_ID).style.objectPosition).toBe(
+        initialObjectPosition
+      );
+    }
   });
 
   it('should call the given `onEnterDelete` when clicking on delete button', async () => {
@@ -180,27 +184,21 @@ describe('<ImageToolkit />', () => {
     expect(onDelete).not.toHaveBeenCalledOnce();
   });
 
-  it('should cancel the deletion when clicking on the No button', async () => {
+  it('should cancel the deletion via the No button or the Escape key', async () => {
     const user = userEvent.setup();
     render(<ImageToolkitWrapper />);
-    await user.click(screen.getByRole('button', { name: /delete/i }));
-    await user.click(screen.getByRole('button', { name: /no/i }));
-    expect(onDelete).not.toHaveBeenCalledOnce();
-    await waitFor(() =>
-      expect(screen.queryByRole('button', { name: /yes/i })).toBeNull()
-    );
-    expect(screen.queryByRole('button', { name: /no/i })).toBeNull();
-  });
-
-  it('should cancel the deletion when pressing the Escape key', async () => {
-    const user = userEvent.setup();
-    render(<ImageToolkitWrapper />);
-    await user.click(screen.getByRole('button', { name: /delete/i }));
-    await user.keyboard('{Escape}');
-    await waitFor(() =>
-      expect(screen.queryByRole('button', { name: /yes/i })).toBeNull()
-    );
-    expect(screen.queryByRole('button', { name: /no/i })).toBeNull();
-    expect(onDelete).not.toHaveBeenCalledOnce();
+    const cancelFns = [
+      () => user.click(screen.getByRole('button', { name: /no/i })),
+      () => user.keyboard('{Escape}'),
+    ];
+    for (const cancel of cancelFns) {
+      await user.click(screen.getByRole('button', { name: /delete/i }));
+      await cancel();
+      await waitFor(() =>
+        expect(screen.queryByRole('button', { name: /yes/i })).toBeNull()
+      );
+      expect(screen.queryByRole('button', { name: /no/i })).toBeNull();
+      expect(onDelete).not.toHaveBeenCalledOnce();
+    }
   });
 });

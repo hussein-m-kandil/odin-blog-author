@@ -21,9 +21,7 @@ const getImgYPos = (img: HTMLImageElement) => {
 };
 
 const setImgYPos = (img: HTMLImageElement, yPos: number) => {
-  if (yPos > 100) img.style.objectPosition = '50% 100%';
-  else if (yPos < 0) img.style.objectPosition = '50% 0%';
-  else img.style.objectPosition = `50% ${yPos}%`;
+  img.style.objectPosition = `50% ${yPos}%`;
 };
 
 export function ImageToolkit({
@@ -41,16 +39,16 @@ export function ImageToolkit({
   const idle = mode === 'idle';
 
   const resetMode = React.useCallback(
-    (cancel = false) => {
+    (options = { cancelPosition: false }) => {
       setMode('idle');
       const img = imgRef.current;
       if (img) {
-        if (updating && cancel) setImgYPos(img, image.yPos);
+        if (options.cancelPosition) setImgYPos(img, image.yPos);
         img.classList.remove(CURSOR_CN);
         img.focus();
       }
     },
-    [imgRef, image.yPos, updating]
+    [imgRef, image.yPos]
   );
 
   const enterDelete = () => {
@@ -83,7 +81,7 @@ export function ImageToolkit({
         if (e.key === 'Escape') {
           e.preventDefault();
           e.stopPropagation();
-          resetMode(true);
+          resetMode({ cancelPosition: true });
         }
       };
       window.addEventListener('keydown', cancelMutation, true);
@@ -101,12 +99,16 @@ export function ImageToolkit({
           e.stopPropagation();
           const img = imgRef.current;
           if (img) {
-            if (e.key === 'Enter') updateImage();
-            else {
-              setImgYPos(
-                img,
-                getImgYPos(img) + (e.key === 'ArrowDown' ? -1 : 1)
-              );
+            if (e.key === 'Enter') {
+              updateImage();
+            } else if (e.key === 'ArrowDown') {
+              const oldY = getImgYPos(img);
+              const newY = oldY === 0 ? 100 : oldY - 1;
+              setImgYPos(img, newY);
+            } else if (e.key === 'ArrowUp') {
+              const oldY = getImgYPos(img);
+              const newY = oldY === 100 ? 0 : oldY + 1;
+              setImgYPos(img, newY);
             }
             img.focus();
           }
@@ -122,18 +124,20 @@ export function ImageToolkit({
   useDrag({
     disabled: !updating,
     htmlElementRef: imgRef,
-    onDrag: ({ deltaY }) => {
+    onDrag: ({ deltaY: pointerDY }) => {
       const img = imgRef.current;
       if (img) {
         const scaleFactor = img.width / img.naturalWidth;
         const fullImgH = img.naturalHeight * scaleFactor;
-        const minDY = fullImgH / 100;
-        const absDY = Math.abs(deltaY);
-        const dSign = deltaY / absDY;
-        const dY = dSign * (absDY < minDY ? minDY : deltaY);
-        const dYPercent = Math.ceil((dY * 100) / fullImgH);
-        const newImgYPos = getImgYPos(img) - dYPercent;
-        setImgYPos(img, newImgYPos);
+        const minImgDY = fullImgH / 100;
+        const absPDY = Math.abs(pointerDY);
+        const dYSign = absPDY !== 0 ? pointerDY / absPDY : 1;
+        const dY = dYSign * (absPDY < minImgDY ? minImgDY : absPDY);
+        const dYPercent = Math.round((dY * 100) / fullImgH);
+        const oldYPos = getImgYPos(img);
+        const newYPos = oldYPos - dYPercent;
+        const clampedYPos = Math.min(100, Math.max(0, newYPos));
+        setImgYPos(img, clampedYPos);
       }
     },
   });
@@ -221,7 +225,7 @@ export function ImageToolkit({
                   </Button>
                   <Button
                     {...commonBtnProps}
-                    onClick={() => resetMode()}
+                    onClick={() => resetMode({ cancelPosition: true })}
                     className={cn(
                       commonBtnProps.className,
                       'text-muted-foreground!'
