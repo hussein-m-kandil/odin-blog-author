@@ -4,11 +4,11 @@ import React from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'motion/react';
 import { ImageToolkitProps } from './image-toolkit.types';
 import { Separator } from '@/components/ui/separator';
+import { cn, wrapNum, clampNum } from '@/lib/utils';
+import { MoveVertical, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Small } from '@/components/typography';
-import { MoveVertical, Trash } from 'lucide-react';
 import { useDrag } from '@/hooks/use-drag';
-import { cn } from '@/lib/utils';
 
 const CURSOR_CN = 'cursor-ns-resize';
 const DEFAULT_OBJ_POS = '50% 50%';
@@ -119,13 +119,9 @@ export function ImageToolkit({
             if (e.key === 'Enter') {
               updateImage();
             } else if (e.key === 'ArrowDown') {
-              const oldY = getImgYPos(img);
-              const newY = oldY === 0 ? 100 : oldY - 1;
-              setImgYPos(img, newY);
+              setImgYPos(img, wrapNum(getImgYPos(img), -1, 0, 100));
             } else if (e.key === 'ArrowUp') {
-              const oldY = getImgYPos(img);
-              const newY = oldY === 100 ? 0 : oldY + 1;
-              setImgYPos(img, newY);
+              setImgYPos(img, wrapNum(getImgYPos(img), 1, 0, 100));
             }
             img.focus();
           }
@@ -144,17 +140,10 @@ export function ImageToolkit({
     onDrag: ({ deltaY: pointerDY }) => {
       const img = imgRef.current;
       if (img) {
-        const scaleFactor = img.width / img.naturalWidth;
-        const fullImgH = img.naturalHeight * scaleFactor;
-        const minImgDY = fullImgH / 100;
         const absPDY = Math.abs(pointerDY);
         const dYSign = absPDY !== 0 ? pointerDY / absPDY : 1;
-        const dY = dYSign * (absPDY < minImgDY ? minImgDY : absPDY);
-        const dYPercent = Math.round((dY * 100) / fullImgH);
-        const oldYPos = getImgYPos(img);
-        const newYPos = oldYPos - dYPercent;
-        const clampedYPos = Math.min(100, Math.max(0, newYPos));
-        setImgYPos(img, clampedYPos);
+        const dYPercent = dYSign * Math.ceil((absPDY * 100) / img.height);
+        setImgYPos(img, clampNum(getImgYPos(img) - dYPercent, 0, 100));
       }
     },
   });
