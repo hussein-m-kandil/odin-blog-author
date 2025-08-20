@@ -1,7 +1,7 @@
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ImageToolkitProps } from './image-toolkit.types';
-import { act, render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { ImageToolkit } from './image-toolkit';
 import { image } from '@/test-utils';
@@ -160,6 +160,15 @@ describe('<ImageToolkit />', () => {
     expect(screen.getByRole('button', { name: /no/i })).toBeInTheDocument();
   });
 
+  it('should automatically focus on the No button from the delete confirmation options', async () => {
+    const user = userEvent.setup();
+    render(<ImageToolkitWrapper />);
+    await user.click(screen.getByRole('button', { name: /delete/i }));
+    expect(screen.getByRole('button', { name: /yes/i })).not.toHaveFocus();
+    expect(screen.getByRole('button', { name: /no/i })).toHaveFocus();
+    expect(onDelete).not.toHaveBeenCalledOnce();
+  });
+
   it('should confirm the deletion when clicking on the Yes button', async () => {
     const user = userEvent.setup();
     render(<ImageToolkitWrapper />);
@@ -170,18 +179,6 @@ describe('<ImageToolkit />', () => {
       expect(screen.queryByRole('button', { name: /yes/i })).toBeNull()
     );
     expect(screen.queryByRole('button', { name: /no/i })).toBeNull();
-  });
-
-  it('should not confirm the deletion when pressing the Enter key (To avoid delete by mistake)', async () => {
-    const user = userEvent.setup();
-    render(<ImageToolkitWrapper />);
-    await act(async () => {
-      await user.click(screen.getByRole('button', { name: /delete/i }));
-      await user.keyboard('{Enter}');
-    });
-    expect(screen.getByRole('button', { name: /yes/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /no/i })).toBeInTheDocument();
-    expect(onDelete).not.toHaveBeenCalledOnce();
   });
 
   it('should cancel the deletion via the No button or the Escape key', async () => {

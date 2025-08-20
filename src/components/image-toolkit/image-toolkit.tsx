@@ -219,7 +219,10 @@ export function ImageToolkit({
                       Yes
                     </Button>
                     <Separator orientation='vertical' className='min-h-4' />
-                    <Button {...commonBtnProps} onClick={() => resetMode()}>
+                    <Button
+                      autoFocus
+                      {...commonBtnProps}
+                      onClick={() => resetMode()}>
                       No
                     </Button>
                   </div>
