@@ -4,9 +4,9 @@ import { z } from 'zod';
 
 export interface PostFormProps
   extends Omit<React.ComponentProps<'form'>, 'onSubmit'> {
+  shouldUnmountRef: React.Ref<() => Promise<boolean>>;
   post?: Post;
   onSuccess?: () => void;
-  shouldUnmountRef: React.Ref<() => Promise<boolean>>;
 }
 
 export type NewPostInput = z.infer<ReturnType<typeof createPostFormSchema>>;

@@ -8,10 +8,10 @@ import {
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
 import { Query, useMutation, useQueryClient } from '@tanstack/react-query';
 import { parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
+import { ImageForm, ImageFormState } from '@/components/image-form';
 import { PostFormProps, NewPostInput } from './post-form.types';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
-import { ImageForm } from '@/components/image-form';
 import { Querybox } from '@/components/querybox';
 import { Plus, PencilLine } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
@@ -32,9 +32,9 @@ const getInvalidateQueryPredicate = (post?: Post) => {
 };
 
 export function PostForm({
+  shouldUnmountRef,
   post,
   onSuccess,
-  shouldUnmountRef,
   ...formProps
 }: PostFormProps) {
   const postTags = React.useMemo(() => {
@@ -51,7 +51,7 @@ export function PostForm({
   } = useAuthData();
 
   const discardWarningIdRef = React.useRef<number | string>(null);
-  const imageUploadingRef = React.useRef<boolean>(false);
+  const imageFormStateRef = React.useRef<ImageFormState>(null);
   const hookFormRef = React.useRef<UseFormReturn>(null);
 
   const isUpdate = !!post;
@@ -95,7 +95,10 @@ export function PostForm({
     () => {
       return () =>
         new Promise((resolve) => {
-          if (imageUploadingRef.current) {
+          if (
+            imageFormStateRef.current &&
+            imageFormStateRef.current.uploading
+          ) {
             toast.warning('Please wait until the image finishes uploading!');
             return resolve(false);
           }
@@ -177,7 +180,7 @@ export function PostForm({
       <ImageForm
         image={image}
         onSuccess={handleImageUpdate}
-        uploadingRef={imageUploadingRef}
+        stateRef={imageFormStateRef}
       />
       <DynamicForm
         {...formProps}

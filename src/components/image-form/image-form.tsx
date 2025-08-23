@@ -31,19 +31,19 @@ import { toast } from 'sonner';
 
 export function ImageForm({
   label = 'Image',
-  uploadingRef,
-  className,
-  onSuccess,
-  onError,
+  stateRef,
   image,
+  onError,
+  onSuccess,
+  className,
   ...props
 }: ImageFormProps) {
   const [newImage, setNewImage] = React.useState<NewImage | null>(
     image ? getNewImageDataFromImage(image) : null
   );
   const [uploadPercent, setUploadPercent] = React.useState(-1);
+  const [file, setFile] = React.useState<File | null>(null);
   const [uploading, setUploading] = React.useState(false);
-  const [file, setFile] = React.useState<File | null>();
 
   const {
     authData: { authAxios },
@@ -57,7 +57,11 @@ export function ImageForm({
   const toBeUpdated =
     !file && isUpdate && newImage && isNewImageHasUpdates(image, newImage);
 
-  React.useImperativeHandle(uploadingRef, () => uploading, [uploading]);
+  React.useImperativeHandle(
+    stateRef,
+    () => ({ uploadPercent, uploading, newImage, file }),
+    [uploadPercent, uploading, newImage, file]
+  );
 
   React.useEffect(() => {
     return () => {
