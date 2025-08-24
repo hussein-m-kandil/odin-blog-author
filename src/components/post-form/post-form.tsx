@@ -7,8 +7,8 @@ import {
 } from '@/components/dynamic-form';
 import { createPostFormAttrs, createPostFormSchema } from './post-form.data';
 import { Query, useMutation, useQueryClient } from '@tanstack/react-query';
+import { ImageInput, useImageInputState } from '@/components/image-input';
 import { parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
-import { ImageForm, ImageFormState } from '@/components/image-form';
 import { PostFormProps, NewPostInput } from './post-form.types';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
@@ -16,8 +16,9 @@ import { Querybox } from '@/components/querybox';
 import { Plus, PencilLine } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import { Tag, Image, Post } from '@/types';
+import { AxiosRequestConfig } from 'axios';
 import { Tags } from '@/components/tags';
+import { Tag, Post } from '@/types';
 import { toast } from 'sonner';
 
 const MAX_TAGS_NUM = 7;
@@ -40,37 +41,57 @@ export function PostForm({
   const postTags = React.useMemo(() => {
     return post?.tags.map((t) => t.name) || [];
   }, [post]);
-
-  const [image, setImage] = React.useState<Image | null>(post?.image || null);
   const [tags, setTags] = React.useState<string[]>(postTags);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [tagsError, setTagsError] = React.useState('');
   const router = useRouter();
+
   const {
     authData: { authAxios },
   } = useAuthData();
 
+  const {
+    handleUploadProgress,
+    applyNewImage,
+    clearNewImage,
+    setNewImage,
+    mode,
+    newImage,
+    imageFile,
+    fileInputRef,
+    uploadPercent,
+  } = useImageInputState(post?.image);
+
   const discardWarningIdRef = React.useRef<number | string>(null);
-  const imageFormStateRef = React.useRef<ImageFormState>(null);
   const hookFormRef = React.useRef<UseFormReturn>(null);
 
   const isUpdate = !!post;
+  const imageModified = mode !== 'idle';
   const postFormAttrs = createPostFormAttrs(post);
   const postFormSchema = createPostFormSchema(postFormAttrs);
 
   const queryClient = useQueryClient();
 
-  const { mutate } = useMutation<
+  const { mutate, isPending } = useMutation<
     Post,
     Error | Response,
     Parameters<DynamicFormSubmitHandler<NewPostInput>>
   >({
     mutationFn: async (submitArgs) => {
-      const formValues = submitArgs[1];
-      const body = { ...formValues, tags, image: image?.id };
+      const body = new FormData();
+      const formEntries = Object.entries(submitArgs[1]);
+      formEntries.forEach(([k, v]) => body.set(k, v));
+      tags.forEach((t, i) => body.set(`tags[${i}]`, t));
+      if (imageFile) body.set('image', imageFile);
+      Object.entries(newImage || {}).forEach(([k, v]) =>
+        body.set(`imagedata[${k}]`, v)
+      );
+      const config: AxiosRequestConfig = {
+        onUploadProgress: handleUploadProgress,
+      };
       const { data } = await (isUpdate
-        ? authAxios.put<Post>(`/posts/${post.id}`, body)
-        : authAxios.post<Post>('/posts', body));
+        ? authAxios.put<Post>(`/posts/${post.id}`, body, config)
+        : authAxios.post<Post>('/posts', body, config));
       return data;
     },
     onSuccess: async (resPost, [hookForm]) => {
@@ -95,15 +116,12 @@ export function PostForm({
     () => {
       return () =>
         new Promise((resolve) => {
-          if (
-            imageFormStateRef.current &&
-            imageFormStateRef.current.uploading
-          ) {
-            toast.warning('Please wait until the image finishes uploading!');
-            return resolve(false);
-          }
           if (discardWarningIdRef.current !== null) {
             toast.dismiss(discardWarningIdRef.current);
+          }
+          if (isPending) {
+            toast.warning('Please wait until the image finishes submitting!');
+            return resolve(false);
           }
           const textFieldNames = Object.entries(postFormAttrs)
             .filter((attr) => attr[1].type === 'text')
@@ -115,10 +133,10 @@ export function PostForm({
               if (isFormDirty) break;
             }
           }
-          const hasNotSavedImage = image && (!isUpdate || !post.image);
           const hasNewTags =
-            tags.length && JSON.stringify(postTags) !== JSON.stringify(tags);
-          if (!isFormDirty && !hasNotSavedImage && !hasNewTags) {
+            tags.length !== postTags.length ||
+            tags.some((t) => !postTags.includes(t));
+          if (!isFormDirty && !imageModified && !hasNewTags) {
             return resolve(true);
           }
           discardWarningIdRef.current = toast.warning(
@@ -133,18 +151,13 @@ export function PostForm({
               action: { label: 'Keep', onClick: () => resolve(false) },
               cancel: {
                 label: 'Discard',
-                onClick: () => {
-                  if (hasNotSavedImage) {
-                    authAxios.delete(`/images/${image.id}`).catch();
-                  }
-                  resolve(true);
-                },
+                onClick: () => resolve(true),
               },
             }
           );
         });
     },
-    [postFormAttrs, authAxios, postTags, isUpdate, image, post, tags]
+    [postFormAttrs, imageModified, postTags, isPending, tags]
   );
 
   const validateTag = (value: string) => /^\w*$/.test(value);
@@ -167,20 +180,19 @@ export function PostForm({
     }
   };
 
-  const handleImageUpdate = (data: Image | null) => {
-    setImage(data);
-    queryClient.invalidateQueries({
-      predicate: getInvalidateQueryPredicate(post),
-    });
-  };
-
   return (
     <div>
       <ErrorMessage>{errorMessage}</ErrorMessage>
-      <ImageForm
-        image={image}
-        onSuccess={handleImageUpdate}
-        stateRef={imageFormStateRef}
+      <ImageInput
+        ref={fileInputRef}
+        newImage={newImage}
+        uploadPercent={uploadPercent}
+        clearNewImage={clearNewImage}
+        applyNewImage={applyNewImage}
+        setNewImage={setNewImage}
+        submitting={isPending}
+        imageFile={imageFile}
+        image={post?.image}
       />
       <DynamicForm
         {...formProps}

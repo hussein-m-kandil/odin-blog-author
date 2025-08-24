@@ -3,10 +3,10 @@ import { UpdateImage, UploadImage, DeleteImage } from './image-form.types';
 const ENDPOINT = '/images';
 
 export const uploadImage: UploadImage = async ({
-  file,
   image,
+  newImage,
+  imageFile,
   authAxios,
-  newImage: newImageData,
   onUploadProgress,
   onSuccess,
   onError,
@@ -14,9 +14,9 @@ export const uploadImage: UploadImage = async ({
   let result = null;
   try {
     const body = new FormData();
-    body.set('image', file);
-    if (newImageData) {
-      const newImageEntries = Object.entries(newImageData);
+    body.set('image', imageFile);
+    if (newImage) {
+      const newImageEntries = Object.entries(newImage);
       for (const [k, v] of newImageEntries) {
         body.set(k, v);
       }

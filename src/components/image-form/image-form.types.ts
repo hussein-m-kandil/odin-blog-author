@@ -1,18 +1,11 @@
 import { AxiosInstance, AxiosProgressEvent } from 'axios';
 import { Image, NewImage } from '@/types';
 
-export interface ImageFormState {
-  newImage: NewImage | null;
-  uploadPercent: number;
-  uploading: boolean;
-  file: File | null;
-}
-
 export interface ImageFormProps
   extends Omit<React.ComponentProps<'form'>, 'onSubmit'> {
-  stateRef?: React.Ref<ImageFormState>;
   onSuccess?: (image: Image | null) => void;
   onError?: (error: unknown) => void;
+  submittingRef?: React.Ref<boolean>;
   image?: Image | null;
   label?: string;
 }
@@ -29,7 +22,7 @@ export type UploadImage = (
   data: Omit<ImageFormServiceData, 'image'> & {
     onUploadProgress: (e: AxiosProgressEvent) => void;
     image: ImageFormProps['image'];
-    file: File;
+    imageFile: File;
   }
 ) => Promise<Image | null>;
 

@@ -2,101 +2,56 @@
 
 import React from 'react';
 import {
-  cn,
-  isNewImageHasUpdates,
-  parseAxiosAPIError,
-  getUnknownErrorMessage,
-  getNewImageDataFromImage,
-} from '@/lib/utils';
-import {
   UploadImage,
   UpdateImage,
   DeleteImage,
   ImageFormProps,
 } from './image-form.types';
-import {
-  MutableImage,
-  MutableImageProps,
-  MutableImageSkeleton,
-} from '@/components/mutable-image';
+import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { uploadImage, updateImage, deleteImage } from './image-form.services';
 import { Loader, ImageUp, ImagePlus, ImageMinus } from 'lucide-react';
+import { ImageInput, useImageInputState } from '../image-input';
 import { useAuthData } from '@/contexts/auth-context';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Image, NewImage } from '@/types';
 import { toast } from 'sonner';
 
 export function ImageForm({
   label = 'Image',
-  stateRef,
-  image,
+  submittingRef,
+  className,
+  image: initImage,
   onError,
   onSuccess,
-  className,
   ...props
 }: ImageFormProps) {
-  const [newImage, setNewImage] = React.useState<NewImage | null>(
-    image ? getNewImageDataFromImage(image) : null
-  );
-  const [uploadPercent, setUploadPercent] = React.useState(-1);
-  const [file, setFile] = React.useState<File | null>(null);
-  const [uploading, setUploading] = React.useState(false);
+  const [submitting, setSubmitting] = React.useState(false);
+
+  React.useImperativeHandle(submittingRef, () => submitting, [submitting]);
 
   const {
     authData: { authAxios },
   } = useAuthData();
 
-  const fileInpRef = React.useRef<HTMLInputElement>(null);
-
-  const isUpdate = !!image;
-  const toBeUploaded = file && newImage;
-  const toBeDeleted = isUpdate && !newImage;
-  const toBeUpdated =
-    !file && isUpdate && newImage && isNewImageHasUpdates(image, newImage);
-
-  React.useImperativeHandle(
-    stateRef,
-    () => ({ uploadPercent, uploading, newImage, file }),
-    [uploadPercent, uploading, newImage, file]
-  );
-
-  React.useEffect(() => {
-    return () => {
-      if (toBeUploaded) {
-        URL.revokeObjectURL(newImage.src);
-      }
-    };
-  }, [toBeUploaded, newImage]);
-
-  const setNewImageData = (selectedFile: File) => {
-    setFile(selectedFile);
-    if (newImage) URL.revokeObjectURL(newImage.src);
-    const src = URL.createObjectURL(selectedFile);
-    setNewImage({ yPos: 50, xPos: 50, info: '', alt: '', src });
-  };
-
-  const resetNewImageData = (prevImage?: Image | null) => {
-    setFile(null);
-    if (fileInpRef.current) fileInpRef.current.value = '';
-    setNewImage(prevImage ? getNewImageDataFromImage(prevImage) : null);
-    if (newImage) URL.revokeObjectURL(newImage.src);
-  };
-
-  const handleUploadProgress: Parameters<UploadImage>['0']['onUploadProgress'] =
-    ({ loaded, total }) => {
-      if (loaded && total) {
-        const intProgressPercent = Math.floor((loaded / total) * 100);
-        const newUploadPercent = (intProgressPercent % 100) - 1;
-        setUploadPercent(newUploadPercent);
-      }
-    };
+  const {
+    handleUploadProgress,
+    applyNewImage,
+    clearNewImage,
+    setNewImage,
+    mode,
+    image,
+    newImage,
+    imageFile,
+    shouldDelete,
+    shouldUpdate,
+    shouldUpload,
+    fileInputRef,
+    uploadPercent,
+  } = useImageInputState(initImage);
 
   const getUploadData = (baseData: {
-    file: File;
     newImage: NewImage;
+    imageFile: File;
   }): Parameters<UploadImage>['0'] => {
     return {
       ...baseData,
@@ -104,7 +59,7 @@ export function ImageForm({
       authAxios,
       onUploadProgress: handleUploadProgress,
       onSuccess: (uploadedImage) => {
-        resetNewImageData(uploadedImage);
+        clearNewImage(uploadedImage);
         toast.success('Upload succeeded', {
           description: 'Your image have been uploaded successfully',
         });
@@ -126,7 +81,7 @@ export function ImageForm({
       ...baseData,
       authAxios,
       onSuccess: (updatedImage) => {
-        resetNewImageData(updatedImage);
+        clearNewImage(updatedImage);
         toast.success('Update succeeded', {
           description: 'Your image have been updated successfully',
         });
@@ -149,7 +104,7 @@ export function ImageForm({
       ...baseData,
       authAxios,
       onSuccess: () => {
-        resetNewImageData();
+        clearNewImage();
         toast.success('Delete succeeded', {
           description: 'Your image have been deleted successfully',
         });
@@ -167,51 +122,25 @@ export function ImageForm({
 
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    setUploading(true);
-    if (toBeUploaded) {
-      await uploadImage(getUploadData({ file, newImage }));
-    } else if (toBeUpdated) {
+    setSubmitting(true);
+    if (mode === 'upload') {
+      await uploadImage(getUploadData({ imageFile, newImage }));
+    } else if (mode === 'update') {
       await updateImage(getUpdateData({ image, newImage }));
-    } else if (toBeDeleted) {
+    } else if (mode === 'delete') {
       await deleteImage(getDeleteData({ image }));
     } else {
       toast.warning('There are no pending changes to submit!');
     }
-    setUploading(false);
+    setSubmitting(false);
   };
 
-  const handleFileChange: React.EventHandler<
-    React.ChangeEvent<HTMLInputElement>
-  > = (e) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      if (selectedFile.type.startsWith('image/')) {
-        setNewImageData(selectedFile);
-      } else {
-        resetNewImageData();
-        toast.error('Please select a valid image file!');
-      }
-    }
-  };
-
-  const imageMutation: MutableImageProps['mutation'] =
-    image || newImage
-      ? {
-          update: (data) => newImage && setNewImage({ ...newImage, ...data }),
-          delete: () => resetNewImageData(file ? image : null),
-          reset: () => {
-            if (file) setNewImageData(file);
-            else resetNewImageData(image);
-          },
-        }
-      : null;
-
-  const submitter = toBeDeleted
+  const submitter = shouldDelete
     ? {
         idle: { icon: <ImageMinus />, label: `Delete ${label.toLowerCase()}` },
         submitting: { label: 'Deleting...' },
       }
-    : isUpdate && !file
+    : initImage && !imageFile
     ? {
         idle: { icon: <ImagePlus />, label: `Update ${label.toLowerCase()}` },
         submitting: { label: 'Updating...' },
@@ -227,34 +156,25 @@ export function ImageForm({
       onSubmit={handleSubmit}
       aria-label={submitter.idle.label}
       className={cn('w-full my-4 space-y-2', className)}>
-      <Label htmlFor='image'>{label}</Label>
-      <div className='relative'>
-        {uploading ? (
-          <MutableImageSkeleton />
-        ) : (
-          <MutableImage image={newImage} mutation={imageMutation} />
-        )}
-        {uploadPercent >= 0 && (
-          <Progress
-            value={uploadPercent}
-            className='absolute bottom-0 w-full rounded-none shadow'
-          />
-        )}
-      </div>
-      <Input
-        id='image'
-        type='file'
-        name='image'
-        accept='image/*'
-        ref={fileInpRef}
-        disabled={uploading}
-        onChange={handleFileChange}
+      <ImageInput
+        ref={fileInputRef}
+        newImage={newImage}
+        submitting={submitting}
+        uploadPercent={uploadPercent}
+        clearNewImage={clearNewImage}
+        applyNewImage={applyNewImage}
+        setNewImage={setNewImage}
+        imageFile={imageFile}
+        image={image}
+        label={label}
       />
       <Button
         type='submit'
         className='w-full'
-        disabled={(!toBeUploaded && !toBeUpdated && !toBeDeleted) || uploading}>
-        {uploading ? (
+        disabled={
+          (!shouldUpload && !shouldUpdate && !shouldDelete) || submitting
+        }>
+        {submitting ? (
           <>
             <Loader aria-label='Uploading' className='animate-spin' />{' '}
             {submitter.submitting.label}
