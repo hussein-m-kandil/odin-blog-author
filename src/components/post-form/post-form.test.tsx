@@ -13,6 +13,7 @@ import { AuthProvider } from '@/contexts/auth-context';
 import { post, initAuthData } from '@/test-utils';
 import { axiosMock } from '@/__mocks__/axios';
 import { PostForm } from './post-form';
+import { Toaster } from 'sonner';
 import { Post } from '@/types';
 
 const PostFormWrapper = (
@@ -28,6 +29,7 @@ const PostFormWrapper = (
       }>
       <AuthProvider initAuthData={initAuthData}>
         <PostForm {...props} shouldUnmountRef={shouldUnmountRef} />
+        <Toaster />
       </AuthProvider>
     </QueryClientProvider>
   );

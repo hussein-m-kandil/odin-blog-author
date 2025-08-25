@@ -42,7 +42,6 @@ export function PostForm({
     return post?.tags.map((t) => t.name) || [];
   }, [post]);
   const [tags, setTags] = React.useState<string[]>(postTags);
-  const [errorMessage, setErrorMessage] = React.useState('');
   const [tagsError, setTagsError] = React.useState('');
   const router = useRouter();
 
@@ -97,7 +96,6 @@ export function PostForm({
     },
     onSuccess: async (resPost, [hookForm]) => {
       hookForm.reset();
-      setErrorMessage('');
       await queryClient.invalidateQueries({
         predicate: getInvalidateQueryPredicate(post),
       });
@@ -106,10 +104,12 @@ export function PostForm({
     },
     onError: async (error, [hookForm]) => {
       refreshNewImageUrl();
-      setErrorMessage(
-        parseAxiosAPIError(error, hookForm).message ||
-          getUnknownErrorMessage(error)
-      );
+      toast.error('Post submission failed', {
+        description:
+          parseAxiosAPIError(error, hookForm).message ||
+          getUnknownErrorMessage(error),
+        duration: Infinity,
+      });
     },
   });
 
@@ -184,7 +184,6 @@ export function PostForm({
 
   return (
     <div>
-      <ErrorMessage>{errorMessage}</ErrorMessage>
       <ImageInput
         ref={fileInputRef}
         newImage={newImage}
