@@ -46,8 +46,8 @@ export function UserProfile({ owner }: { owner: User }) {
       description: 'All fields are optional',
       body: (
         <AuthForm
-          className='w-full mt-0'
           onSuccess={hideDialog}
+          onClose={hideDialog}
           formType='update'
         />
       ),
