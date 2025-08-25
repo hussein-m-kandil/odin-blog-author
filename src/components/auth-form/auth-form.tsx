@@ -15,8 +15,14 @@ import {
   refineSignupSchema,
   updateUserFormAttrs,
 } from './auth-form.data';
+import {
+  LogIn,
+  UserPen,
+  UserPlus,
+  UserCheck,
+  PanelLeftClose,
+} from 'lucide-react';
 import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
-import { LogIn, UserPen, UserPlus, UserCheck } from 'lucide-react';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
 import { AuthFormProps } from './auth-form.types';
@@ -27,7 +33,12 @@ import { AuthResData } from '@/types';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
-export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
+export function AuthForm({
+  className,
+  formType,
+  onSuccess,
+  onClose,
+}: AuthFormProps) {
   const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
 
@@ -136,7 +147,7 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
   };
 
   return (
-    <div className={cn('px-4 max-w-md mx-auto mt-6', className)}>
+    <div className={cn('w-full max-w-md mx-auto mt-4 space-y-4', className)}>
       <ErrorMessage>{errorMessage}</ErrorMessage>
       <DynamicForm
         aria-label={`${formType}${formType === 'update' ? ' user' : ''} form`}
@@ -161,6 +172,15 @@ export function AuthForm({ className, formType, onSuccess }: AuthFormProps) {
             <UserCheck /> Sign in as guest
           </Button>
         </div>
+      )}
+      {onClose && (
+        <Button
+          type='button'
+          variant='outline'
+          className='w-full'
+          onClick={onClose}>
+          <PanelLeftClose /> Close
+        </Button>
       )}
     </div>
   );

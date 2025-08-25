@@ -119,6 +119,13 @@ describe(`<AuthForm />`, () => {
         expect(container.firstElementChild).toHaveClass(className);
       });
 
+      it('should call the given `onClose` after clicking the close button', async () => {
+        const onClose = vi.fn();
+        const { user } = await setup({ ...props, onClose });
+        await user.click(screen.getByRole('button', { name: /close/i }));
+        expect(onClose).toHaveBeenCalledOnce();
+      });
+
       it('should have a guest sign-in button', async () => {
         await setup(props);
         expect(
