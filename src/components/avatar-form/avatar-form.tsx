@@ -44,6 +44,7 @@ export function AvatarForm({
       .then(({ data }) => {
         setErrorMessage('');
         signin(data);
+        onClose?.();
       })
       .catch(() => {
         updateAvatarInAuthData(image);
