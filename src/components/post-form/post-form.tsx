@@ -52,6 +52,7 @@ export function PostForm({
 
   const {
     handleUploadProgress,
+    refreshNewImageUrl,
     applyNewImage,
     clearNewImage,
     setNewImage,
@@ -104,6 +105,7 @@ export function PostForm({
       if (!isUpdate) router.push(`/${resPost.id}`);
     },
     onError: async (error, [hookForm]) => {
+      refreshNewImageUrl();
       setErrorMessage(
         parseAxiosAPIError(error, hookForm).message ||
           getUnknownErrorMessage(error)
