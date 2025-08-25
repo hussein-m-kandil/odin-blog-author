@@ -46,6 +46,14 @@ export function setURlParams(
   return srcUrl.href;
 }
 
+export const createObjectURL = (
+  selectedFile: Blob | MediaSource,
+  oldURLToRevoke?: string
+) => {
+  if (oldURLToRevoke) URL.revokeObjectURL(oldURLToRevoke);
+  return URL.createObjectURL(selectedFile);
+};
+
 export function getNewImageDataFromImage(image: Image): NewImage {
   return {
     src: setURlParams(image.src, { updatedAt: image.updatedAt }),
