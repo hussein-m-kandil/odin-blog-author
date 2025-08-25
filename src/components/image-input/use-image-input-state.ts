@@ -1,5 +1,9 @@
 import React from 'react';
-import { getNewImageDataFromImage, isNewImageHasUpdates } from '@/lib/utils';
+import {
+  createObjectURL,
+  isNewImageHasUpdates,
+  getNewImageDataFromImage,
+} from '@/lib/utils';
 import { ImageInputState, ImageInputProps } from './image-input.types';
 import { AxiosProgressEvent } from 'axios';
 import { Image, NewImage } from '@/types';
@@ -22,12 +26,22 @@ export const useImageInputState = (image?: ImageInputProps['image']) => {
   const applyNewImage = React.useCallback(
     (selectedFile: File) => {
       setFile(selectedFile);
-      if (newImage) URL.revokeObjectURL(newImage.src);
-      const src = URL.createObjectURL(selectedFile);
+      const src = createObjectURL(selectedFile, newImage?.src);
       setNewImage({ yPos: 50, xPos: 50, info: '', alt: '', src });
     },
     [newImage]
   );
+
+  const refreshNewImageUrl = React.useCallback(() => {
+    if (imageFile) {
+      if (newImage) {
+        const src = createObjectURL(imageFile, newImage.src);
+        setNewImage({ ...newImage, src });
+      } else {
+        applyNewImage(imageFile);
+      }
+    }
+  }, [imageFile, newImage, applyNewImage]);
 
   const clearNewImage = React.useCallback(
     (prevImage?: Image | null) => {
@@ -51,13 +65,14 @@ export const useImageInputState = (image?: ImageInputProps['image']) => {
   };
 
   return {
+    ...getImageState({ image, newImage, imageFile }),
     handleUploadProgress,
+    refreshNewImageUrl,
     applyNewImage,
     clearNewImage,
     setNewImage,
     fileInputRef,
     uploadPercent,
-    ...getImageState({ image, newImage, imageFile }),
   };
 };
 
