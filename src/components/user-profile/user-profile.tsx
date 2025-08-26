@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { DeleteProfileForm } from '@/components/delete-profile-form';
+import { UserPen, ImageIcon, Trash2 } from 'lucide-react';
 import { UserAvatar } from '@/components/user-avatar';
 import { useDialog } from '@/contexts/dialog-context';
 import { Muted } from '@/components/typography/muted';
@@ -8,7 +10,6 @@ import { useAuthData } from '@/contexts/auth-context';
 import { Separator } from '@/components/ui/separator';
 import { AvatarForm } from '@/components/avatar-form';
 import { Lead } from '@/components/typography/lead';
-import { UserPen, ImageIcon } from 'lucide-react';
 import { AuthForm } from '@/components/auth-form';
 import { Button } from '@/components/ui/button';
 import { H1 } from '@/components/typography/h1';
@@ -54,15 +55,29 @@ export function UserProfile({ owner }: { owner: User }) {
     });
   };
 
+  const deleteProfile = () => {
+    showDialog({
+      title: 'Delete Profile',
+      description: (
+        <span>
+          <strong>WARNING!</strong> You are about to <em>permanently</em> delete
+          your profile.
+        </span>
+      ),
+      body: <DeleteProfileForm onSuccess={hideDialog} onCancel={hideDialog} />,
+    });
+  };
+
   type ButtonProps = React.ComponentProps<typeof Button>;
   const createMutateBtnProps = (
     label: string,
-    onClick: ButtonProps['onClick']
+    onClick: ButtonProps['onClick'],
+    variant: ButtonProps['variant'] = 'outline'
   ): ButtonProps => ({
     ['aria-label']: label,
-    variant: 'outline',
     type: 'button',
     size: 'icon',
+    variant,
     onClick,
   });
 
@@ -78,12 +93,21 @@ export function UserProfile({ owner }: { owner: User }) {
           <H1 className='wrap-anywhere'>{owner.fullname}</H1>
           <Muted>@{owner.username}</Muted>
           {ownedByCurrentUser && (
-            <div className='mt-2 flex justify-center gap-2'>
+            <div className='w-full max-w-36 mx-auto mt-2 flex justify-center items-center gap-2'>
               <Button {...createMutateBtnProps('Edit avatar', editAvatar)}>
                 <ImageIcon />
               </Button>
               <Button {...createMutateBtnProps('Edit profile', editProfile)}>
                 <UserPen />
+              </Button>
+              <Separator orientation='vertical' className='min-h-8 mx-auto' />
+              <Button
+                {...createMutateBtnProps(
+                  'Delete profile',
+                  deleteProfile,
+                  'destructive'
+                )}>
+                <Trash2 />
               </Button>
             </div>
           )}

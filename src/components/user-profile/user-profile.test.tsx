@@ -78,6 +78,18 @@ describe('<UserProfile />', () => {
     expect(showDialog).toHaveBeenCalledOnce();
   });
 
+  it('should show delete profile button', () => {
+    render(<UserProfileWrapper owner={author} />);
+    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+  });
+
+  it('should show a dialog after clicking on delete profile button', async () => {
+    const user = userEvent.setup();
+    render(<UserProfileWrapper owner={author} />);
+    await user.click(screen.getByRole('button', { name: /delete/i }));
+    expect(showDialog).toHaveBeenCalledOnce();
+  });
+
   it('should not show edit profile button for users other than the owner', () => {
     getAuthDataMock.mockImplementationOnce(() => ({
       ...initAuthData,
@@ -94,6 +106,15 @@ describe('<UserProfile />', () => {
     }));
     render(<UserProfileWrapper owner={author} />);
     expect(screen.queryByRole('button', { name: /edit avatar/i })).toBeNull();
+  });
+
+  it('should not show delete profile button for users other than the owner', () => {
+    getAuthDataMock.mockImplementationOnce(() => ({
+      ...initAuthData,
+      user: { ...author, id: randomUUID },
+    }));
+    render(<UserProfileWrapper owner={author} />);
+    expect(screen.queryByRole('button', { name: /delete/i })).toBeNull();
   });
 });
 
