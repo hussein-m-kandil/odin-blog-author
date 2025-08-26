@@ -10,6 +10,7 @@ export function DeleteForm({
   subject,
   onCancel,
   onDelete,
+  children,
   ...formProps
 }: Omit<React.ComponentProps<'form'>, 'onSubmit'> & {
   errorMessage?: string;
@@ -30,13 +31,15 @@ export function DeleteForm({
       onSubmit={handleSubmit}
       aria-label={`Delete confirmation form for ${subject}`}>
       <ErrorMessage>{errorMessage}</ErrorMessage>
-      <P className='max-sm:text-center'>
-        Do you really want to delete
-        <span className='font-bold'>{` "${
-          subject.length > 24 ? subject.slice(0, 21) + '...' : subject
-        }"`}</span>
-        ?
-      </P>
+      {children || (
+        <P className='max-sm:text-center'>
+          Do you really want to delete
+          <span className='font-bold'>{` "${
+            subject.length > 24 ? subject.slice(0, 21) + '...' : subject
+          }"`}</span>
+          ?
+        </P>
+      )}
       <div className='flex justify-end max-[320px]:flex-col max-sm:justify-center gap-4 mt-5 *:min-w-26'>
         <Button
           type='reset'

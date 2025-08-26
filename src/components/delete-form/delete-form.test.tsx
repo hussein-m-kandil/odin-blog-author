@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { DeleteForm } from './delete-form';
 
-describe('<DeletePostForm />', () => {
+describe('<DeleteForm />', () => {
   const onDelete = vi.fn();
   const onCancel = vi.fn();
   const subject = 'Delete Test';
@@ -16,10 +16,20 @@ describe('<DeletePostForm />', () => {
 
   afterEach(vi.clearAllMocks);
 
-  it('should be identified by the post title', () => {
+  it('should be identified by the subject', () => {
     render(<DeleteForm {...props} />);
     const form = screen.getByRole('form', { name });
     expect(form).toBeInTheDocument();
+  });
+
+  it('should display the given children', () => {
+    const children = [
+      <p key={0}>Blah</p>,
+      <input key={1} type='text' aria-label='Foo' />,
+    ];
+    render(<DeleteForm {...props}>{children}</DeleteForm>);
+    expect(screen.getByText('Blah')).toBeInTheDocument();
+    expect(screen.getByLabelText('Foo')).toBeInTheDocument();
   });
 
   it('should represent the given form method', () => {
