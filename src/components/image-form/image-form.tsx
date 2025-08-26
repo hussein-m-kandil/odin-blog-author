@@ -17,14 +17,17 @@ import { Image, NewImage } from '@/types';
 import { toast } from 'sonner';
 
 export function ImageForm({
-  label = 'Image',
+  isAvatar = false,
+  image: initImage,
+  label: initLabel,
   submittingRef,
   className,
-  image: initImage,
   onError,
   onSuccess,
   ...props
 }: ImageFormProps) {
+  const label = initLabel || (isAvatar ? 'Avatar' : 'Image');
+
   const [submitting, setSubmitting] = React.useState(false);
 
   React.useImperativeHandle(submittingRef, () => submitting, [submitting]);

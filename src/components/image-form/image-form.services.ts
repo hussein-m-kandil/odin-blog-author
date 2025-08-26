@@ -4,6 +4,7 @@ const ENDPOINT = '/images';
 
 export const uploadImage: UploadImage = async ({
   image,
+  userid,
   newImage,
   imageFile,
   authAxios,
@@ -15,6 +16,7 @@ export const uploadImage: UploadImage = async ({
   try {
     const body = new FormData();
     body.set('image', imageFile);
+    if (userid) body.set('userid', userid);
     if (newImage) {
       const newImageEntries = Object.entries(newImage);
       for (const [k, v] of newImageEntries) {
@@ -47,6 +49,7 @@ export const uploadImage: UploadImage = async ({
 };
 
 export const updateImage: UpdateImage = async ({
+  userid,
   newImage,
   authAxios,
   image: { id, ...oldImage },
@@ -56,7 +59,7 @@ export const updateImage: UpdateImage = async ({
   let result = null;
   try {
     const url = `${ENDPOINT}/${id}`;
-    const body = { ...oldImage, ...newImage };
+    const body = { ...oldImage, ...newImage, userid };
     const { data } = await authAxios.put<
       NonNullable<Awaited<ReturnType<UpdateImage>>>
     >(url, body);
