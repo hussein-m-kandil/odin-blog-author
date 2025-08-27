@@ -38,13 +38,31 @@ describe('<ImageForm />', () => {
     expect(submitter).toHaveAttribute('type', 'submit');
   });
 
-  it('should display upload form if given an image', () => {
-    render(<ImageFormWrapper image={image} />);
+  it('should display update form if given an image', () => {
+    render(<ImageFormWrapper initImage={image} />);
     const form = screen.getByRole('form', { name: /update/i });
     const submitter = screen.getByRole('button', { name: /update/i });
     expect(form).toBeInTheDocument();
     expect(submitter).toBeDisabled();
     expect(submitter).toHaveAttribute('type', 'submit');
+  });
+
+  it('should not display the close button if not given `onClose` prop', () => {
+    render(<ImageFormWrapper />);
+    expect(screen.queryByRole('button', { name: /close/i })).toBeNull();
+  });
+
+  it('should display the close button if not given `onClose` prop', () => {
+    render(<ImageFormWrapper onClose={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
+  });
+
+  it('should call the given `onClose` after clicking the close button', async () => {
+    const onCloseMock = vi.fn();
+    const user = userEvent.setup();
+    render(<ImageFormWrapper onClose={onCloseMock} />);
+    await user.click(screen.getByRole('button', { name: /close/i }));
+    expect(onCloseMock).toHaveBeenCalledOnce();
   });
 
   it('should use the given className and id', () => {
@@ -82,15 +100,38 @@ describe('<ImageForm />', () => {
     expect(onError.mock.calls[0][0].response.data).toEqual(message);
   });
 
-  it('should call the given `onSuccess` and not call `onFailed`', async () => {
+  it('should upload-form call the given `onSuccess`, not call `onFailed`, and not upload as avatar', async () => {
     const user = userEvent.setup();
-    render(<ImageFormWrapper onError={onError} onSuccess={onSuccess} />);
+    const props = { onError, onSuccess };
+    render(<ImageFormWrapper {...props} />);
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
     await user.upload(screen.getByLabelText('Image'), file);
     await user.click(screen.getByRole('button', { name: /upload/i }));
     await waitForElementToBeRemoved(() => screen.getByLabelText(/uploading/i));
     expect(onError).not.toHaveBeenCalled();
     expect(onSuccess.mock.calls[0][0]).toEqual(image);
+    expect(axiosMock.history).toHaveLength(1);
+    expect(axiosMock.history.post[0].data).toBeInstanceOf(FormData);
+    expect(
+      Object.fromEntries(axiosMock.history.post[0].data)
+    ).not.toHaveProperty('isAvatar');
+  });
+
+  it('should update-form call the given `onSuccess`, not call `onFailed`, and not upload as avatar', async () => {
+    const user = userEvent.setup();
+    const props = { initImage: image, onError, onSuccess };
+    render(<ImageFormWrapper {...props} />);
+    const file = new File(['hello'], 'hello.png', { type: 'image/png' });
+    await user.upload(screen.getByLabelText('Image'), file);
+    await user.click(screen.getByRole('button', { name: /update/i }));
+    await waitForElementToBeRemoved(() => screen.getByLabelText(/uploading/i));
+    expect(onError).not.toHaveBeenCalled();
+    expect(onSuccess.mock.calls[0][0]).toEqual(image);
+    expect(axiosMock.history).toHaveLength(1);
+    expect(axiosMock.history.put[0].data).toBeInstanceOf(FormData);
+    expect(
+      Object.fromEntries(axiosMock.history.put[0].data)
+    ).not.toHaveProperty('isAvatar');
   });
 
   it('should add-avatar form has label of Avatar', () => {
@@ -101,43 +142,45 @@ describe('<ImageForm />', () => {
   });
 
   it('should update-avatar form has label of Avatar', () => {
-    const props = { image, onError, onSuccess, isAvatar: true };
+    const props = { initImage: image, onError, onSuccess, isAvatar: true };
     render(<ImageFormWrapper {...props} />);
     expect(screen.getByRole('form', { name: /avatar/i })).toBeInTheDocument();
     expect(screen.getByLabelText('Avatar')).toBeInTheDocument();
   });
 
-  it('should add the `userid` field to request data if it is add-avatar form', async () => {
+  it('should add the `isAvatar` field to request data if it is add-avatar form', async () => {
     const user = userEvent.setup();
     const props = { onError, onSuccess, isAvatar: true };
     render(<ImageFormWrapper {...props} />);
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
-    await user.upload(screen.getByLabelText('Image'), file);
+    await user.upload(screen.getByLabelText('Avatar'), file);
     await user.click(screen.getByRole('button', { name: /upload/i }));
     await waitForElementToBeRemoved(() => screen.getByLabelText(/uploading/i));
     expect(onError).not.toHaveBeenCalled();
     expect(onSuccess.mock.calls[0][0]).toEqual(image);
     expect(axiosMock.history).toHaveLength(1);
-    expect(axiosMock.history.post[0].data).toHaveProperty(
-      'userid',
-      initAuthData.user!.id
+    expect(axiosMock.history.post[0].data).toBeInstanceOf(FormData);
+    expect(Object.fromEntries(axiosMock.history.post[0].data)).toHaveProperty(
+      'isAvatar',
+      'true'
     );
   });
 
-  it('should add the `userid` field to request data if it is update-avatar form', async () => {
+  it('should add the `isAvatar` field to request data if it is update-avatar form', async () => {
     const user = userEvent.setup();
-    const props = { image, onError, onSuccess, isAvatar: true };
+    const props = { initImage: image, onError, onSuccess, isAvatar: true };
     render(<ImageFormWrapper {...props} />);
     const file = new File(['hello'], 'hello.png', { type: 'image/png' });
-    await user.upload(screen.getByLabelText('Image'), file);
-    await user.click(screen.getByRole('button', { name: /upload/i }));
+    await user.upload(screen.getByLabelText('Avatar'), file);
+    await user.click(screen.getByRole('button', { name: /update/i }));
     await waitForElementToBeRemoved(() => screen.getByLabelText(/uploading/i));
     expect(onError).not.toHaveBeenCalled();
     expect(onSuccess.mock.calls[0][0]).toEqual(image);
     expect(axiosMock.history).toHaveLength(1);
-    expect(axiosMock.history.put[0].data).toHaveProperty(
-      'userid',
-      initAuthData.user!.id
+    expect(axiosMock.history.put[0].data).toBeInstanceOf(FormData);
+    expect(Object.fromEntries(axiosMock.history.put[0].data)).toHaveProperty(
+      'isAvatar',
+      'true'
     );
   });
 });

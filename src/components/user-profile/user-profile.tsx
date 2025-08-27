@@ -8,8 +8,8 @@ import { useDialog } from '@/contexts/dialog-context';
 import { Muted } from '@/components/typography/muted';
 import { useAuthData } from '@/contexts/auth-context';
 import { Separator } from '@/components/ui/separator';
-import { AvatarForm } from '@/components/avatar-form';
 import { Lead } from '@/components/typography/lead';
+import { ImageForm } from '@/components/image-form';
 import { AuthForm } from '@/components/auth-form';
 import { Button } from '@/components/ui/button';
 import { H1 } from '@/components/typography/h1';
@@ -31,9 +31,12 @@ export function UserProfile({ owner }: { owner: User }) {
         title: 'Edit Avatar',
         description: 'Choose an image, click upload, be patient, enjoy.',
         body: (
-          <AvatarForm
-            initAvatar={owner.avatar?.image}
-            onClose={() => (router.refresh(), hideDialog())}
+          <ImageForm
+            isAvatar={true}
+            className='mt-4'
+            onClose={hideDialog}
+            initImage={owner.avatar?.image}
+            onSuccess={() => (router.refresh(), hideDialog())}
           />
         ),
       },

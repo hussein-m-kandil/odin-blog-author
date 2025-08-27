@@ -2,6 +2,13 @@
 
 import React from 'react';
 import {
+  Loader,
+  ImageUp,
+  ImagePlus,
+  ImageMinus,
+  PanelLeftClose,
+} from 'lucide-react';
+import {
   UploadImage,
   UpdateImage,
   DeleteImage,
@@ -9,7 +16,6 @@ import {
 } from './image-form.types';
 import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { uploadImage, updateImage, deleteImage } from './image-form.services';
-import { Loader, ImageUp, ImagePlus, ImageMinus } from 'lucide-react';
 import { ImageInput, useImageInputState } from '../image-input';
 import { useAuthData } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
@@ -18,14 +24,16 @@ import { toast } from 'sonner';
 
 export function ImageForm({
   isAvatar = false,
-  image: initImage,
-  label: initLabel,
   submittingRef,
+  initImage,
+  initLabel,
   className,
   onError,
+  onClose,
   onSuccess,
   ...props
 }: ImageFormProps) {
+  const isUpdate = !!initImage;
   const label = initLabel || (isAvatar ? 'Avatar' : 'Image');
 
   const [submitting, setSubmitting] = React.useState(false);
@@ -59,13 +67,15 @@ export function ImageForm({
   }): Parameters<UploadImage>['0'] => {
     return {
       ...baseData,
-      image,
+      isAvatar,
       authAxios,
+      initImage: image,
       onUploadProgress: handleUploadProgress,
       onSuccess: (uploadedImage) => {
         clearNewImage(uploadedImage);
-        toast.success('Upload succeeded', {
-          description: 'Your image have been uploaded successfully',
+        const verb = isUpdate ? 'updated' : 'uploaded';
+        toast.success(`${label} ${verb}`, {
+          description: `Your ${label.toLowerCase()} have been ${verb} successfully`,
         });
         onSuccess?.(uploadedImage);
       },
@@ -87,11 +97,12 @@ export function ImageForm({
   }): Parameters<UpdateImage>['0'] => {
     return {
       ...baseData,
+      isAvatar,
       authAxios,
       onSuccess: (updatedImage) => {
         clearNewImage(updatedImage);
-        toast.success('Update succeeded', {
-          description: 'Your image have been updated successfully',
+        toast.success(`${label} updated`, {
+          description: `Your ${label.toLowerCase()} have been updated successfully`,
         });
         onSuccess?.(updatedImage);
       },
@@ -114,8 +125,8 @@ export function ImageForm({
       authAxios,
       onSuccess: () => {
         clearNewImage();
-        toast.success('Delete succeeded', {
-          description: 'Your image have been deleted successfully',
+        toast.success(`${label} deleted`, {
+          description: `Your ${label.toLowerCase()} have been deleted successfully`,
         });
         onSuccess?.(null);
       },
@@ -150,7 +161,7 @@ export function ImageForm({
         idle: { icon: <ImageMinus />, label: `Delete ${label.toLowerCase()}` },
         submitting: { label: 'Deleting...' },
       }
-    : initImage && !imageFile
+    : isUpdate
     ? {
         idle: { icon: <ImagePlus />, label: `Update ${label.toLowerCase()}` },
         submitting: { label: 'Updating...' },
@@ -165,11 +176,12 @@ export function ImageForm({
       {...props}
       onSubmit={handleSubmit}
       aria-label={submitter.idle.label}
-      className={cn('w-full my-4 space-y-2', className)}>
+      className={cn('w-full', className)}>
       <ImageInput
         ref={fileInputRef}
         newImage={newImage}
         submitting={submitting}
+        containerClassName='m-0'
         uploadPercent={uploadPercent}
         clearNewImage={clearNewImage}
         applyNewImage={applyNewImage}
@@ -180,7 +192,7 @@ export function ImageForm({
       />
       <Button
         type='submit'
-        className='w-full'
+        className='w-full mt-2 mb-4'
         disabled={
           (!shouldUpload && !shouldUpdate && !shouldDelete) || submitting
         }>
@@ -195,6 +207,15 @@ export function ImageForm({
           </>
         )}
       </Button>
+      {onClose && (
+        <Button
+          type='button'
+          variant='outline'
+          className='w-full'
+          onClick={onClose}>
+          <PanelLeftClose /> Close
+        </Button>
+      )}
     </form>
   );
 }

@@ -3,20 +3,20 @@ import { UpdateImage, UploadImage, DeleteImage } from './image-form.types';
 const ENDPOINT = '/images';
 
 export const uploadImage: UploadImage = async ({
-  image,
-  userid,
-  newImage,
-  imageFile,
-  authAxios,
   onUploadProgress,
   onSuccess,
   onError,
+  isAvatar,
+  newImage,
+  initImage,
+  imageFile,
+  authAxios,
 }) => {
   let result = null;
   try {
     const body = new FormData();
     body.set('image', imageFile);
-    if (userid) body.set('userid', userid);
+    if (isAvatar) body.set('isAvatar', String(isAvatar));
     if (newImage) {
       const newImageEntries = Object.entries(newImage);
       for (const [k, v] of newImageEntries) {
@@ -25,8 +25,8 @@ export const uploadImage: UploadImage = async ({
       body.delete('src');
     }
     let url: string, method: 'post' | 'put';
-    if (image) {
-      url = `${ENDPOINT}/${image.id}`;
+    if (initImage) {
+      url = `${ENDPOINT}/${initImage.id}`;
       method = 'put';
     } else {
       url = ENDPOINT;
@@ -49,7 +49,7 @@ export const uploadImage: UploadImage = async ({
 };
 
 export const updateImage: UpdateImage = async ({
-  userid,
+  isAvatar,
   newImage,
   authAxios,
   image: { id, ...oldImage },
@@ -59,7 +59,7 @@ export const updateImage: UpdateImage = async ({
   let result = null;
   try {
     const url = `${ENDPOINT}/${id}`;
-    const body = { ...oldImage, ...newImage, userid };
+    const body = { ...oldImage, ...newImage, isAvatar };
     const { data } = await authAxios.put<
       NonNullable<Awaited<ReturnType<UpdateImage>>>
     >(url, body);

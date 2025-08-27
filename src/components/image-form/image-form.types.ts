@@ -3,19 +3,20 @@ import { Image, NewImage } from '@/types';
 
 export interface ImageFormProps
   extends Omit<React.ComponentProps<'form'>, 'onSubmit'> {
-  onSuccess?: (image: Image | null) => void;
+  onClose?: () => void;
   onError?: (error: unknown) => void;
+  onSuccess?: (image: Image | null) => void;
   submittingRef?: React.Ref<boolean>;
-  image?: Image | null;
+  initImage?: Image | null;
+  initLabel?: string;
   isAvatar?: boolean;
-  label?: string;
 }
 
 export interface ImageFormServiceData {
   onError?: (error: unknown) => void;
   onSuccess?: (data: Image) => void;
   authAxios: AxiosInstance;
-  userid?: string | null;
+  isAvatar?: boolean;
   newImage: NewImage;
   image: Image;
 }
@@ -23,7 +24,7 @@ export interface ImageFormServiceData {
 export type UploadImage = (
   data: Omit<ImageFormServiceData, 'image'> & {
     onUploadProgress: (e: AxiosProgressEvent) => void;
-    image: ImageFormProps['image'];
+    initImage: ImageFormProps['initImage'];
     imageFile: File;
   }
 ) => Promise<Image | null>;
@@ -31,7 +32,7 @@ export type UploadImage = (
 export type UpdateImage = (data: ImageFormServiceData) => Promise<Image | null>;
 
 export type DeleteImage = (
-  data: Omit<ImageFormServiceData, 'newImage' | 'onSuccess' | 'userid'> & {
+  data: Omit<ImageFormServiceData, 'newImage' | 'onSuccess' | 'isAvatar'> & {
     onSuccess: () => void;
   }
 ) => Promise<void>;
