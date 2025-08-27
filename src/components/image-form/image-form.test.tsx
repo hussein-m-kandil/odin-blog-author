@@ -47,24 +47,6 @@ describe('<ImageForm />', () => {
     expect(submitter).toHaveAttribute('type', 'submit');
   });
 
-  it('should not display the close button if not given `onClose` prop', () => {
-    render(<ImageFormWrapper />);
-    expect(screen.queryByRole('button', { name: /close/i })).toBeNull();
-  });
-
-  it('should display the close button if not given `onClose` prop', () => {
-    render(<ImageFormWrapper onClose={vi.fn()} />);
-    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
-  });
-
-  it('should call the given `onClose` after clicking the close button', async () => {
-    const onCloseMock = vi.fn();
-    const user = userEvent.setup();
-    render(<ImageFormWrapper onClose={onCloseMock} />);
-    await user.click(screen.getByRole('button', { name: /close/i }));
-    expect(onCloseMock).toHaveBeenCalledOnce();
-  });
-
   it('should use the given className and id', () => {
     const id = 'test-id';
     const className = 'test-class';

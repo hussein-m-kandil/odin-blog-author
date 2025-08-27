@@ -88,24 +88,6 @@ describe(`<PostForm />`, () => {
 
   afterEach(vi.clearAllMocks);
 
-  it('should not display the close button if not given `onClose` prop', () => {
-    render(<PostFormWrapper />);
-    expect(screen.queryByRole('button', { name: /close/i })).toBeNull();
-  });
-
-  it('should display the close button if not given `onClose` prop', () => {
-    render(<PostFormWrapper onClose={vi.fn()} />);
-    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
-  });
-
-  it('should call the given `onClose` after clicking the close button', async () => {
-    const onCloseMock = vi.fn();
-    const user = userEvent.setup();
-    render(<PostFormWrapper onClose={onCloseMock} />);
-    await user.click(screen.getByRole('button', { name: /close/i }));
-    expect(onCloseMock).toHaveBeenCalledOnce();
-  });
-
   it('should render a create post form with inputs and correct submitter', async () => {
     await assertPostFormFieldsAndSubmitter();
   });

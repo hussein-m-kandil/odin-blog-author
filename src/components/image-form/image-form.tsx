@@ -2,13 +2,6 @@
 
 import React from 'react';
 import {
-  Loader,
-  ImageUp,
-  ImagePlus,
-  ImageMinus,
-  PanelLeftClose,
-} from 'lucide-react';
-import {
   UploadImage,
   UpdateImage,
   DeleteImage,
@@ -16,7 +9,9 @@ import {
 } from './image-form.types';
 import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { uploadImage, updateImage, deleteImage } from './image-form.services';
+import { Loader, ImageUp, ImagePlus, ImageMinus } from 'lucide-react';
 import { ImageInput, useImageInputState } from '../image-input';
+import { CloseButton } from '@/components/close-button';
 import { useAuthData } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Image, NewImage } from '@/types';
@@ -206,15 +201,7 @@ export function ImageForm({
           </>
         )}
       </Button>
-      {onClose && (
-        <Button
-          type='button'
-          variant='outline'
-          className='w-full'
-          onClick={onClose}>
-          <PanelLeftClose /> Close
-        </Button>
-      )}
+      <CloseButton onClose={onClose} />
     </form>
   );
 }

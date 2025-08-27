@@ -24,7 +24,6 @@ import { AuthProvider } from '@/contexts/auth-context';
 import { author, initAuthData } from '@/test-utils';
 import { axiosMock } from '@/__mocks__/axios';
 
-const onClose = vi.fn();
 const onSuccess = vi.fn();
 const routerMethodMock = vi.fn();
 const getInitAuthDataMock = vi.fn(() => initAuthData);
@@ -118,24 +117,6 @@ describe(`<AuthForm />`, () => {
         const className = 'test-class';
         const { container } = await setup({ ...props, className });
         expect(container.firstElementChild).toHaveClass(className);
-      });
-
-      it('should not display the close button if not given `onClose` prop', async () => {
-        await setup(props);
-        expect(screen.queryByRole('button', { name: /close/i })).toBeNull();
-      });
-
-      it('should display the close button if not given `onClose` prop', async () => {
-        await setup({ ...props, onClose });
-        expect(
-          screen.getByRole('button', { name: /close/i })
-        ).toBeInTheDocument();
-      });
-
-      it('should call the given `onClose` after clicking the close button', async () => {
-        const { user } = await setup({ ...props, onClose });
-        await user.click(screen.getByRole('button', { name: /close/i }));
-        expect(onClose).toHaveBeenCalledOnce();
       });
 
       it('should have a guest sign-in button', async () => {

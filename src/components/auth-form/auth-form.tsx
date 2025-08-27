@@ -15,15 +15,10 @@ import {
   refineSignupSchema,
   updateUserFormAttrs,
 } from './auth-form.data';
-import {
-  LogIn,
-  UserPen,
-  UserPlus,
-  UserCheck,
-  PanelLeftClose,
-} from 'lucide-react';
 import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
+import { LogIn, UserPen, UserPlus, UserCheck } from 'lucide-react';
 import { ErrorMessage } from '@/components/error-message';
+import { CloseButton } from '@/components/close-button';
 import { useAuthData } from '@/contexts/auth-context';
 import { AuthFormProps } from './auth-form.types';
 import { Button } from '@/components/ui/button';
@@ -173,15 +168,7 @@ export function AuthForm({
           </Button>
         </div>
       )}
-      {onClose && (
-        <Button
-          type='button'
-          variant='outline'
-          className='w-full'
-          onClick={onClose}>
-          <PanelLeftClose /> Close
-        </Button>
-      )}
+      <CloseButton onClose={onClose} />
     </div>
   );
 }

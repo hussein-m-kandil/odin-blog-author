@@ -10,12 +10,12 @@ import { Query, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImageInput, useImageInputState } from '@/components/image-input';
 import { parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { PostFormProps, NewPostInput } from './post-form.types';
-import { Plus, PencilLine, PanelLeftClose } from 'lucide-react';
 import { ErrorMessage } from '@/components/error-message';
+import { CloseButton } from '@/components/close-button';
 import { useAuthData } from '@/contexts/auth-context';
 import { Querybox } from '@/components/querybox';
 import { UseFormReturn } from 'react-hook-form';
-import { Button } from '@/components/ui/button';
+import { Plus, PencilLine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AxiosRequestConfig } from 'axios';
 import { Tags } from '@/components/tags';
@@ -246,15 +246,7 @@ export function PostForm({
           </ErrorMessage>
         </div>
       </DynamicForm>
-      {onClose && (
-        <Button
-          type='button'
-          variant='outline'
-          className='w-full'
-          onClick={onClose}>
-          <PanelLeftClose /> Close
-        </Button>
-      )}
+      <CloseButton onClose={onClose} />
     </div>
   );
 }
