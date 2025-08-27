@@ -21,7 +21,9 @@ export function UserAvatar({
 
   // Use image update time to revalidate the "painful" browser-cache ;)
   const src = user.avatar
-    ? setURlParams(user.avatar.src, { updatedAt: user.avatar.updatedAt })
+    ? setURlParams(user.avatar.image.src, {
+        updatedAt: user.avatar.image.updatedAt,
+      })
     : undefined;
 
   const alt = src ? `${user.username} avatar` : '';
@@ -33,7 +35,7 @@ export function UserAvatar({
         alt={alt}
         style={{
           objectFit: 'cover',
-          objectPosition: `50% ${user.avatar?.yPos}%`,
+          objectPosition: `50% ${user.avatar?.image.yPos || 50}%`,
         }}
       />
       <AvatarFallback>{user.fullname[0].toUpperCase()}</AvatarFallback>

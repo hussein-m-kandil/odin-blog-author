@@ -26,7 +26,7 @@ export function AvatarForm({
       signin({
         ...authData,
         token: authData.token,
-        user: { ...user, avatar: image || null },
+        user: { ...user, avatar: image ? { image } : null },
       });
     } else {
       signout();

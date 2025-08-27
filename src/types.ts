@@ -11,7 +11,7 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   bio: string | null;
-  avatar?: Image | null;
+  avatar?: { image: Image } | null;
 }
 
 export interface AuthResData {

@@ -32,7 +32,7 @@ export function UserProfile({ owner }: { owner: User }) {
         description: 'Choose an image, click upload, be patient, enjoy.',
         body: (
           <AvatarForm
-            initAvatar={owner.avatar}
+            initAvatar={owner.avatar?.image}
             onClose={() => (router.refresh(), hideDialog())}
           />
         ),
