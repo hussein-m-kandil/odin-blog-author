@@ -6,6 +6,7 @@ export interface PostFormProps
   extends Omit<React.ComponentProps<'form'>, 'onSubmit'> {
   shouldUnmountRef: React.Ref<() => Promise<boolean>>;
   post?: Post;
+  onClose?: () => void;
   onSuccess?: () => void;
 }
 

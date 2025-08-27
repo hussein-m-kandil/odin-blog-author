@@ -43,7 +43,6 @@ export function Navbar() {
   const [yScroll, setYScroll] = React.useState(0);
   const { showDialog, hideDialog } = useDialog();
   const router = useRouter();
-  const id = React.useId();
 
   React.useEffect(() => {
     const navContainer = navContainerRef.current;
@@ -94,23 +93,20 @@ export function Navbar() {
 
   const shouldUnmountPostFormRef = React.useRef<() => Promise<boolean>>(null);
 
-  const postFormProps = {
-    'aria-labelledby': `create-post-form-${id}`,
-    shouldUnmountRef: shouldUnmountPostFormRef,
-    onSuccess: hideDialog,
-    title: 'Create Post',
-  };
+  const createPostTitle = 'Create Post';
 
   const showPostFormDialog = () => {
     showDialog(
       {
-        title: (
-          <span id={postFormProps['aria-labelledby']}>
-            {postFormProps.title}
-          </span>
-        ),
+        title: createPostTitle,
         description: 'Use the following form to create a new post.',
-        body: <PostForm {...postFormProps} />,
+        body: (
+          <PostForm
+            onClose={hideDialog}
+            onSuccess={hideDialog}
+            shouldUnmountRef={shouldUnmountPostFormRef}
+          />
+        ),
       },
       () => {
         const shouldUnmount = shouldUnmountPostFormRef.current;
@@ -155,7 +151,7 @@ export function Navbar() {
                     <CustomMenuItem>
                       <button
                         {...btnProps}
-                        title={postFormProps.title}
+                        title={createPostTitle}
                         onClick={showPostFormDialog}>
                         <PencilLine /> New Post
                       </button>

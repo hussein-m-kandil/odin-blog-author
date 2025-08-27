@@ -10,11 +10,12 @@ import { Query, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImageInput, useImageInputState } from '@/components/image-input';
 import { parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { PostFormProps, NewPostInput } from './post-form.types';
+import { Plus, PencilLine, PanelLeftClose } from 'lucide-react';
 import { ErrorMessage } from '@/components/error-message';
 import { useAuthData } from '@/contexts/auth-context';
 import { Querybox } from '@/components/querybox';
-import { Plus, PencilLine } from 'lucide-react';
 import { UseFormReturn } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { AxiosRequestConfig } from 'axios';
 import { Tags } from '@/components/tags';
@@ -35,6 +36,7 @@ const getInvalidateQueryPredicate = (post?: Post) => {
 export function PostForm({
   shouldUnmountRef,
   post,
+  onClose,
   onSuccess,
   ...formProps
 }: PostFormProps) {
@@ -187,7 +189,7 @@ export function PostForm({
       <ImageInput
         ref={fileInputRef}
         newImage={newImage}
-        containerClassName='my-4'
+        containerClassName='mt-4'
         uploadPercent={uploadPercent}
         clearNewImage={clearNewImage}
         applyNewImage={applyNewImage}
@@ -198,11 +200,13 @@ export function PostForm({
       />
       <DynamicForm
         {...formProps}
+        className='my-4'
         hookFormRef={hookFormRef}
         formAttrs={postFormAttrs}
         formSchema={postFormSchema}
         submitterClassName='w-full'
         submitterIcon={<PencilLine />}
+        aria-label={`${isUpdate ? 'Update' : 'Create'} post form`}
         submitterLabel={
           isUpdate
             ? { idle: 'Update Post', submitting: 'Updating...' }
@@ -242,6 +246,15 @@ export function PostForm({
           </ErrorMessage>
         </div>
       </DynamicForm>
+      {onClose && (
+        <Button
+          type='button'
+          variant='outline'
+          className='w-full'
+          onClick={onClose}>
+          <PanelLeftClose /> Close
+        </Button>
+      )}
     </div>
   );
 }

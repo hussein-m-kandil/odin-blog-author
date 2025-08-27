@@ -22,19 +22,18 @@ export function PostOptionsMenu({
   const shouldUnmountPostFormRef = React.useRef<() => Promise<boolean>>(null);
 
   const showUpdateForm = () => {
-    const titleId = `post-opts-update-form-${post.id}`;
     showDialog(
       {
+        title: 'Update Post',
+        description: 'Do whatever updates on the post, then click "update".',
         body: (
           <PostForm
             post={post}
+            onClose={hideDialog}
             onSuccess={hideDialog}
-            aria-labelledby={titleId}
             shouldUnmountRef={shouldUnmountPostFormRef}
           />
         ),
-        title: <span id={titleId}>Update Post</span>,
-        description: 'Do whatever updates on the post, then click "update".',
       },
       () => {
         const shouldUnmount = shouldUnmountPostFormRef.current;
