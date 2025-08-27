@@ -56,7 +56,7 @@ export function ImageInput({
       : null;
 
   return (
-    <div {...containerProps} className={cn('w-full my-4', containerClassName)}>
+    <div {...containerProps} className={cn('w-full', containerClassName)}>
       <Label htmlFor='image'>{label}</Label>
       <div className='relative'>
         {submitting ? (

@@ -181,7 +181,6 @@ export function ImageForm({
         ref={fileInputRef}
         newImage={newImage}
         submitting={submitting}
-        containerClassName='m-0'
         uploadPercent={uploadPercent}
         clearNewImage={clearNewImage}
         applyNewImage={applyNewImage}

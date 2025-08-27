@@ -187,6 +187,7 @@ export function PostForm({
       <ImageInput
         ref={fileInputRef}
         newImage={newImage}
+        containerClassName='my-4'
         uploadPercent={uploadPercent}
         clearNewImage={clearNewImage}
         applyNewImage={applyNewImage}
