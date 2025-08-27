@@ -42,17 +42,15 @@ export function DialogProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // React interpret function state-value as state initializer/updater
-  // So, initialize/update function state-value via a wrapper function
-  const [shouldHide, setShouldHide] = React.useState(() => initShouldHideFn);
   const [dialogData, setDialogData] = React.useState<DialogData>(initData);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
   const overlayRef = React.useRef<HTMLDivElement>(null);
+  const shouldHideRef = React.useRef(initShouldHideFn);
 
   const contextValue: DialogContextValue = {
     showDialog: (data: DialogData, shouldHideDialog) => {
-      setShouldHide(() => shouldHideDialog || initShouldHideFn);
+      shouldHideRef.current = shouldHideDialog || initShouldHideFn;
       setIsDialogOpen(true);
       setDialogData(data);
     },
@@ -60,8 +58,12 @@ export function DialogProvider({
   };
 
   const handleOpenChange = async (open: boolean) => {
-    const hide = await shouldHide();
-    setIsDialogOpen(open === false ? !hide : open);
+    const canHide = await shouldHideRef.current();
+    if (!open === canHide) {
+      setIsDialogOpen(false);
+      setDialogData(initData);
+      shouldHideRef.current = initShouldHideFn;
+    }
   };
 
   const handleOverlayInteraction: React.ComponentProps<
