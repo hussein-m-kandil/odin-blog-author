@@ -32,6 +32,7 @@ export function DynamicForm({
   className,
   onSubmit,
   children,
+  topChildren,
   hookFormRef,
   ...formProps
 }: DynamicFormProps) {
@@ -63,6 +64,7 @@ export function DynamicForm({
         {...formProps}
         onSubmit={handleSubmit}
         className={cn('space-y-5', className)}>
+        {topChildren}
         {Object.entries(formAttrs).map(([name, attrs], i) => (
           <FormField
             key={name}

@@ -30,6 +30,7 @@ export interface DynamicFormProps
   hookFormRef?: React.Ref<UseFormReturn>;
   submitterIcon?: React.ReactNode;
   submitterLabel?: SubmitterLabel;
+  topChildren?: React.ReactNode;
   formSchema: DynamicFormSchema;
   formAttrs: DynamicFormAttrs;
   submitterClassName?: string;

@@ -72,6 +72,30 @@ describe('<DynamicForm />', () => {
     })) as HTMLButtonElement;
   };
 
+  it('should have the given `topChildren` as the first child', () => {
+    const topChildren = <div>Hi!</div>;
+    render(
+      <DynamicForm
+        {...{ formSchema, formAttrs, onSubmit, topChildren }}
+        aria-label='Signin Form'
+      />
+    );
+    expect(screen.getByRole('form').firstElementChild).toHaveTextContent('Hi!');
+  });
+
+  it('should have the given `children` before the submit button', () => {
+    render(
+      <DynamicForm
+        {...{ formSchema, formAttrs, onSubmit }}
+        aria-label='Signin Form'>
+        <div>Hi!</div>
+      </DynamicForm>
+    );
+    expect(
+      Array.from(screen.getByRole('form').children).at(-2)
+    ).toHaveTextContent('Hi!');
+  });
+
   it('should have the given fields with their attributes', () => {
     render(
       <DynamicForm
