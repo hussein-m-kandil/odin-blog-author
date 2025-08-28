@@ -44,18 +44,16 @@ export function PostOptionsMenu({
   };
 
   const showDeleteForm = () => {
-    const titleId = `post-opts-delete-form-${post.id}`;
     showDialog({
+      title: 'Delete Post',
+      description: 'You are deleting a post now! This action cannot be undone.',
       body: (
         <DeletePostForm
           post={post}
           onCancel={hideDialog}
           onSuccess={hideDialog}
-          aria-labelledby={titleId}
         />
       ),
-      title: <span id={titleId}>Delete Post</span>,
-      description: 'You are deleting a post now! This action cannot be undone.',
     });
   };
 

@@ -51,6 +51,7 @@ export function DeletePostForm({
       {...deleteFormProps}
       subject={post.title}
       errorMessage={errorMessage}
+      aria-label='Delete post form'
       onDelete={deletePostMutation.mutate}
       deleting={deletePostMutation.isPending}
     />
