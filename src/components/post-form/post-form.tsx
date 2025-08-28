@@ -101,8 +101,8 @@ export function PostForm({
       await queryClient.invalidateQueries({
         predicate: getInvalidateQueryPredicate(post),
       });
-      onSuccess?.();
       if (!isUpdate) router.push(`/${resPost.id}`);
+      onSuccess?.();
     },
     onError: async (error, [hookForm]) => {
       refreshNewImageUrl();
@@ -115,54 +115,55 @@ export function PostForm({
     },
   });
 
-  React.useImperativeHandle(
-    shouldUnmountRef,
-    () => {
-      return () =>
-        new Promise((resolve) => {
-          if (discardWarningIdRef.current !== null) {
-            toast.dismiss(discardWarningIdRef.current);
+  const shouldUnmount = React.useCallback(
+    () =>
+      new Promise<boolean>((resolve) => {
+        if (discardWarningIdRef.current !== null) {
+          toast.dismiss(discardWarningIdRef.current);
+        }
+        if (isPending) {
+          toast.warning('Please wait until the image finishes submitting!');
+          return resolve(false);
+        }
+        const textFieldNames = Object.entries(postFormAttrs)
+          .filter((attr) => attr[1].type === 'text')
+          .map(([name]) => name);
+        let isFormDirty = false;
+        if (hookFormRef.current) {
+          for (const name of textFieldNames) {
+            isFormDirty = hookFormRef.current.getFieldState(name).isDirty;
+            if (isFormDirty) break;
           }
-          if (isPending) {
-            toast.warning('Please wait until the image finishes submitting!');
-            return resolve(false);
+        }
+        const hasNewTags =
+          tags.length !== postTags.length ||
+          tags.some((t) => !postTags.includes(t));
+        if (!isFormDirty && !imageModified && !hasNewTags) {
+          return resolve(true);
+        }
+        discardWarningIdRef.current = toast.warning(
+          'Your changes will not be saved!',
+          {
+            duration: Infinity,
+            classNames: {
+              toast: 'flex-wrap!',
+              cancelButton: 'justify-center! h-auto! basis-3/7! p-1!',
+              actionButton: 'justify-center! h-auto! basis-3/7! p-1!',
+            },
+            action: { label: 'Keep', onClick: () => resolve(false) },
+            cancel: {
+              label: 'Discard',
+              onClick: () => resolve(true),
+            },
           }
-          const textFieldNames = Object.entries(postFormAttrs)
-            .filter((attr) => attr[1].type === 'text')
-            .map(([name]) => name);
-          let isFormDirty = false;
-          if (hookFormRef.current) {
-            for (const name of textFieldNames) {
-              isFormDirty = hookFormRef.current.getFieldState(name).isDirty;
-              if (isFormDirty) break;
-            }
-          }
-          const hasNewTags =
-            tags.length !== postTags.length ||
-            tags.some((t) => !postTags.includes(t));
-          if (!isFormDirty && !imageModified && !hasNewTags) {
-            return resolve(true);
-          }
-          discardWarningIdRef.current = toast.warning(
-            'Your changes will not be saved!',
-            {
-              duration: Infinity,
-              classNames: {
-                toast: 'flex-wrap!',
-                cancelButton: 'justify-center! h-auto! basis-3/7! p-1!',
-                actionButton: 'justify-center! h-auto! basis-3/7! p-1!',
-              },
-              action: { label: 'Keep', onClick: () => resolve(false) },
-              cancel: {
-                label: 'Discard',
-                onClick: () => resolve(true),
-              },
-            }
-          );
-        });
-    },
+        );
+      }),
     [postFormAttrs, imageModified, postTags, isPending, tags]
   );
+
+  React.useImperativeHandle(shouldUnmountRef, () => shouldUnmount, [
+    shouldUnmount,
+  ]);
 
   const validateTag = (value: string) => /^\w*$/.test(value);
   const searchTags = async (searchValue: string) => {
@@ -247,7 +248,13 @@ export function PostForm({
           </ErrorMessage>
         </div>
       </DynamicForm>
-      <CloseButton onClose={onClose} />
+      {onClose && (
+        <CloseButton
+          onClose={async () => {
+            if (await shouldUnmount()) onClose();
+          }}
+        />
+      )}
     </div>
   );
 }
