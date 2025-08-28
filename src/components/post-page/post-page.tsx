@@ -58,7 +58,9 @@ export function PostPage({
               <H1 id={titleId} className='text-3xl text-center'>
                 {post.title}
               </H1>
-              {user?.id === post.authorId && <PostOptionsMenu post={post} />}
+              {user && (user.isAdmin || user.id === post.authorId) && (
+                <PostOptionsMenu post={post} />
+              )}
             </div>
             <div className='flex items-center justify-between mt-1'>
               <Muted className='flex items-center gap-1 leading-0'>

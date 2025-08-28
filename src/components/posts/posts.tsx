@@ -71,7 +71,9 @@ export function Posts({ postsUrl }: { postsUrl: string }) {
             <React.Fragment key={data.pageParams[i]}>
               {page.map((post) => (
                 <PostCard
-                  isMutable={!!user && user.id === post.authorId}
+                  isMutable={
+                    !!user && (user.isAdmin || user.id === post.authorId)
+                  }
                   key={post.id}
                   post={post}
                 />
