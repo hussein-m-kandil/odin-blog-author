@@ -18,16 +18,15 @@ import {
   PencilLine,
 } from 'lucide-react';
 import { cn, getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
-import { useDialog } from '@/contexts/dialog-context/';
 import { useAuthData } from '@/contexts/auth-context';
 import { UserAvatar } from '@/components/user-avatar';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Separator } from '@/components/ui/separator';
-import { PostForm } from '@/components/post-form';
 import { Button } from '@/components/ui/button';
 import { Large } from '@/components/typography';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { usePostFormDialog } from '@/hooks/use-post-form-dialog';
 
 function CustomMenuItem({ children }: React.PropsWithChildren) {
   return <DropdownMenuItem asChild>{children}</DropdownMenuItem>;
@@ -36,12 +35,13 @@ function CustomMenuItem({ children }: React.PropsWithChildren) {
 export function Navbar() {
   const navContainerRef = React.useRef<HTMLDivElement>(null);
 
+  const { showPostForm } = usePostFormDialog();
+
   const { authData, signout } = useAuthData();
 
   const { user, authAxios } = authData;
 
   const [yScroll, setYScroll] = React.useState(0);
-  const { showDialog, hideDialog } = useDialog();
   const router = useRouter();
 
   React.useEffect(() => {
@@ -91,31 +91,6 @@ export function Navbar() {
     });
   };
 
-  const shouldUnmountPostFormRef = React.useRef<() => Promise<boolean>>(null);
-
-  const createPostTitle = 'Create Post';
-
-  const showPostFormDialog = () => {
-    showDialog(
-      {
-        title: createPostTitle,
-        description: 'Use the following form to create a new post.',
-        body: (
-          <PostForm
-            onClose={hideDialog}
-            onSuccess={hideDialog}
-            shouldUnmountRef={shouldUnmountPostFormRef}
-          />
-        ),
-      },
-      () => {
-        const shouldUnmount = shouldUnmountPostFormRef.current;
-        if (shouldUnmount) return shouldUnmount();
-        return true;
-      }
-    );
-  };
-
   const btnProps: React.ComponentProps<'button'> = {
     className: 'inline-flex items-center gap-1',
     type: 'button',
@@ -149,10 +124,7 @@ export function Navbar() {
                 {user ? (
                   <>
                     <CustomMenuItem>
-                      <button
-                        {...btnProps}
-                        title={createPostTitle}
-                        onClick={showPostFormDialog}>
+                      <button {...btnProps} onClick={showPostForm}>
                         <PencilLine /> New Post
                       </button>
                     </CustomMenuItem>

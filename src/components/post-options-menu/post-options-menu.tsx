@@ -4,9 +4,9 @@ import React from 'react';
 import { OptionsMenu } from '@/components/options-menu';
 import { useDialog } from '@/contexts/dialog-context';
 import { DeletePostForm } from '../delete-post-form';
-import { PostForm } from '@/components/post-form';
 import { Edit, Trash2 } from 'lucide-react';
 import { Post } from '@/types';
+import { usePostFormDialog } from '@/hooks/use-post-form-dialog';
 
 export function PostOptionsMenu({
   post,
@@ -18,30 +18,9 @@ export function PostOptionsMenu({
 > & {
   post: Post;
 }) {
-  const { showDialog, hideDialog } = useDialog();
-  const shouldUnmountPostFormRef = React.useRef<() => Promise<boolean>>(null);
+  const { showPostForm } = usePostFormDialog({ post });
 
-  const showUpdateForm = () => {
-    showDialog(
-      {
-        title: 'Update Post',
-        description: 'Do whatever updates on the post, then click "update".',
-        body: (
-          <PostForm
-            post={post}
-            onClose={hideDialog}
-            onSuccess={hideDialog}
-            shouldUnmountRef={shouldUnmountPostFormRef}
-          />
-        ),
-      },
-      () => {
-        const shouldUnmount = shouldUnmountPostFormRef.current;
-        if (shouldUnmount) return shouldUnmount();
-        return true;
-      }
-    );
-  };
+  const { showDialog, hideDialog } = useDialog();
 
   const showDeleteForm = () => {
     showDialog({
@@ -64,10 +43,7 @@ export function PostOptionsMenu({
       menuProps={{ 'aria-label': 'Post options', align: 'end', ...menuProps }}
       triggerProps={{ 'aria-label': 'Open post options', ...triggerProps }}
       menuItems={[
-        <button
-          type='button'
-          onClick={showUpdateForm}
-          key={`update-${post.id}`}>
+        <button type='button' onClick={showPostForm} key={`update-${post.id}`}>
           <Edit /> Update {srOnlyPostTitle}
         </button>,
         <button
