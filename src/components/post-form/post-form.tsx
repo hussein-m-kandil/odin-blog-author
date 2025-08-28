@@ -186,18 +186,6 @@ export function PostForm({
 
   return (
     <div>
-      <ImageInput
-        ref={fileInputRef}
-        newImage={newImage}
-        containerClassName='mt-4'
-        uploadPercent={uploadPercent}
-        clearNewImage={clearNewImage}
-        applyNewImage={applyNewImage}
-        setNewImage={setNewImage}
-        submitting={isPending}
-        imageFile={imageFile}
-        image={post?.image}
-      />
       <DynamicForm
         {...formProps}
         className='my-4'
@@ -217,6 +205,19 @@ export function PostForm({
             // This way the `DynamicForm` can monitor the submitting period
             mutate(args, { onSettled: resolve });
           })
+        }
+        topChildren={
+          <ImageInput
+            ref={fileInputRef}
+            newImage={newImage}
+            uploadPercent={uploadPercent}
+            clearNewImage={clearNewImage}
+            applyNewImage={applyNewImage}
+            setNewImage={setNewImage}
+            submitting={isPending}
+            imageFile={imageFile}
+            image={post?.image}
+          />
         }>
         <div>
           <div className='flex justify-between items-baseline space-x-2'>
