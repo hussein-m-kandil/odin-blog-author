@@ -28,18 +28,22 @@ export interface QueryboxProps {
   onValidate: (searchValue: string) => boolean;
   includeSearchValueInResult?: boolean;
   triggerContent: React.ReactNode;
+  queryPlaceholder?: string;
   blacklist?: string[];
   triggerCN?: string;
+  label?: string;
 }
 
 export function Querybox({
   includeSearchValueInResult = false,
+  queryPlaceholder = 'Search...',
   blacklist = [],
   triggerContent,
-  onValidate,
   triggerCN,
-  onSearch,
+  label,
   onSelect,
+  onSearch,
+  onValidate,
 }: QueryboxProps) {
   const [searchValue, setSearchValue] = React.useState('');
   const [open, setOpen] = React.useState(false);
@@ -75,17 +79,22 @@ export function Querybox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant='outline' className={triggerCN} aria-expanded={open}>
+        <Button variant='outline' aria-expanded={open} className={triggerCN}>
           {triggerContent}
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-[200px] p-0'>
-        <Command filter={() => 1}>
+        <Command
+          filter={() => 1}
+          label={
+            label ||
+            (typeof triggerContent === 'string' && triggerContent) ||
+            'Search'
+          }>
           <CommandInput
+            placeholder={queryPlaceholder}
             onValueChange={handleSearch}
-            placeholder='Search...'
             value={searchValue}
-            aria-label='Search'
             name='autocomplete'
             autoComplete='off'
             className='h-9'

@@ -31,28 +31,33 @@ const props: QueryboxProps = {
   includeSearchValueInResult: true,
 };
 
+const getTrigger = () => screen.getByText(triggerText);
+const getSearchInput = (name?: string | RegExp) => {
+  return screen.getByRole('combobox', { name: name || triggerText });
+};
+
 describe('<Querybox />', () => {
   afterEach(vi.resetAllMocks);
 
   it('should display the given `triggerContent` with the given `triggerCN`', () => {
     render(<QueryboxWrapper {...{ ...props, triggerCN: 'test-class' }} />);
-    expect(screen.getByText(triggerText)).toHaveClass('test-class');
+    expect(getTrigger()).toHaveClass('test-class');
   });
 
-  it('should display search input after clicking on the trigger', async () => {
+  it('should display combobox with the given label & placeholder, after clicking on the trigger', async () => {
     const user = userEvent.setup();
-    render(<QueryboxWrapper {...props} />);
-    await user.click(screen.getByText(triggerText));
-    const searchInp = screen.getByLabelText(/search/i) as HTMLInputElement;
-    expect(searchInp).toBeInTheDocument();
-    expect(searchInp).toHaveAttribute('type', 'text');
+    render(
+      <QueryboxWrapper {...props} label='Test' queryPlaceholder='Test...' />
+    );
+    await user.click(getTrigger());
+    expect(getSearchInput('Test')).toHaveAttribute('placeholder', 'Test...');
   });
 
   it('should call `onSearch` while typing', async () => {
     const user = userEvent.setup();
     render(<QueryboxWrapper {...props} />);
-    await user.click(screen.getByText(triggerText));
-    await user.type(screen.getByLabelText(/search/i), 'xyz');
+    await user.click(getTrigger());
+    await user.type(getSearchInput(), 'xyz');
     expect(screen.getByDisplayValue('xyz')).toBeInTheDocument();
     expect(onSearch.mock.calls).toStrictEqual([['x'], ['xy'], ['xyz']]);
   });
@@ -60,8 +65,8 @@ describe('<Querybox />', () => {
   it('should call `onValidate` while typing', async () => {
     const user = userEvent.setup();
     render(<QueryboxWrapper {...props} />);
-    await user.click(screen.getByText(triggerText));
-    await user.type(screen.getByLabelText(/search/i), 'xyz');
+    await user.click(getTrigger());
+    await user.type(getSearchInput(), 'xyz');
     expect(screen.getByDisplayValue('xyz')).toBeInTheDocument();
     expect(onValidate.mock.calls).toStrictEqual([['x'], ['xy'], ['xyz']]);
   });
@@ -70,8 +75,8 @@ describe('<Querybox />', () => {
     onValidate.mockImplementation(() => false);
     const user = userEvent.setup();
     render(<QueryboxWrapper {...props} />);
-    await user.click(screen.getByText(triggerText));
-    await user.type(screen.getByLabelText(/search/i), 'xyz');
+    await user.click(getTrigger());
+    await user.type(getSearchInput(), 'xyz');
     expect(onValidate.mock.calls).toStrictEqual([['x'], ['y'], ['z']]);
     expect(screen.queryByDisplayValue('xyz')).toBeNull();
     expect(onSearch).not.toHaveBeenCalled();
@@ -85,8 +90,8 @@ describe('<Querybox />', () => {
         {...{ ...props, includeSearchValueInResult: undefined }}
       />
     );
-    await user.click(screen.getByText(triggerText));
-    await user.type(screen.getByLabelText(/search/i), 'x');
+    await user.click(getTrigger());
+    await user.type(getSearchInput(), 'x');
     expect(screen.getAllByRole('option')).toHaveLength(1);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
   });
@@ -97,8 +102,8 @@ describe('<Querybox />', () => {
     render(
       <QueryboxWrapper {...{ ...props, includeSearchValueInResult: false }} />
     );
-    await user.click(screen.getByText(triggerText));
-    await user.type(screen.getByLabelText(/search/i), 'x');
+    await user.click(getTrigger());
+    await user.type(getSearchInput(), 'x');
     expect(screen.getAllByRole('option')).toHaveLength(1);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
   });
@@ -107,8 +112,8 @@ describe('<Querybox />', () => {
     const user = userEvent.setup();
     onSearch.mockImplementation(() => ['x', 'y', 'z']);
     render(<QueryboxWrapper {...{ ...props, blacklist: ['x', 'y'] }} />);
-    await user.click(screen.getByText(triggerText));
-    await user.type(screen.getByLabelText(/search/i), 'xyz');
+    await user.click(getTrigger());
+    await user.type(getSearchInput(), 'xyz');
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
   });
 
@@ -116,8 +121,8 @@ describe('<Querybox />', () => {
     const user = userEvent.setup();
     onSearch.mockImplementation(() => ['xyz', 'xy', 'x']);
     render(<QueryboxWrapper {...{ ...props, blacklist: ['x', 'xy'] }} />);
-    await user.click(screen.getByText(triggerText));
-    await user.type(screen.getByLabelText(/search/i), 'x');
+    await user.click(getTrigger());
+    await user.type(getSearchInput(), 'x');
     expect(screen.getAllByRole('option')).toHaveLength(2);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('x');
     expect(screen.getAllByRole('option')[1]).toHaveTextContent('xyz');
@@ -127,8 +132,8 @@ describe('<Querybox />', () => {
     const user = userEvent.setup();
     onSearch.mockImplementation(() => ['xyz', 'xy', 'x']);
     render(<QueryboxWrapper {...{ ...props, blacklist: ['xy', 'x'] }} />);
-    await user.click(screen.getByText(triggerText));
-    await user.type(screen.getByLabelText(/search/i), 'xyz');
+    await user.click(getTrigger());
+    await user.type(getSearchInput(), 'xyz');
     expect(screen.getAllByRole('option')).toHaveLength(1);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
   });
@@ -136,8 +141,8 @@ describe('<Querybox />', () => {
   it('should call `onSelect` with the selected value and the search result', async () => {
     const user = userEvent.setup();
     render(<QueryboxWrapper {...props} />);
-    await user.click(screen.getByText(triggerText));
-    await user.type(screen.getByLabelText(/search/i), 'xyz');
+    await user.click(getTrigger());
+    await user.type(getSearchInput(), 'xyz');
     const options = screen.getAllByRole('option');
     await user.click(options[0]);
     expect(onSelect).toHaveBeenCalledOnce();
