@@ -50,7 +50,7 @@ export function Search({
         aria-label={placeholder}
         placeholder={placeholder}
       />
-      <div className='absolute top-0 right-0 text-gray-500'>
+      <div className='absolute top-0 right-0'>
         <Button
           size='icon'
           type='submit'
@@ -58,8 +58,8 @@ export function Search({
           disabled={!query}
           aria-label='Search'
           className={cn(
-            'hover:bg-transparent focus-visible:ring-0 focus-visible:text-foreground',
-            'border-0 rounded-l-none shadow-none bg-transparent'
+            'border-0 shadow-none bg-transparent',
+            'rounded-l-none focus-visible:rounded-l-md'
           )}>
           <SearchIcon />
         </Button>
