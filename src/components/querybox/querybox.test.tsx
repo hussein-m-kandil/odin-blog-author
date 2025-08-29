@@ -39,8 +39,12 @@ const getSearchInput = (name?: string | RegExp) => {
 describe('<Querybox />', () => {
   afterEach(vi.resetAllMocks);
 
-  it('should display the given `triggerContent` with the given `triggerCN`', () => {
-    render(<QueryboxWrapper {...{ ...props, triggerCN: 'test-class' }} />);
+  it('should display the given `triggerContent` with the given `triggerProps`', () => {
+    render(
+      <QueryboxWrapper
+        {...{ ...props, triggerProps: { className: 'test-class' } }}
+      />
+    );
     expect(getTrigger()).toHaveClass('test-class');
   });
 

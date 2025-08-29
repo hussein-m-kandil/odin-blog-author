@@ -23,6 +23,7 @@ const createStrEqChecker = (a: string) => (b: string) => {
 };
 
 export interface QueryboxProps {
+  triggerProps?: Omit<React.ComponentProps<typeof Button>, 'aria-expanded'>;
   onSearch: (searchValue: string) => string[] | Promise<string[]>;
   onSelect: (v: string, searchResult?: string[]) => void;
   onValidate: (searchValue: string) => boolean;
@@ -30,16 +31,15 @@ export interface QueryboxProps {
   triggerContent: React.ReactNode;
   queryPlaceholder?: string;
   blacklist?: string[];
-  triggerCN?: string;
   label?: string;
 }
 
 export function Querybox({
   includeSearchValueInResult = false,
   queryPlaceholder = 'Search...',
+  triggerProps = {},
   blacklist = [],
   triggerContent,
-  triggerCN,
   label,
   onSelect,
   onSearch,
@@ -76,10 +76,12 @@ export function Querybox({
     setOpen(false);
   };
 
+  triggerProps.variant = triggerProps.variant || 'outline';
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant='outline' aria-expanded={open} className={triggerCN}>
+        <Button {...triggerProps} aria-expanded={open}>
           {triggerContent}
         </Button>
       </PopoverTrigger>
