@@ -2,9 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { Querybox } from './querybox';
-
-type QueryboxProps = React.ComponentProps<typeof Querybox>;
+import { Querybox, QueryboxProps } from './querybox';
 
 const QueryboxWrapper = (props: QueryboxProps) => {
   return (
@@ -36,9 +34,9 @@ const props: QueryboxProps = {
 describe('<Querybox />', () => {
   afterEach(vi.resetAllMocks);
 
-  it('should display the given `triggerContent`', () => {
-    render(<QueryboxWrapper {...props} />);
-    expect(screen.getByText(triggerText)).toBeInTheDocument();
+  it('should display the given `triggerContent` with the given `triggerCN`', () => {
+    render(<QueryboxWrapper {...{ ...props, triggerCN: 'test-class' }} />);
+    expect(screen.getByText(triggerText)).toHaveClass('test-class');
   });
 
   it('should display search input after clicking on the trigger', async () => {

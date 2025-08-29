@@ -22,21 +22,25 @@ const createStrEqChecker = (a: string) => (b: string) => {
   return a.toLowerCase() === b.toLowerCase();
 };
 
-export function Querybox({
-  includeSearchValueInResult = false,
-  blacklist = [],
-  triggerContent,
-  onValidate,
-  onSearch,
-  onSelect,
-}: {
+export interface QueryboxProps {
   onSearch: (searchValue: string) => string[] | Promise<string[]>;
   onSelect: (v: string, searchResult?: string[]) => void;
   onValidate: (searchValue: string) => boolean;
   includeSearchValueInResult?: boolean;
   triggerContent: React.ReactNode;
   blacklist?: string[];
-}) {
+  triggerCN?: string;
+}
+
+export function Querybox({
+  includeSearchValueInResult = false,
+  blacklist = [],
+  triggerContent,
+  onValidate,
+  triggerCN,
+  onSearch,
+  onSelect,
+}: QueryboxProps) {
   const [searchValue, setSearchValue] = React.useState('');
   const [open, setOpen] = React.useState(false);
   const id = React.useId();
@@ -71,7 +75,7 @@ export function Querybox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant='outline' className='gap-1' aria-expanded={open}>
+        <Button variant='outline' className={triggerCN} aria-expanded={open}>
           {triggerContent}
         </Button>
       </PopoverTrigger>
