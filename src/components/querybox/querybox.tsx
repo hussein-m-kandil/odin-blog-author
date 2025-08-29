@@ -23,6 +23,7 @@ const createStrEqChecker = (a: string) => (b: string) => {
 };
 
 export function Querybox({
+  includeSearchValueInResult = false,
   blacklist = [],
   triggerContent,
   onValidate,
@@ -32,6 +33,7 @@ export function Querybox({
   onSearch: (searchValue: string) => string[] | Promise<string[]>;
   onSelect: (v: string, searchResult?: string[]) => void;
   onValidate: (searchValue: string) => boolean;
+  includeSearchValueInResult?: boolean;
   triggerContent: React.ReactNode;
   blacklist?: string[];
 }) {
@@ -69,7 +71,7 @@ export function Querybox({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant='outline' aria-expanded={open}>
+        <Button variant='outline' className='gap-1' aria-expanded={open}>
           {triggerContent}
         </Button>
       </PopoverTrigger>
@@ -99,14 +101,15 @@ export function Querybox({
             ) : (
               Array.isArray(data) && (
                 <CommandGroup>
-                  {data.findIndex(createStrEqChecker(searchValue)) < 0 && (
-                    <CommandItem
-                      value={searchValue}
-                      className='font-bold'
-                      onSelect={handleSelectItem}>
-                      {searchValue}
-                    </CommandItem>
-                  )}
+                  {includeSearchValueInResult &&
+                    !data.some(createStrEqChecker(searchValue)) && (
+                      <CommandItem
+                        value={searchValue}
+                        className='font-bold'
+                        onSelect={handleSelectItem}>
+                        {searchValue}
+                      </CommandItem>
+                    )}
                   {data.map((item) => (
                     <CommandItem
                       key={item}

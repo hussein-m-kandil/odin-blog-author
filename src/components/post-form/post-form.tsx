@@ -223,6 +223,7 @@ export function PostForm({
         <div>
           <div className='flex justify-between items-baseline space-x-2'>
             <Querybox
+              includeSearchValueInResult={true}
               triggerContent={
                 <>
                   Add Tag

@@ -30,10 +30,11 @@ const props: QueryboxProps = {
   onSelect,
   onValidate,
   triggerContent: triggerText,
+  includeSearchValueInResult: true,
 };
 
 describe('<Querybox />', () => {
-  afterEach(vi.clearAllMocks);
+  afterEach(vi.resetAllMocks);
 
   it('should display the given `triggerContent`', () => {
     render(<QueryboxWrapper {...props} />);
@@ -76,17 +77,41 @@ describe('<Querybox />', () => {
     expect(onValidate.mock.calls).toStrictEqual([['x'], ['y'], ['z']]);
     expect(screen.queryByDisplayValue('xyz')).toBeNull();
     expect(onSearch).not.toHaveBeenCalled();
-    onValidate.mockReset();
   });
 
-  it('should display the typed text as the first option', async () => {
+  it('should not display the search value in the list by default', async () => {
+    onSearch.mockImplementation(() => ['xyz']);
+    const user = userEvent.setup();
+    render(
+      <QueryboxWrapper
+        {...{ ...props, includeSearchValueInResult: undefined }}
+      />
+    );
+    await user.click(screen.getByText(triggerText));
+    await user.type(screen.getByLabelText(/search/i), 'x');
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
+  });
+
+  it('should not display the search value in the list', async () => {
+    onSearch.mockImplementation(() => ['xyz']);
+    const user = userEvent.setup();
+    render(
+      <QueryboxWrapper {...{ ...props, includeSearchValueInResult: false }} />
+    );
+    await user.click(screen.getByText(triggerText));
+    await user.type(screen.getByLabelText(/search/i), 'x');
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+    expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
+  });
+
+  it('should display the search value as the first option', async () => {
     const user = userEvent.setup();
     onSearch.mockImplementation(() => ['x', 'y', 'z']);
     render(<QueryboxWrapper {...{ ...props, blacklist: ['x', 'y'] }} />);
     await user.click(screen.getByText(triggerText));
     await user.type(screen.getByLabelText(/search/i), 'xyz');
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
-    onSearch.mockReset();
   });
 
   it('should show a list of the response result minus any value from the given blacklist', async () => {
@@ -98,7 +123,6 @@ describe('<Querybox />', () => {
     expect(screen.getAllByRole('option')).toHaveLength(2);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('x');
     expect(screen.getAllByRole('option')[1]).toHaveTextContent('xyz');
-    onSearch.mockReset();
   });
 
   it('should show the prefect match once at the start of the list', async () => {
@@ -109,7 +133,6 @@ describe('<Querybox />', () => {
     await user.type(screen.getByLabelText(/search/i), 'xyz');
     expect(screen.getAllByRole('option')).toHaveLength(1);
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
-    onSearch.mockReset();
   });
 
   it('should call `onSelect` with the selected value and the search result', async () => {
