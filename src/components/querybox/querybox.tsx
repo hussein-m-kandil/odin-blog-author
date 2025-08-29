@@ -30,9 +30,9 @@ export function Querybox({
   onSelect,
 }: {
   onSearch: (searchValue: string) => string[] | Promise<string[]>;
+  onSelect: (v: string, searchResult?: string[]) => void;
   onValidate: (searchValue: string) => boolean;
   triggerContent: React.ReactNode;
-  onSelect: (v: string) => void;
   blacklist?: string[];
 }) {
   const [searchValue, setSearchValue] = React.useState('');
@@ -61,7 +61,7 @@ export function Querybox({
   };
 
   const handleSelectItem = (selectedValue: string) => {
-    onSelect(selectedValue);
+    onSelect(selectedValue, data);
     setSearchValue('');
     setOpen(false);
   };

@@ -111,4 +111,19 @@ describe('<Querybox />', () => {
     expect(screen.getAllByRole('option')[0]).toHaveTextContent('xyz');
     onSearch.mockReset();
   });
+
+  it('should call `onSelect` with the selected value and the search result', async () => {
+    const user = userEvent.setup();
+    render(<QueryboxWrapper {...props} />);
+    await user.click(screen.getByText(triggerText));
+    await user.type(screen.getByLabelText(/search/i), 'xyz');
+    const options = screen.getAllByRole('option');
+    await user.click(options[0]);
+    expect(onSelect).toHaveBeenCalledOnce();
+    expect(onSelect).toHaveBeenNthCalledWith(
+      1,
+      options[0].textContent,
+      options.slice(1).map((o) => o.textContent)
+    );
+  });
 });
