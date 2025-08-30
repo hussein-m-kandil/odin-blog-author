@@ -10,19 +10,16 @@ import { Query, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImageInput, useImageInputState } from '@/components/image-input';
 import { parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { PostFormProps, NewPostInput } from './post-form.types';
-import { ErrorMessage } from '@/components/error-message';
 import { CloseButton } from '@/components/close-button';
+import { TagSelector } from '@/components/tag-selector';
 import { useAuthData } from '@/contexts/auth-context';
-import { Querybox } from '@/components/querybox';
 import { UseFormReturn } from 'react-hook-form';
 import { Plus, PencilLine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { AxiosRequestConfig } from 'axios';
 import { Tags } from '@/components/tags';
-import { Tag, Post } from '@/types';
+import { Post } from '@/types';
 import { toast } from 'sonner';
-
-const MAX_TAGS_NUM = 7;
 
 const getInvalidateQueryPredicate = (post?: Post) => {
   return ({ queryKey }: Query) => {
@@ -44,7 +41,6 @@ export function PostForm({
     return post?.tags.map((t) => t.name) || [];
   }, [post]);
   const [tags, setTags] = React.useState<string[]>(postTags);
-  const [tagsError, setTagsError] = React.useState('');
   const router = useRouter();
 
   const {
@@ -165,25 +161,9 @@ export function PostForm({
     shouldUnmount,
   ]);
 
-  const validateTag = (value: string) => /^\w*$/.test(value);
-  const searchTags = async (searchValue: string) => {
-    if (!searchValue) return [];
-    const url = `/posts/tags?tags=${searchValue}`;
-    const { data } = await authAxios.get<Tag[]>(url);
-    const fetchedTags = data.map((tag) => tag.name);
-    return fetchedTags.filter((t) => !tags.includes(t));
-  };
-  const selectTag = (selectedTag: string) => {
-    if (tags.length < MAX_TAGS_NUM) {
-      setTags((tags) => {
-        return tags.find((t) => t.toUpperCase() === selectedTag.toUpperCase())
-          ? tags
-          : [...tags, selectedTag];
-      });
-    } else {
-      setTagsError('You have reached the maximum number of tags');
-    }
-  };
+  const handleSelectTag = (tag: string) => setTags([...tags, tag]);
+  const handleTagsError = (message: string) => toast.error(message);
+  const removeTag = (tag: string) => setTags(tags.filter((t) => t !== tag));
 
   return (
     <div>
@@ -220,33 +200,19 @@ export function PostForm({
             image={post?.image}
           />
         }>
-        <div>
-          <div className='flex justify-between items-baseline space-x-2'>
-            <Querybox
-              includeSearchValueInResult={true}
-              triggerContent={
-                <>
-                  Add Tag
-                  <Plus className='opacity-50' />
-                </>
-              }
-              onValidate={validateTag}
-              onSearch={searchTags}
-              onSelect={selectTag}
-              blacklist={tags}
-            />
-            <Tags
-              tags={tags}
-              className='justify-end'
-              onRemove={(tagToDel) => {
-                setTags((tags) => tags.filter((t) => t !== tagToDel));
-                setTagsError('');
-              }}
-            />
-          </div>
-          <ErrorMessage className='[&:not(:first-child)]:mt-2 mt-2'>
-            {tagsError}
-          </ErrorMessage>
+        <div className='space-y-2'>
+          <TagSelector
+            tags={tags}
+            onError={handleTagsError}
+            onSelect={handleSelectTag}
+            includeSearchValueInResult={true}
+            triggerContent={
+              <>
+                <Plus aria-label='Plus icon' /> Tags
+              </>
+            }
+          />
+          <Tags tags={tags} onRemove={removeTag} />
         </div>
       </DynamicForm>
       {onClose && (

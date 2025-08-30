@@ -5,6 +5,10 @@ import { clsx, type ClassValue } from 'clsx';
 import { Image, NewImage } from '@/types';
 import { twMerge } from 'tailwind-merge';
 
+export const MAX_TAGS_NUM = 7;
+
+export const validateTag = (value: string) => /^\w*$/.test(value);
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
