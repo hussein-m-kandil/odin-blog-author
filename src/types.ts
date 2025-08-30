@@ -1,5 +1,9 @@
 import { AxiosInstance } from 'axios';
 
+export type SearchParams = Promise<
+  Record<string, string | string[] | undefined>
+>;
+
 export type ID = string | number;
 
 export interface User {

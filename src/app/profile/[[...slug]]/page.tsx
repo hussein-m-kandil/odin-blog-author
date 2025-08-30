@@ -1,14 +1,14 @@
 import { PostsWrapper } from '@/components/posts-wrapper';
 import { UserProfile } from '@/components/user-profile';
+import { SearchParams, User } from '@/types';
 import { getServerAuthData } from '@/lib/auth';
 import { Header } from '@/components/header';
 import { redirect } from 'next/navigation';
 import { Metadata } from 'next';
-import { User } from '@/types';
 
 type Props = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
   params: Promise<{ slug?: string[] }>;
+  searchParams: SearchParams;
 };
 
 const getOwnerAndAuthDataOrRedirect = async (ownerId?: string) => {
@@ -30,12 +30,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: data.owner.username };
 }
 
-export default async function Profile({ params }: Props) {
+export default async function Profile({ params, searchParams }: Props) {
   const ownerId = (await params).slug?.[0];
+
   const data = await getOwnerAndAuthDataOrRedirect(ownerId);
   const { owner, authData } = data;
-
-  const postsUrl = `/posts?author=${owner.id}`;
 
   return (
     <>
@@ -43,7 +42,10 @@ export default async function Profile({ params }: Props) {
         <UserProfile owner={owner} />
       </Header>
       <main>
-        <PostsWrapper postsUrl={postsUrl} authData={authData} />
+        <PostsWrapper
+          searchParams={{ ...(await searchParams), author: owner.id }}
+          authData={authData}
+        />
       </main>
     </>
   );

@@ -3,17 +3,37 @@ import {
   QueryClient,
   HydrationBoundary,
 } from '@tanstack/react-query';
+import { SearchParams, ServerAuthData } from '@/types';
 import { H2 } from '@/components/typography';
 import { Posts } from '@/components/posts';
-import { ServerAuthData } from '@/types';
 
-export async function PostsWrapper({
-  authData: { authFetch, backendUrl },
-  postsUrl,
-}: {
+interface Props {
+  searchParams: SearchParams | Awaited<SearchParams>;
   authData: ServerAuthData;
-  postsUrl: string;
-}) {
+}
+
+const createURLSearchParams = async (searchParams: Props['searchParams']) => {
+  return new URLSearchParams(
+    Object.fromEntries(
+      Object.entries(await searchParams).map(([k, v]) => {
+        if (Array.isArray(v)) {
+          return [k, v.map((str) => [k, str])];
+        } else if (!v) {
+          return [k, 'true'];
+        }
+        return [k, v];
+      })
+    )
+  );
+};
+
+export async function PostsWrapper({ searchParams, authData }: Props) {
+  const { authFetch, backendUrl } = authData;
+
+  const urlSearchParams = await createURLSearchParams(searchParams);
+
+  const postsUrl = `/posts?${urlSearchParams.toString()}`;
+
   const queryClient = new QueryClient();
 
   await queryClient.prefetchInfiniteQuery({
