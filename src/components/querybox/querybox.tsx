@@ -125,14 +125,17 @@ export function Querybox({
                         {searchValue}
                       </CommandItem>
                     )}
-                  {data.map((item) => (
-                    <CommandItem
-                      key={item}
-                      value={item}
-                      onSelect={handleSelectItem}>
-                      {item}
-                    </CommandItem>
-                  ))}
+                  {data.map(
+                    (item, i) =>
+                      !data.slice(0, i).includes(item) && (
+                        <CommandItem
+                          key={item}
+                          value={item}
+                          onSelect={handleSelectItem}>
+                          {item}
+                        </CommandItem>
+                      )
+                  )}
                 </CommandGroup>
               )
             )}
