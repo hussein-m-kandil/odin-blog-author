@@ -5,6 +5,7 @@ import { InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { PostCard } from '@/components/post-card';
 import { useAuthData } from '@/contexts/auth-context';
 import { QueryError } from '@/components/query-error';
+import { PostSearch } from '@/components/post-search';
 import { InView } from 'react-intersection-observer';
 import { PostsSkeleton } from './posts.skeleton';
 import { Button } from '@/components/ui/button';
@@ -59,7 +60,8 @@ export function Posts({ postsUrl }: { postsUrl: string }) {
 
   return (
     <>
-      <div className='flex flex-wrap justify-center grow gap-8 px-4 *:sm:max-w-xl *:lg:max-w-md'>
+      <PostSearch />
+      <div className='mt-4 px-4 flex flex-wrap justify-center grow gap-8 *:sm:max-w-xl *:lg:max-w-md'>
         {isLoadingError || !Array.isArray(data.pages[0]) ? (
           <QueryError onRefetch={refetch}>
             Sorry, we could not load any posts
