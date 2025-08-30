@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Post } from '@/types';
+import { Tags } from '../tags';
 
 interface PostCardProps extends React.ComponentProps<'div'> {
   isMutable: boolean;
@@ -57,9 +58,12 @@ export function PostCard({
       </CardHeader>
       <CardContent className='mb-auto p-0'>
         {post.image && <MutableImage image={post.image} />}
-        <Lead className='line-clamp-3 font-light text-lg px-6'>
-          {post.content}
-        </Lead>
+        <div className='px-6 space-y-2'>
+          <Lead className='line-clamp-3 font-light text-lg'>
+            {post.content}
+          </Lead>
+          <Tags tags={post.tags} />
+        </div>
       </CardContent>
       <CardFooter className='flex items-center justify-between'>
         <Muted>
