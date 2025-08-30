@@ -71,9 +71,8 @@ export function Querybox({
   };
 
   const handleSelectItem = (selectedValue: string) => {
-    onSelect(selectedValue, data);
-    setSearchValue('');
     setOpen(false);
+    onSelect(selectedValue, data);
   };
 
   triggerProps.variant = triggerProps.variant || 'outline';
@@ -85,7 +84,9 @@ export function Querybox({
           {triggerContent}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className='w-[200px] p-0'>
+      <PopoverContent
+        className='w-[200px] p-0'
+        onCloseAutoFocus={() => setSearchValue('')}>
         <Command
           filter={() => 1}
           label={
