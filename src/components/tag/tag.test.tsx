@@ -7,9 +7,7 @@ describe('<Tag />', () => {
   it('should render the given name as a link if not given `onRemove` prop', () => {
     const name = 'Test';
     render(<Tag name={name} />);
-    expect(
-      screen.getByRole('link', { name: new RegExp(name, 'i') })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('link', { name })).toBeInTheDocument();
   });
 
   it('should add the given className', () => {
@@ -23,9 +21,7 @@ describe('<Tag />', () => {
     const user = userEvent.setup();
     const handleRemoveMock = vi.fn();
     render(<Tag name={name} onRemove={handleRemoveMock} />);
-    expect(
-      screen.getByRole('button', { name: new RegExp(`^${name}$`, 'i') })
-    ).toBeInTheDocument();
+    expect(screen.getByText(name)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /remove/i }));
     expect(handleRemoveMock).toHaveBeenNthCalledWith(1, name);
   });

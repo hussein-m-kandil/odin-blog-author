@@ -5,12 +5,14 @@ import { Tag } from '@/types';
 export function Tags({
   tags,
   tagCN,
+  closeBtnCN,
   className,
   onRemove,
 }: React.ComponentProps<'ul'> & {
-  tagCN?: string;
-  tags: string[] | Tag[];
   onRemove?: (name: string) => void;
+  tags: string[] | Tag[];
+  closeBtnCN?: string;
+  tagCN?: string;
 }) {
   if (!tags || tags.length < 0) return null;
 
@@ -23,12 +25,17 @@ export function Tags({
   return (
     <ul
       className={cn(
-        'flex flex-wrap justify-between content-center space-x-2 space-y-2',
+        'w-full flex flex-wrap justify-center content-center gap-2',
         className
       )}>
       {strTags.map((t) => (
-        <li key={t}>
-          <TagComponent name={t} onRemove={onRemove} className={tagCN} />
+        <li key={t} className='max-w-full'>
+          <TagComponent
+            name={t}
+            className={tagCN}
+            onRemove={onRemove}
+            closeBtnCN={closeBtnCN}
+          />
         </li>
       ))}
     </ul>
