@@ -9,24 +9,16 @@ import {
   DropdownMenuContent,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
-import {
-  Home,
-  LogIn,
-  LogOut,
-  UserPlus,
-  UserIcon,
-  PencilLine,
-} from 'lucide-react';
-import { cn, getUnknownErrorMessage, parseAxiosAPIError } from '@/lib/utils';
+import { Home, LogIn, UserPlus, UserIcon, PencilLine } from 'lucide-react';
+import { usePostFormDialog } from '@/hooks/use-post-form-dialog';
 import { useAuthData } from '@/contexts/auth-context';
 import { UserAvatar } from '@/components/user-avatar';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Separator } from '@/components/ui/separator';
+import { SignoutButton } from '../signout-button';
 import { Button } from '@/components/ui/button';
 import { Large } from '@/components/typography';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { usePostFormDialog } from '@/hooks/use-post-form-dialog';
+import { cn } from '@/lib/utils';
 
 function CustomMenuItem({ children }: React.PropsWithChildren) {
   return <DropdownMenuItem asChild>{children}</DropdownMenuItem>;
@@ -37,12 +29,10 @@ export function Navbar() {
 
   const { showPostForm } = usePostFormDialog();
 
-  const { authData, signout } = useAuthData();
-
-  const { user, authAxios } = authData;
+  const { authData } = useAuthData();
+  const { user } = authData;
 
   const [yScroll, setYScroll] = React.useState(0);
-  const router = useRouter();
 
   React.useEffect(() => {
     const navContainer = navContainerRef.current;
@@ -70,26 +60,6 @@ export function Navbar() {
       return () => window.removeEventListener(eventName, handleScroll);
     }
   }, [yScroll]);
-
-  const handleSignout = async () => {
-    const signoutUrl = `${authData.authUrl}/signout`;
-    toast.promise(authAxios.post(signoutUrl, null, { baseURL: '' }), {
-      loading: 'Signing out...',
-      success: () => {
-        signout();
-        router.replace('/signin');
-        return {
-          message: `Bye${user ? ', ' + user.username : ''}`,
-          description: 'You have signed out successfully',
-        };
-      },
-      error: (error) => ({
-        message:
-          parseAxiosAPIError(error).message || getUnknownErrorMessage(error),
-        description: 'Failed to sign you out',
-      }),
-    });
-  };
 
   const btnProps: React.ComponentProps<'button'> = {
     className: 'inline-flex items-center gap-1',
@@ -140,12 +110,7 @@ export function Navbar() {
                     </CustomMenuItem>
                     <DropdownMenuSeparator />
                     <CustomMenuItem>
-                      <button
-                        {...btnProps}
-                        onClick={handleSignout}
-                        className={cn(btnProps.className, 'text-destructive!')}>
-                        <LogOut /> Sign out
-                      </button>
+                      <SignoutButton {...btnProps} />
                     </CustomMenuItem>
                   </>
                 ) : (
