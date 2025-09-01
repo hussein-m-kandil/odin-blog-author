@@ -17,7 +17,6 @@ import {
 } from './auth-form.data';
 import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { LogIn, UserPen, UserPlus, UserCheck } from 'lucide-react';
-import { ErrorMessage } from '@/components/error-message';
 import { CloseButton } from '@/components/close-button';
 import { useAuthData } from '@/contexts/auth-context';
 import { AuthFormProps } from './auth-form.types';
@@ -34,7 +33,6 @@ export function AuthForm({
   onSuccess,
   onClose,
 }: AuthFormProps) {
-  const [errorMessage, setErrorMessage] = React.useState('');
   const router = useRouter();
 
   const {
@@ -88,7 +86,6 @@ export function AuthForm({
   }
 
   const handleSuccess = (data: AuthResData) => {
-    setErrorMessage('');
     signin(data);
     onSuccess?.();
     router.replace(
@@ -116,7 +113,7 @@ export function AuthForm({
         });
       }
     } catch (error) {
-      setErrorMessage(
+      toast.error(
         parseAxiosAPIError(error, hookForm).message ||
           getUnknownErrorMessage(error)
       );
@@ -135,7 +132,7 @@ export function AuthForm({
         description: 'You have signed in as guest successfully',
       });
     } catch (error) {
-      setErrorMessage(
+      toast.error(
         parseAxiosAPIError(error).message || getUnknownErrorMessage(error)
       );
     }
@@ -143,7 +140,6 @@ export function AuthForm({
 
   return (
     <div className={cn('w-full max-w-md mx-auto mt-4 space-y-4', className)}>
-      <ErrorMessage>{errorMessage}</ErrorMessage>
       <DynamicForm
         aria-label={`${formType}${formType === 'update' ? ' user' : ''} form`}
         submitterClassName='w-full'
