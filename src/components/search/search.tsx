@@ -1,8 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { InputGroup } from '@/components/input-group';
 import { SearchIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -40,30 +39,19 @@ export function Search({
       {...props}
       onSubmit={handleSearch}
       className={cn('w-full relative', className)}>
-      <Input
+      <InputGroup
         name='q'
-        type='text'
         value={query}
-        className='pe-12'
-        autoComplete='off'
         onChange={handleChange}
         aria-label={placeholder}
         placeholder={placeholder}
-      />
-      <div className='absolute top-0 right-0'>
-        <Button
-          size='icon'
-          type='submit'
-          variant='outline'
-          disabled={!query}
-          aria-label='Search'
-          className={cn(
-            'border-0 shadow-none bg-transparent',
-            'rounded-l-none focus-visible:rounded-l-md'
-          )}>
-          <SearchIcon />
-        </Button>
-      </div>
+        buttonProps={{
+          ['aria-label']: 'Search',
+          disabled: !query,
+          type: 'submit',
+        }}>
+        <SearchIcon />
+      </InputGroup>
     </form>
   );
 }

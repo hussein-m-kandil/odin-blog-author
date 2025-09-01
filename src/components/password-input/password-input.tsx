@@ -1,9 +1,8 @@
 'use client';
 
 import React from 'react';
+import { InputGroup } from '@/components/input-group';
 import { Eye, EyeOff } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
 export function PasswordInput(
   props: React.ComponentProps<'input'>
@@ -11,37 +10,39 @@ export function PasswordInput(
   const [hidden, setHidden] = React.useState<boolean>(true);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  let currentType: string, togglerLabel: string, TogglerIcon: typeof Eye;
+  let inpType: string, btnLabel: string, EyeIcon: typeof Eye;
 
   if (hidden) {
-    togglerLabel = 'Show password';
-    currentType = 'password';
-    TogglerIcon = EyeOff;
+    btnLabel = 'Show password';
+    inpType = 'password';
+    EyeIcon = EyeOff;
   } else {
-    togglerLabel = 'Hide password';
-    currentType = 'text';
-    TogglerIcon = Eye;
+    btnLabel = 'Hide password';
+    inpType = 'text';
+    EyeIcon = Eye;
   }
 
-  const handleToggleVisibility = () => {
+  const toggleVisibility = () => {
     setHidden(!hidden);
-    inputRef.current?.focus();
+    const input = inputRef.current;
+    if (input) {
+      input.focus();
+      input.select();
+    }
   };
 
   return (
-    <div className='relative'>
-      <Input {...props} type={currentType} ref={inputRef} />
-      <div className='absolute top-0 right-0 text-gray-500'>
-        <Button
-          className='border-0 rounded-l-none shadow-none bg-transparent hover:bg-transparent focus-visible:ring-0 focus-visible:text-foreground'
-          type='button'
-          variant='outline'
-          aria-label={togglerLabel}
-          onClick={handleToggleVisibility}>
-          <TogglerIcon />
-        </Button>
-      </div>
-    </div>
+    <InputGroup
+      {...props}
+      ref={inputRef}
+      type={inpType}
+      buttonProps={{
+        ['aria-label']: btnLabel,
+        onClick: toggleVisibility,
+        type: 'button',
+      }}>
+      <EyeIcon />
+    </InputGroup>
   );
 }
 
