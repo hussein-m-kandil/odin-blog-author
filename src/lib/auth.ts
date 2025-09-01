@@ -20,6 +20,16 @@ export const authUrl = AUTH_URL;
 export const AUTH_COOKIE_KEY = 'authorization';
 export const URL_HEADER_KEY = 'x-url';
 
+export class AuthError extends Error {
+  metadata = '';
+
+  constructor(message: string, metadata = '') {
+    super(message);
+    this.name = 'AuthError';
+    this.metadata = metadata;
+  }
+}
+
 export async function getCurrentUrl() {
   const headerStore = await headers();
   const url = headerStore.get(URL_HEADER_KEY);
@@ -64,7 +74,9 @@ export const getServerAuthData = async (): Promise<ServerAuthData> => {
       headers: { Authorization: initAuthData.token || '', ...headers },
       ...reqInit,
     });
-    if (!res.ok) throw res;
+    if (!res.ok) {
+      throw new AuthError('API response is not okay', await res.text());
+    }
     return res.json();
   };
   return { ...initAuthData, authFetch };
