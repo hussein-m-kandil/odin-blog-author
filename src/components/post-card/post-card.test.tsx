@@ -33,7 +33,9 @@ describe('<PostCard />', () => {
     const authorLink = screen.getByRole('link', {
       name: new RegExp(`${post.author.username}|${post.author.fullname}`, 'i'),
     }) as HTMLAnchorElement;
-    expect(authorLink.href).toMatch(new RegExp(`/profile/${post.authorId}$`));
+    expect(authorLink.href).toMatch(
+      new RegExp(`/profile/(${post.author.username}|${post.author.id})$`)
+    );
   });
 
   it('should show action button with mutation actions for a mutable post', () => {

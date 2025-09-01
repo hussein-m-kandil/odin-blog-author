@@ -3,21 +3,13 @@ import {
   signupFormAttrs,
   updateUserFormAttrs,
 } from './auth-form.data';
-import { injectDefaultValuesInDynamicFormAttrs as injectDefaults } from '@/components/dynamic-form';
-import {
-  beforeEach,
-  afterEach,
-  afterAll,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vitest';
 import {
   render,
   screen,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
+import { injectDefaultValuesInDynamicFormAttrs as injectDefaults } from '@/components/dynamic-form';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import { AuthFormProps, FormType } from './auth-form.types';
 import { userEvent } from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/auth-context';
@@ -74,11 +66,11 @@ const setup = async (props: AuthFormProps) => {
 };
 
 describe(`<AuthForm />`, () => {
+  beforeEach(() => {
+    axiosMock.reset();
+    axiosMock.onAny().reply(200, { user: author, token: 'test-token' });
+  });
   afterEach(vi.clearAllMocks);
-  afterAll(() => vi.doUnmock('next/navigation'));
-  beforeEach(() =>
-    axiosMock.onAny().reply(200, { user: author, token: 'test-token' })
-  );
 
   for (const formType of ['signin', 'signup'] as FormType[]) {
     const props = { formType };
@@ -200,7 +192,7 @@ describe(`<AuthForm />`, () => {
     await waitForElementToBeRemoved(() =>
       screen.getByRole('button', data.submittingOpts)
     );
-    expect(routerMethodMock).toHaveBeenCalled();
+    expect(onSuccess).toHaveBeenCalledOnce();
     expect(routerMethodMock).toHaveBeenCalledOnce();
   });
 

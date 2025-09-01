@@ -14,7 +14,7 @@ export function UsernameLink({
 }) {
   if (!user) return null;
   return (
-    <Link {...props} href={href || `/profile/${user.id}`}>
+    <Link {...props} href={href || `/profile/${user.username}`}>
       {prefix}
       {user.username}
     </Link>

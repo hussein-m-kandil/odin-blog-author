@@ -129,7 +129,7 @@ export function Navbar() {
                       </button>
                     </CustomMenuItem>
                     <CustomMenuItem>
-                      <Link href='/profile'>
+                      <Link href={`/profile/${user.username}`}>
                         <UserIcon /> Profile
                       </Link>
                     </CustomMenuItem>

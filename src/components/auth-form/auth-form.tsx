@@ -51,7 +51,6 @@ export function AuthForm({
       formAttrs: DynamicFormProps['formAttrs'];
     };
     reqConfig: AxiosRequestConfig;
-    redirectUrl: string;
   };
   if (formType === 'signin') {
     formData = {
@@ -62,7 +61,6 @@ export function AuthForm({
         submitterIcon: <LogIn />,
       },
       reqConfig: { url: `${authUrl}/signin`, method: 'post', baseURL: '' },
-      redirectUrl: '/',
     };
   } else if (formType === 'signup') {
     formData = {
@@ -73,7 +71,6 @@ export function AuthForm({
         submitterIcon: <UserPlus />,
       },
       reqConfig: { url: `${authUrl}/signup`, method: 'post', baseURL: '' },
-      redirectUrl: '/',
     };
   } else if (formType === 'update' && user) {
     formData = {
@@ -84,18 +81,21 @@ export function AuthForm({
         submitterIcon: <UserPen />,
       },
       reqConfig: { url: `/users/${user.id}`, method: 'patch' },
-      redirectUrl: '/profile',
     };
   } else {
     signout();
     throw Error('Invalid `AuthForm` usage');
   }
 
-  const handleSuccess = (data: AuthResData, redirectUrl: string) => {
+  const handleSuccess = (data: AuthResData) => {
     setErrorMessage('');
     signin(data);
     onSuccess?.();
-    router.replace(redirectUrl);
+    router.replace(
+      formType === 'update' && data.user
+        ? `/profile/${data.user.username}`
+        : '/'
+    );
   };
 
   const handleSubmit: DynamicFormSubmitHandler<
@@ -105,7 +105,7 @@ export function AuthForm({
       formData.reqConfig.data = values;
       const { data } = await authAxios<AuthResData>(formData.reqConfig);
       hookForm.reset();
-      handleSuccess(data, formData.redirectUrl);
+      handleSuccess(data);
       if (formType === 'update') {
         toast.success('Profile updated', {
           description: `You have updated your profile successfully`,
@@ -130,7 +130,7 @@ export function AuthForm({
         method: 'post',
         baseURL: '',
       });
-      handleSuccess(data, '/');
+      handleSuccess(data);
       toast.success(`Hello, @${data.user.username}!`, {
         description: 'You have signed in as guest successfully',
       });
