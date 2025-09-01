@@ -19,6 +19,7 @@ import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { LogIn, UserPen, UserPlus, UserCheck } from 'lucide-react';
 import { CloseButton } from '@/components/close-button';
 import { useAuthData } from '@/contexts/auth-context';
+import { Separator } from '@/components/ui/separator';
 import { AuthFormProps } from './auth-form.types';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -147,7 +148,12 @@ export function AuthForm({
         {...formData.props}
       />
       {formType !== 'update' && (
-        <div className='text-center space-y-2 *:flex *:w-full pt-6 mt-6 border-t border-muted'>
+        <div className='text-center space-y-2 *:flex *:w-full'>
+          <div className='my-6 *:shrink-1 *:grow-1 items-center gap-2'>
+            <Separator />
+            <span>or</span>
+            <Separator />
+          </div>
           <Button type='button' variant='outline' asChild>
             {formType === 'signin' ? (
               <Link href='/signup' className='p-0'>
