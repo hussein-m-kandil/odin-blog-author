@@ -23,7 +23,6 @@ export function SignoutButton({
   const handleSignout = async () => {
     const signoutUrl = `${authData.authUrl}/signout`;
     toast.promise(authAxios.post(signoutUrl, null, { baseURL: '' }), {
-      classNames: { loader: 'animate-spin' },
       loading: 'Signing out...',
       success: () => {
         signout();
