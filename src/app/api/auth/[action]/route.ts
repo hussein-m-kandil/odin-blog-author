@@ -4,10 +4,8 @@ import { NextRequest } from 'next/server';
 import logger from '@/lib/logger';
 
 export async function POST(
-  req: NextRequest,
-  context: {
-    params: Promise<{ action: 'signin' | 'signup' | 'signout' | 'guest' }>;
-  }
+  request: NextRequest,
+  context: { params: Promise<{ action: string }> }
 ) {
   try {
     revalidatePath('/', 'layout');
@@ -21,7 +19,7 @@ export async function POST(
     const url = new URL(backendUrl);
     const options: RequestInit = {
       headers: { 'Content-Type': 'application/json' },
-      body: await req.text(),
+      body: await request.text(),
       method: 'POST',
     };
 
@@ -47,7 +45,7 @@ export async function POST(
         logger.error(`Unexpect ${action} response`, data);
         return Response.json(null, { status: 500 });
       }
-      return signin(data, req);
+      return signin(data, request);
     }
 
     return res;
