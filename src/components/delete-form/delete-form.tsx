@@ -1,8 +1,9 @@
 import React from 'react';
-import { Loader, PanelLeftClose, Trash2 } from 'lucide-react';
 import { ErrorMessage } from '@/components/error-message';
+import { PanelLeftClose, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { P } from '@/components/typography/p';
+import { Loader } from '@/components/loader';
 
 export function DeleteForm({
   errorMessage = '',
@@ -52,7 +53,7 @@ export function DeleteForm({
         <Button type='submit' variant='destructive' disabled={deleting}>
           {deleting ? (
             <>
-              <Loader className='animate-spin' /> Deleting
+              <Loader /> Deleting
             </>
           ) : (
             <>

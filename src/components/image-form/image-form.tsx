@@ -9,11 +9,12 @@ import {
 } from './image-form.types';
 import { cn, parseAxiosAPIError, getUnknownErrorMessage } from '@/lib/utils';
 import { uploadImage, updateImage, deleteImage } from './image-form.services';
-import { Loader, ImageUp, ImagePlus, ImageMinus } from 'lucide-react';
-import { ImageInput, useImageInputState } from '../image-input';
+import { ImageInput, useImageInputState } from '@/components/image-input';
+import { ImageUp, ImagePlus, ImageMinus } from 'lucide-react';
 import { CloseButton } from '@/components/close-button';
 import { useAuthData } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
+import { Loader } from '@/components/loader';
 import { Image, NewImage } from '@/types';
 import { toast } from 'sonner';
 
@@ -192,8 +193,7 @@ export function ImageForm({
         }>
         {submitting ? (
           <>
-            <Loader aria-label='Uploading' className='animate-spin' />{' '}
-            {submitter.submitting.label}
+            <Loader aria-label='Uploading' /> {submitter.submitting.label}
           </>
         ) : (
           <>

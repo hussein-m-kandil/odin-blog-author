@@ -10,7 +10,7 @@ import { InView } from 'react-intersection-observer';
 import { PostsSkeleton } from './posts.skeleton';
 import { Button } from '@/components/ui/button';
 import { P } from '@/components/typography/';
-import { Loader } from 'lucide-react';
+import { Loader } from '@/components/loader';
 import { Post } from '@/types';
 
 export function Posts({ postsUrl }: { postsUrl: string }) {
@@ -85,7 +85,7 @@ export function Posts({ postsUrl }: { postsUrl: string }) {
         )}
       </div>
       {isFetchingNextPage ? (
-        <Loader className='animate-spin mx-auto' />
+        <Loader className='mx-auto' />
       ) : isFetchNextPageError ? (
         <QueryError onRefetch={fetchNextIfYouCan}>
           Sorry, we could not load more posts

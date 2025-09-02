@@ -8,8 +8,8 @@ import { QueryError } from '@/components/query-error';
 import { Muted } from '@/components/typography/muted';
 import { Comment as CommentT, Post } from '@/types';
 import { Comment } from '@/components/comment';
+import { Loader } from '@/components/loader';
 import { Button } from '../ui/button';
-import { Loader } from 'lucide-react';
 
 export function Comments({
   initialComments,
@@ -137,9 +137,7 @@ export function Comments({
     }
   }, [data.pages, extraComments]);
 
-  const loader = (
-    <Loader aria-label='Loading comments' className='animate-spin mx-auto' />
-  );
+  const loader = <Loader aria-label='Loading comments' className='mx-auto' />;
 
   return (
     <div {...props}>

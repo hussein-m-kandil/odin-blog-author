@@ -19,8 +19,8 @@ import { useAuthData } from '@/contexts/auth-context';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Comment, Post, User } from '@/types';
+import { Loader } from '@/components/loader';
 import { useForm } from 'react-hook-form';
-import { Loader } from 'lucide-react';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -193,8 +193,7 @@ export function CommentForm({
             )}>
             {mutation.isPending ? (
               <>
-                <Loader className='animate-spin' />{' '}
-                {updating ? 'Updating' : 'Commenting'}
+                <Loader /> {updating ? 'Updating' : 'Commenting'}
               </>
             ) : updating ? (
               'Update'

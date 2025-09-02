@@ -18,8 +18,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { PasswordInput } from '@/components/password-input';
 import { DynamicFormProps } from './dynamic-form.types';
+import { Loader } from '@/components/loader';
 import { useForm } from 'react-hook-form';
-import { Loader } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
@@ -127,7 +127,7 @@ export function DynamicForm({
           className={cn(`min-w-[${submitterMaxWidthPX}]`, submitterClassName)}>
           {hookForm.formState.isSubmitting ? (
             <>
-              <Loader className='animate-spin' />
+              <Loader />
               {submitterLabel.submitting}
             </>
           ) : (

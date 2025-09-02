@@ -16,7 +16,7 @@ import {
 import { QueryError } from '@/components/query-error';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Loader } from 'lucide-react';
+import { Loader } from '@/components/loader';
 
 const createStrEqChecker = (a: string) => (b: string) => {
   return a.toLowerCase() === b.toLowerCase();
@@ -112,7 +112,7 @@ export function Querybox({
               </QueryError>
             ) : isFetching ? (
               <div aria-label='Loading...' className='flex justify-center py-1'>
-                <Loader size={16} className='animate-spin' />
+                <Loader size={16} />
               </div>
             ) : (
               Array.isArray(data) && (
