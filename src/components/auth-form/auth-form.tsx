@@ -34,6 +34,7 @@ export function AuthForm({
   onSuccess,
   onClose,
 }: AuthFormProps) {
+  const [submitting, setSubmitting] = React.useState(false);
   const router = useRouter();
 
   const {
@@ -41,6 +42,10 @@ export function AuthForm({
     signout,
     signin,
   } = useAuthData();
+
+  const isUpdate = formType === 'update' && user;
+  const isSignin = formType === 'signin';
+  const isSignup = formType === 'signup';
 
   let formData: {
     props: {
@@ -51,7 +56,7 @@ export function AuthForm({
     };
     reqConfig: AxiosRequestConfig;
   };
-  if (formType === 'signin') {
+  if (isSignin) {
     formData = {
       props: {
         submitterLabel: { idle: 'Sign in', submitting: 'Signing in...' },
@@ -61,7 +66,7 @@ export function AuthForm({
       },
       reqConfig: { url: `${authUrl}/signin`, method: 'post', baseURL: '' },
     };
-  } else if (formType === 'signup') {
+  } else if (isSignup) {
     formData = {
       props: {
         submitterLabel: { idle: 'Sign up', submitting: 'Signing up...' },
@@ -71,7 +76,7 @@ export function AuthForm({
       },
       reqConfig: { url: `${authUrl}/signup`, method: 'post', baseURL: '' },
     };
-  } else if (formType === 'update' && user) {
+  } else if (isUpdate) {
     formData = {
       props: {
         formSchema: refineSignupSchema(createSchema(updateUserFormAttrs)),
@@ -90,21 +95,31 @@ export function AuthForm({
     signin(data);
     onSuccess?.();
     router.replace(
-      formType === 'update' && data.user
-        ? `/profile/${data.user.username}`
-        : '/'
+      isUpdate && data.user ? `/profile/${data.user.username}` : '/'
     );
   };
 
   const handleSubmit: DynamicFormSubmitHandler<
     z.infer<typeof formData.props.formSchema>
   > = async (hookForm, values) => {
+    if (submitting) {
+      // Wait until an exception is caught or a redirect occurs on success
+      return new Promise((resolve) => {
+        const intervalId = window.setInterval(() => {
+          if (!submitting) {
+            window.clearInterval(intervalId);
+            resolve(undefined);
+          }
+        }, 100);
+      });
+    }
     try {
+      setSubmitting(true);
       formData.reqConfig.data = values;
       const { data } = await authAxios<AuthResData>(formData.reqConfig);
       hookForm.reset();
       handleSuccess(data);
-      if (formType === 'update') {
+      if (isUpdate) {
         toast.success('Profile updated', {
           description: `You have updated your profile successfully`,
         });
@@ -114,6 +129,7 @@ export function AuthForm({
         });
       }
     } catch (error) {
+      setSubmitting(false); // Otherwise, should redirect on success
       toast.error(
         parseAxiosAPIError(error, hookForm).message ||
           getUnknownErrorMessage(error)
@@ -139,33 +155,54 @@ export function AuthForm({
     }
   };
 
+  const btnProps: React.ComponentProps<typeof Button> = {
+    variant: 'outline',
+    type: 'button',
+  };
+
+  const preventDefaultIfSubmitting = (e: React.SyntheticEvent) => {
+    if (submitting) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   return (
     <div className={cn('w-full max-w-md mx-auto mt-4 space-y-4', className)}>
       <DynamicForm
-        aria-label={`${formType}${formType === 'update' ? ' user' : ''} form`}
+        aria-label={`${formType}${isUpdate ? ' user' : ''} form`}
         submitterClassName='w-full'
         onSubmit={handleSubmit}
         {...formData.props}
       />
-      {formType !== 'update' && (
+      {!isUpdate && (
         <div className='text-center space-y-2 *:flex *:w-full'>
           <div className='my-6 *:shrink-1 *:grow-1 items-center gap-2'>
             <Separator />
             <span>or</span>
             <Separator />
           </div>
-          <Button type='button' variant='outline' asChild>
-            {formType === 'signin' ? (
-              <Link href='/signup' className='p-0'>
-                <UserPlus /> Sign up
-              </Link>
-            ) : (
-              <Link href='/signin' className='p-0'>
-                <LogIn /> Sign in
-              </Link>
-            )}
+          <Button {...btnProps} asChild>
+            <Link
+              tabIndex={submitting ? -1 : 0}
+              onClick={preventDefaultIfSubmitting}
+              href={isSignin ? '/signup' : '/signin'}
+              className={cn(
+                submitting && 'opacity-50 pointer-events-none',
+                'p-0'
+              )}>
+              {isSignin ? (
+                <>
+                  <UserPlus /> Sign up
+                </>
+              ) : (
+                <>
+                  <LogIn /> Sign in
+                </>
+              )}
+            </Link>
           </Button>
-          <Button type='button' variant='outline' onClick={signInGuest}>
+          <Button {...btnProps} disabled={submitting} onClick={signInGuest}>
             <UserCheck /> Sign in as guest
           </Button>
         </div>
