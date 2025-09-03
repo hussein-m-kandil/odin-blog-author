@@ -119,4 +119,23 @@ describe('<SignoutButton />', async () => {
     expect(axiosMock.history.post).toHaveLength(1);
     expect(signoutMock).toHaveBeenCalledOnce();
   });
+
+  it('should disable the button while signing out, and remain disabled on success', async () => {
+    const user = userEvent.setup();
+    render(<SignoutButtonWrapper />);
+    await user.click(screen.getByRole('button'));
+    expect(screen.getByRole('button')).toBeDisabled();
+    await waitForElementToBeRemoved(() => screen.getByText(/signing out/i));
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+
+  it('should disable the button while signing out, and re-enable it on error', async () => {
+    axiosMock.onPost().networkError();
+    const user = userEvent.setup();
+    render(<SignoutButtonWrapper />);
+    await user.click(screen.getByRole('button'));
+    expect(screen.getByRole('button')).toBeDisabled();
+    await waitForElementToBeRemoved(() => screen.getByText(/signing out/i));
+    expect(screen.getByRole('button')).not.toBeDisabled();
+  });
 });
