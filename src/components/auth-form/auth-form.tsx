@@ -47,6 +47,11 @@ export function AuthForm({
   const isSignin = formType === 'signin';
   const isSignup = formType === 'signup';
 
+  React.useEffect(() => {
+    // Prevent displaying auth form for an authenticated user
+    if (!isUpdate && user) router.replace('/');
+  }, [isUpdate, router, user]);
+
   let formData: {
     props: {
       submitterLabel: DynamicFormProps['submitterLabel'];
@@ -94,9 +99,7 @@ export function AuthForm({
   const handleSuccess = (data: AuthResData) => {
     signin(data);
     onSuccess?.();
-    router.replace(
-      isUpdate && data.user ? `/profile/${data.user.username}` : '/'
-    );
+    router.push(isUpdate && data.user ? `/profile/${data.user.username}` : '/');
   };
 
   const handleSubmit: DynamicFormSubmitHandler<
@@ -139,6 +142,7 @@ export function AuthForm({
 
   const signInGuest = async () => {
     try {
+      setSubmitting(true);
       const { data } = await authAxios<AuthResData>({
         url: `${authUrl}/guest`,
         method: 'post',
@@ -149,6 +153,7 @@ export function AuthForm({
         description: 'You have signed in as guest successfully',
       });
     } catch (error) {
+      setSubmitting(false);
       toast.error(
         parseAxiosAPIError(error).message || getUnknownErrorMessage(error)
       );
@@ -173,6 +178,7 @@ export function AuthForm({
         aria-label={`${formType}${isUpdate ? ' user' : ''} form`}
         submitterClassName='w-full'
         onSubmit={handleSubmit}
+        isDisabled={submitting}
         {...formData.props}
       />
       {!isUpdate && (
