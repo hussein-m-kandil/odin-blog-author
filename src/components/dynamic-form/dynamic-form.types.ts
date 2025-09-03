@@ -34,4 +34,5 @@ export interface DynamicFormProps
   formSchema: DynamicFormSchema;
   formAttrs: DynamicFormAttrs;
   submitterClassName?: string;
+  isDisabled?: boolean;
 }

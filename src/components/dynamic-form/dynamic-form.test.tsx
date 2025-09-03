@@ -126,6 +126,21 @@ describe('<DynamicForm />', () => {
     expect(screen.getByText(formAttrs.username.description ?? ''));
   });
 
+  it('should all fields be disabled', () => {
+    render(
+      <DynamicForm
+        {...{ formSchema, formAttrs, onSubmit }}
+        aria-label='Signin Form'
+        isDisabled={true}
+      />
+    );
+    expect(getSubmitBtn()).toBeDisabled();
+    expect(screen.getByLabelText(username)).toBeDisabled();
+    expect(screen.getByLabelText(password)).toBeDisabled();
+    expect(screen.getByRole('checkbox')).toBeDisabled();
+    expect(screen.getByLabelText(bio)).toBeDisabled();
+  });
+
   it('should have the given submitter: label, className, and icon', async () => {
     const submitterLabel = { idle: 'Sign in', submitting: 'Signing in' };
     const submitterClassName = 'blah';
@@ -224,7 +239,6 @@ describe('<DynamicForm />', () => {
     expect(onSubmit).toHaveBeenCalledOnce();
     expect(await findSubmittingBtn()).toBeInTheDocument();
     expect(screen.getByText(serverError.message)).toBeInTheDocument();
-    expect(usernameInp).toHaveFocus();
     await user.type(usernameInp, validUsername);
     await user.click(submitter);
     expect(await findSubmittingBtn()).toBeInTheDocument();

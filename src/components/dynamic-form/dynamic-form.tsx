@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { z } from 'zod';
 
 export function DynamicForm({
+  isDisabled = false,
   submitterLabel = { idle: 'Submit', submitting: 'Submitting' },
   submitterClassName,
   submitterIcon,
@@ -56,6 +57,10 @@ export function DynamicForm({
   const submitterLabelLengths = submitterLabels.map((s) => s.length);
   const submitterMaxLabelLen = Math.max(...submitterLabelLengths);
   const submitterMaxWidthPX = `${Math.round(submitterMaxLabelLen * 12.8)}px`;
+  const disabled =
+    hookForm.formState.isSubmitting ||
+    hookForm.formState.isLoading ||
+    isDisabled;
 
   return (
     <Form {...hookForm}>
@@ -74,6 +79,7 @@ export function DynamicForm({
               if (attrs.type === 'checkbox') delete field.value;
               const fieldProps = {
                 ...field,
+                disabled,
                 autoFocus: i === 0,
                 placeholder: attrs.placeholder,
               };
@@ -84,6 +90,7 @@ export function DynamicForm({
                       <FormControl>
                         <Checkbox
                           {...field}
+                          disabled={disabled}
                           defaultChecked={Boolean(attrs.defaultValue)}
                           onCheckedChange={field.onChange}
                         />
@@ -121,9 +128,7 @@ export function DynamicForm({
         {children}
         <Button
           type='submit'
-          disabled={
-            hookForm.formState.isSubmitting || hookForm.formState.isLoading
-          }
+          disabled={disabled}
           className={cn(`min-w-[${submitterMaxWidthPX}]`, submitterClassName)}>
           {hookForm.formState.isSubmitting ? (
             <>
