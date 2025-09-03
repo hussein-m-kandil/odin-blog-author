@@ -16,6 +16,10 @@ export function InputGroup({
 
   const id = inputId || reactId;
 
+  if (buttonProps.disabled === undefined) {
+    buttonProps.disabled = inputProps.disabled;
+  }
+
   return (
     <div className='relative'>
       <Input

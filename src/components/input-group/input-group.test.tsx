@@ -35,6 +35,24 @@ describe('<InputGroup />', () => {
     expect(buttonChild).toHaveTextContent('B');
   });
 
+  it('should disable the button if the input is disabled', () => {
+    render(<InputGroup disabled={true} />);
+    expect(screen.getByRole('textbox')).toBeDisabled();
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+
+  it('should not disable the input if the button is disabled', () => {
+    render(<InputGroup buttonProps={{ disabled: true }} />);
+    expect(screen.getByRole('textbox')).not.toBeDisabled();
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+
+  it('should not disable the button it explicitly enabled while the input is disabled', () => {
+    render(<InputGroup disabled={true} buttonProps={{ disabled: false }} />);
+    expect(screen.getByRole('textbox')).toBeDisabled();
+    expect(screen.getByRole('button')).not.toBeDisabled();
+  });
+
   it('should call the given `onChange` while typing', async () => {
     const user = userEvent.setup();
     const inputValues: string[] = [];
