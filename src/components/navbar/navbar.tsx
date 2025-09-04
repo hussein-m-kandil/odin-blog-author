@@ -70,7 +70,7 @@ export function Navbar() {
               animate={{ translateY: '0%' }}
               initial={{ translateY: containerRef.current ? '-100%' : '0%' }}
               className='fixed top-0 left-0 bottom-auto w-full z-50 bg-background/85 backdrop-blur-xs shadow-sm shadow-secondary'>
-              <div className='container p-4 mx-auto flex flex-wrap items-center justify-between max-[350px]:justify-center gap-y-2 gap-x-4'>
+              <div className='container p-4 mx-auto flex flex-wrap items-center justify-between gap-y-2 gap-x-4'>
                 <Large className='text-2xl'>
                   <Link href='/'>{process.env.NEXT_PUBLIC_APP_NAME}</Link>
                 </Large>
