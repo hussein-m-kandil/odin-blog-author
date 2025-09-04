@@ -30,15 +30,19 @@ export function Navbar() {
   const { authData } = useAuthData();
   const { user } = authData;
 
+  const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollYRef = React.useRef(0);
 
   React.useEffect(() => {
     let handlingAllowed = true;
     const allowHandling = () => (handlingAllowed = true);
     const handleScroll = () => {
-      if (handlingAllowed) {
-        const newScrollY = Math.round(window.scrollY);
-        setVisible(newScrollY < scrollYRef.current);
+      const newScrollY = Math.round(window.scrollY);
+      const { clientHeight, scrollHeight } = document.documentElement;
+      const notDocumentOverScrolled = newScrollY <= scrollHeight - clientHeight;
+      const navHeight = containerRef.current?.offsetHeight || 0;
+      if (handlingAllowed && notDocumentOverScrolled && navHeight) {
+        setVisible(newScrollY < navHeight || newScrollY < scrollYRef.current);
         scrollYRef.current = newScrollY;
         handlingAllowed = false;
       }
@@ -57,14 +61,14 @@ export function Navbar() {
   };
 
   return (
-    <div className='pb-16'>
+    <div ref={containerRef} className='pb-16'>
       <MotionConfig transition={{ duration: 0.35 }}>
         <AnimatePresence>
           {visible && (
             <motion.nav
               exit={{ translateY: '-100%' }}
               animate={{ translateY: '0%' }}
-              initial={{ translateY: '-100%' }}
+              initial={{ translateY: containerRef.current ? '-100%' : '0%' }}
               className='fixed top-0 left-0 bottom-auto w-full z-50 bg-background/85 backdrop-blur-xs shadow-sm shadow-secondary'>
               <div className='container p-4 mx-auto flex flex-wrap items-center justify-between max-[350px]:justify-center gap-y-2 gap-x-4'>
                 <Large className='text-2xl'>
