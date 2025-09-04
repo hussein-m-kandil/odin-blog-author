@@ -1,8 +1,10 @@
+import React from 'react';
 import {
   dehydrate,
   QueryClient,
   HydrationBoundary,
 } from '@tanstack/react-query';
+import { PostsWrapperSkeleton } from './posts-wrapper.skeleton';
 import { SearchParams, ServerAuthData } from '@/types';
 import { H2 } from '@/components/typography';
 import { Posts } from '@/components/posts';
@@ -43,12 +45,14 @@ export async function PostsWrapper({ searchParams, authData }: Props) {
   });
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className='max-w-9xl mx-auto my-8 space-y-8'>
-        <H2 className='text-center'>Posts</H2>
-        <Posts postsUrl={postsUrl} />
-      </div>
-    </HydrationBoundary>
+    <React.Suspense fallback={<PostsWrapperSkeleton />}>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <div className='max-w-9xl mx-auto my-8 space-y-8'>
+          <H2 className='text-center'>Posts</H2>
+          <Posts postsUrl={postsUrl} />
+        </div>
+      </HydrationBoundary>
+    </React.Suspense>
   );
 }
 
