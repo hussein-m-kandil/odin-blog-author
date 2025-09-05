@@ -11,7 +11,7 @@ export function PostsWrapperSkeleton({
     <div
       {...props}
       className={cn('max-w-9xl mx-auto my-8 space-y-8', className)}>
-      <Skeleton className='w-32 h-6 mx-auto' />
+      <Skeleton className='w-32 h-10 mx-auto' />
       <PostsSkeleton count={count} />
     </div>
   );

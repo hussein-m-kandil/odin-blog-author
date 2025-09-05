@@ -92,14 +92,18 @@ describe('<PostsSkeleton />', () => {
 
   it('should display 3 card-skeletons bay default', () => {
     const { container } = render(<PostsSkeleton />);
-    expect((container.firstElementChild as Element).children).toHaveLength(3);
+    expect(
+      ((container.firstElementChild as Element).lastElementChild as Element)
+        .children
+    ).toHaveLength(3);
   });
 
   it('should displayed card-skeletons matches the given count', () => {
     const count = 5;
     const { container } = render(<PostsSkeleton count={count} />);
-    expect((container.firstElementChild as Element).children).toHaveLength(
-      count
-    );
+    expect(
+      ((container.firstElementChild as Element).lastElementChild as Element)
+        .children
+    ).toHaveLength(count);
   });
 });
