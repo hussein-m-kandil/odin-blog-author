@@ -135,7 +135,8 @@ export function AuthForm({
       setSubmitting(false); // Otherwise, should redirect on success
       toast.error(
         parseAxiosAPIError(error, hookForm).message ||
-          getUnknownErrorMessage(error)
+          getUnknownErrorMessage(error),
+        { duration: Infinity }
       );
     }
   };
@@ -155,7 +156,8 @@ export function AuthForm({
     } catch (error) {
       setSubmitting(false);
       toast.error(
-        parseAxiosAPIError(error).message || getUnknownErrorMessage(error)
+        parseAxiosAPIError(error).message || getUnknownErrorMessage(error),
+        { duration: Infinity }
       );
     }
   };
