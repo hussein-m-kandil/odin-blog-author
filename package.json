@@ -36,6 +36,7 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.56.4",
     "react-intersection-observer": "^9.16.0",
+    "recharts": "^2.15.4",
     "sonner": "^2.0.5",
     "tailwind-merge": "^3.3.0",
     "zod": "^3.25.7"
@@ -65,5 +66,8 @@
   },
   "simple-git-hooks": {
     "pre-commit": "npm run lint && npm run type-check"
+  },
+  "overrides": {
+    "react-is": "^19.1.1-rc-69d4b800-20241021"
   }
 }
