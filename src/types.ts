@@ -104,3 +104,10 @@ export interface Post {
   image: Image | null;
   _count: { comments: number; votes: number };
 }
+
+export type Model = 'COMMENT' | 'IMAGE' | 'USER' | 'VOTE' | 'POST' | 'TAG';
+
+export type Stats = Record<
+  `${Lowercase<Model>}s` | 'visitors',
+  { count: number; date: Date }[]
+>;
