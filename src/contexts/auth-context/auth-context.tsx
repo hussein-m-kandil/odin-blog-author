@@ -23,6 +23,7 @@ const extendBaseAuthData = (baseAuthData: BaseAuthData) => {
     authAxios: axios.create({
       headers: { Authorization: baseAuthData.token },
       baseURL: baseAuthData.backendUrl,
+      withCredentials: true,
     }),
   };
 };
