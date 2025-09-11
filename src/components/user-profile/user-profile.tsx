@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DeleteProfileForm } from '@/components/delete-profile-form';
-import { UserPen, ImageIcon, Trash2 } from 'lucide-react';
+import { UserPen, ImageIcon, Trash2, Quote } from 'lucide-react';
 import { UserAvatar } from '@/components/user-avatar';
 import { useDialog } from '@/contexts/dialog-context';
 import { Muted } from '@/components/typography/muted';
@@ -86,40 +86,37 @@ export function UserProfile({ owner }: { owner: User }) {
 
   return (
     <div className='text-center max-w-xl mx-auto'>
-      <div className='my-4 max-sm:block flex justify-center items-center gap-8'>
-        <UserAvatar user={owner} className='size-32 text-7xl max-sm:mx-auto' />
-        <Separator
-          orientation='vertical'
-          className='sm:min-h-32 max-sm:hidden'
-        />
-        <div className='flex flex-col justify-center sm:items-start sm:text-start max-sm:mt-0.5'>
-          <H1 className='wrap-anywhere'>{owner.fullname}</H1>
-          <Muted>@{owner.username}</Muted>
-          {ownedByCurrentUser && (
-            <div className='w-full max-w-36 mx-auto mt-2 flex justify-center items-center gap-2'>
-              <Button {...createMutateBtnProps('Edit avatar', editAvatar)}>
-                <ImageIcon />
-              </Button>
-              <Button {...createMutateBtnProps('Edit profile', editProfile)}>
-                <UserPen />
-              </Button>
-              <Separator orientation='vertical' className='min-h-8 mx-auto' />
-              <Button
-                {...createMutateBtnProps(
-                  'Delete profile',
-                  deleteProfile,
-                  'destructive'
-                )}>
-                <Trash2 />
-              </Button>
-            </div>
-          )}
+      <UserAvatar user={owner} className='size-32 text-7xl mx-auto' />
+      {ownedByCurrentUser && (
+        <div className='mt-2 flex flex-wrap justify-center items-center gap-3'>
+          <Button {...createMutateBtnProps('Edit avatar', editAvatar)}>
+            <ImageIcon />
+          </Button>
+          <Button {...createMutateBtnProps('Edit profile', editProfile)}>
+            <UserPen />
+          </Button>
+          <Separator
+            orientation='vertical'
+            className='min-h-8 inline-flex align-middle'
+          />
+          <Button
+            {...createMutateBtnProps(
+              'Delete profile',
+              deleteProfile,
+              'destructive'
+            )}>
+            <Trash2 />
+          </Button>
         </div>
+      )}
+      <div className='my-6'>
+        <H1 className='wrap-anywhere'>{owner.fullname}</H1>
+        <Muted>@{owner.username}</Muted>
       </div>
-      <Lead className='*:odd:text-3xl *:odd:leading-0 *:odd:relative *:odd:-bottom-1.5 space-x-1'>
-        <span>🙶</span>
-        <span>{owner.bio || '...'}</span>
-        <span>🙷</span>
+      <Lead className='*:odd:inline *:odd:size-3 *:odd:relative *:odd:-top-1.5'>
+        <Quote className='rotate-y-180' />
+        <span className='mx-1'>{owner.bio || '...'}</span>
+        <Quote />
       </Lead>
     </div>
   );
