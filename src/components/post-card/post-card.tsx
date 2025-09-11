@@ -57,8 +57,8 @@ export function PostCard({
         )}
       </CardHeader>
       <CardContent className='mb-auto p-0'>
-        {post.image && <MutableImage image={post.image} />}
-        <div className='px-6 space-y-2'>
+        <MutableImage image={post.image} />
+        <div className='px-6 space-y-4'>
           <Lead className='line-clamp-3 font-light text-lg'>
             {post.content}
           </Lead>
