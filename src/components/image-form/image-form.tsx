@@ -80,7 +80,6 @@ export function ImageForm({
         toast.error('Upload failed', {
           description:
             parseAxiosAPIError(error).message || getUnknownErrorMessage(error),
-          duration: Infinity,
         });
         onError?.(error);
       },
@@ -106,7 +105,6 @@ export function ImageForm({
         toast.error('Update failed', {
           description:
             parseAxiosAPIError(error).message || getUnknownErrorMessage(error),
-          duration: Infinity,
         });
         onError?.(error);
       },
@@ -130,7 +128,6 @@ export function ImageForm({
         toast.error('Delete failed', {
           description:
             parseAxiosAPIError(error).message || getUnknownErrorMessage(error),
-          duration: Infinity,
         });
         onError?.(error);
       },

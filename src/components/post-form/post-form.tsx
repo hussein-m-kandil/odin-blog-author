@@ -106,7 +106,6 @@ export function PostForm({
         description:
           parseAxiosAPIError(error, hookForm).message ||
           getUnknownErrorMessage(error),
-        duration: Infinity,
       });
     },
   });
