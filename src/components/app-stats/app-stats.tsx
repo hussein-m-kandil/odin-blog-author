@@ -65,6 +65,24 @@ export function AppStats() {
     [data]
   );
 
+  const chartBtnsContainerRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const cleanBorders = () => {
+      const chartBtnsContainer = chartBtnsContainerRef.current;
+      if (chartBtnsContainer) {
+        chartBtnsContainer.childNodes.forEach((node) => {
+          const chartBtn = node as HTMLButtonElement;
+          if (chartBtn.offsetLeft === chartBtnsContainer.offsetLeft) {
+            chartBtn.classList.remove('border-l');
+          } else chartBtn.classList.add('border-l');
+        });
+      }
+    };
+    window.addEventListener('resize', cleanBorders);
+    return () => window.removeEventListener('resize', cleanBorders);
+  }, []);
+
   if (isPending) return <AppStatsSkeleton />;
 
   if (!data) return null;
@@ -79,12 +97,14 @@ export function AppStats() {
         <div
           className={cn(
             'flex flex-col justify-center gap-1 px-6 pb-3',
-            'max-lg:basis-2/3 sm:pb-0 border-b'
+            'max-lg:basis-2/3 sm:pb-0 sm:border-r border-b'
           )}>
           <CardTitle>App Statistics</CardTitle>
           <CardDescription>Showing totals of certain app data</CardDescription>
         </div>
-        <div className='flex flex-wrap *:max-lg:basis-1/3 max-sm:border-t'>
+        <div
+          ref={chartBtnsContainerRef}
+          className='flex flex-wrap *:max-lg:basis-1/3'>
           {Object.keys(chartConfig).map((key) => {
             const chart = key as ChartKey;
             return (
