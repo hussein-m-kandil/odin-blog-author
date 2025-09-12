@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { useRouter } from 'next/navigation';
 
 export interface DialogData {
   body: React.ReactNode;
@@ -47,23 +48,47 @@ export function DialogProvider({
 
   const overlayRef = React.useRef<HTMLDivElement>(null);
   const shouldHideRef = React.useRef(initShouldHideFn);
+  const urlRef = React.useRef<URL>(null);
 
-  const contextValue: DialogContextValue = {
-    showDialog: (data: DialogData, shouldHideDialog) => {
-      shouldHideRef.current = shouldHideDialog || initShouldHideFn;
-      setIsDialogOpen(true);
-      setDialogData(data);
-    },
-    hideDialog: () => setIsDialogOpen(false),
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!isDialogOpen) return;
+    const hideOnPosState = () => setIsDialogOpen(false);
+    window.addEventListener('popstate', hideOnPosState);
+    return () => window.removeEventListener('popstate', hideOnPosState);
+  }, [isDialogOpen]);
+
+  const showDialog: DialogContextValue['showDialog'] = (
+    data: DialogData,
+    shouldHideDialog
+  ) => {
+    setDialogData(data);
+    setIsDialogOpen(true);
+    shouldHideRef.current = shouldHideDialog || initShouldHideFn;
+    urlRef.current = new URL(window.location.href);
+    router.push('#dialog', { scroll: false });
+  };
+
+  const hideDialog: DialogContextValue['hideDialog'] = () => {
+    setDialogData(initData);
+    setIsDialogOpen(false);
+    shouldHideRef.current = initShouldHideFn;
+    window.setTimeout(() => {
+      const oldURl = urlRef.current;
+      if (oldURl) {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.hash = oldURl.hash;
+        if (currentUrl.href == oldURl.href) {
+          router.replace(oldURl.hash, { scroll: false });
+        }
+      }
+    }, 500);
   };
 
   const handleOpenChange = async (open: boolean) => {
     const canHide = await shouldHideRef.current();
-    if (!open === canHide) {
-      setIsDialogOpen(false);
-      setDialogData(initData);
-      shouldHideRef.current = initShouldHideFn;
-    }
+    if (!open === canHide) hideDialog();
   };
 
   const handleOverlayInteraction: React.ComponentProps<
@@ -74,6 +99,8 @@ export function DialogProvider({
       e.preventDefault();
     }
   };
+
+  const contextValue: DialogContextValue = { showDialog, hideDialog };
 
   return (
     <DialogContext value={contextValue}>
