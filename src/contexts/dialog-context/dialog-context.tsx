@@ -113,7 +113,7 @@ export function DialogProvider({
           <DialogContent
             onInteractOutside={handleOverlayInteraction}
             onPointerDownOutside={handleOverlayInteraction}
-            className='sm:max-w-lg max-h-[calc(100vh-2rem)] overflow-auto gap-0'>
+            className='sm:max-w-lg max-h-dvh overflow-auto gap-0'>
             <DialogHeader>
               <DialogTitle className='text-xl font-bold'>
                 {dialogData.title}
