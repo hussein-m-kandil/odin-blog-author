@@ -52,7 +52,7 @@ export function DeleteProfileForm({
           await authAxios.delete(`/users/${owner.id}`);
           signout();
           onSuccess?.();
-          router.replace('/', { scroll: true });
+          router.push('/', { scroll: true });
           toast.success('Profile deleted', {
             description: 'You have deleted your profile successfully',
           });
