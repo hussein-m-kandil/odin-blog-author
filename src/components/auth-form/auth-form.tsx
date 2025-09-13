@@ -99,7 +99,11 @@ export function AuthForm({
   const handleSuccess = (data: AuthResData) => {
     signin(data);
     onSuccess?.();
-    router.push(isUpdate && data.user ? `/profile/${data.user.username}` : '/');
+    if (isUpdate && data.user) {
+      router.replace(`/profile/${data.user.username}`);
+    } else {
+      router.push('/');
+    }
   };
 
   const handleSubmit: DynamicFormSubmitHandler<
