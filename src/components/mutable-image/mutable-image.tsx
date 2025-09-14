@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { MutableImageSkeleton } from './mutable-image.skeleton';
 import { ImageToolkit } from '@/components/image-toolkit';
 import { MutableImageProps } from './mutable-image.types';
-import { cn, loadSupabaseImg, setURlParams } from '@/lib/utils';
+import { cn, setURlParams } from '@/lib/utils';
 
 export function MutableImage({
   image,
@@ -31,15 +31,15 @@ export function MutableImage({
           tabIndex={0}
           ref={imgRef}
           alt={image.alt || ''}
-          loader={loadSupabaseImg}
           onLoad={() => setLoading(false)}
           className={cn(loading && 'absolute opacity-0 -z-50')}
           sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
+          // Use image update time to revalidate the "painful" browser-cache ;)
           src={
             image.updatedAt
               ? setURlParams(image.src, { updatedAt: image.updatedAt })
               : image.src
-          } // Use image update time to revalidate the "painful" browser-cache ;)
+          }
           style={{
             objectPosition: `50% ${image.yPos}%`,
             objectFit: 'cover',
