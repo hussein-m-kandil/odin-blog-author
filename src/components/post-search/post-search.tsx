@@ -20,6 +20,7 @@ export function PostSearch({
 
   const tags = searchParams.get('tags')?.split(',') || [];
   const reversed = searchParams.get('sort') === 'asc';
+  const query = searchParams.get('q') || '';
 
   const applySearchParams = () => {
     const urlSearch = searchParams.toString();
@@ -67,9 +68,10 @@ export function PostSearch({
   return (
     <div {...props} className={cn('max-w-lg mx-auto space-y-3!', className)}>
       <Search
+        key={query}
+        initQuery={query}
         onSearch={handleSearch}
         placeholder='Search in posts...'
-        initQuery={searchParams.get('q') || ''}
       />
       <div className='my-4 flex justify-center gap-4'>
         <TagSelector
