@@ -43,7 +43,7 @@ export function PostCard({
         <CardTitle
           title={post.title}
           className='hover:underline truncate outline-ring-50 dark:outline-foreground outline-offset-3 has-focus-visible:outline-2'>
-          <Link href={postUrl}>
+          <Link href={postUrl} prefetch={false}>
             <PrivacyIcon isPublic={post.published} /> <span>{post.title}</span>
           </Link>
         </CardTitle>
@@ -76,6 +76,7 @@ export function PostCard({
         <Button type='button' variant={'outline'} asChild>
           <Link
             href={postUrl}
+            prefetch={false}
             title='Read more'
             aria-label={`Read more about ${post.title}`}>
             <BookOpen />
