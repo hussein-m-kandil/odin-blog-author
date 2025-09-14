@@ -25,9 +25,11 @@ export function Search({
     onChange?.(e.target.value);
   };
 
-  const handleSearch: React.FormEventHandler<HTMLFormElement> = (e) => {
+  const handleSearch = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (query) onSearch(query);
+    const form = e.target as HTMLFormElement;
+    (form.elements.namedItem('submitter') as HTMLButtonElement).focus();
   };
 
   if (!props['aria-label'] && !props['aria-labelledby']) {
@@ -47,6 +49,7 @@ export function Search({
         placeholder={placeholder}
         buttonProps={{
           ['aria-label']: 'Search',
+          name: 'submitter',
           disabled: !query,
           type: 'submit',
         }}>
