@@ -64,7 +64,7 @@ describe('<MutableImage />', () => {
     render(<MutableImage {...props} />);
     const img = (await screen.findByRole('img')) as HTMLImageElement;
     expect(img).toHaveAttribute('alt', alt);
-    expect(img.src).toMatch(new RegExp(`^${src}`));
+    expect(img.src).toMatch(new RegExp(`${src}|${encodeURIComponent(src)}`));
     expect(img.style.objectFit).toBe('cover');
     expect(img.style.objectPosition).toBe(`50% ${yPos}%`);
   });

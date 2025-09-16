@@ -5,7 +5,7 @@ import {
 } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { post, author, initAuthData } from '@/test-utils';
+import { post, author, initAuthData, image } from '@/test-utils';
 import { PostPageSkeleton } from './post-page.skeleton';
 import { AuthProvider } from '@/contexts/auth-context';
 import { axiosMock } from '@/__mocks__/axios';
@@ -157,9 +157,10 @@ describe('<PostPage />', () => {
 
   it('should display the post image', async () => {
     render(<PostPageWrapper />);
+    const { src } = image;
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect((screen.getByRole('img') as HTMLImageElement).src).toMatch(
-      new RegExp(post.image?.src as string)
+      new RegExp(`${src}|${encodeURIComponent(src)}`)
     );
   });
 

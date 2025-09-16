@@ -104,9 +104,10 @@ describe('<ImageInput />', () => {
   });
 
   it('should display the given image', () => {
+    const { src } = image;
     render(<ImageInputWrapper image={image} />);
     const img = screen.getByRole('img') as HTMLImageElement;
-    expect(img.src).toMatch(new RegExp(`^${image.src}`));
+    expect(img.src).toMatch(new RegExp(`${src}|${encodeURIComponent(src)}`));
   });
 
   it('should be disabled while submitting', async () => {
