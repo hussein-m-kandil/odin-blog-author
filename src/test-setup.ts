@@ -14,16 +14,24 @@ const nextRouterMock = vi.hoisted(() => ({
   prefetch: vi.fn(),
   back: vi.fn(),
 }));
-vi.mock('next/navigation', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('next/navigation')>()),
-  useRouter: () => nextRouterMock,
-}));
+vi.mock('next/navigation', async (importOriginal) => {
+  const url = new URL(window.location.href);
+  return {
+    ...(await importOriginal<typeof import('next/navigation')>()),
+    useSearchParams: () => url.searchParams,
+    usePathname: () => url.pathname,
+    useRouter: () => nextRouterMock,
+  };
+});
 
 const observe = vi.fn();
 const unobserve = vi.fn();
 const disconnect = vi.fn();
 const takeRecords = vi.fn();
 const revokeObjectURL = vi.fn();
+const hasPointerCapture = vi.fn();
+const setPointerCapture = vi.fn();
+const releasePointerCapture = vi.fn();
 const createObjectURL = vi.fn(() => 'blob://file.ext');
 
 beforeAll(() => {
@@ -37,6 +45,9 @@ beforeAll(() => {
   );
   URL.createObjectURL = createObjectURL;
   URL.revokeObjectURL = revokeObjectURL;
+  HTMLElement.prototype.hasPointerCapture = hasPointerCapture;
+  HTMLElement.prototype.setPointerCapture = setPointerCapture;
+  HTMLElement.prototype.releasePointerCapture = releasePointerCapture;
 });
 
 beforeEach(() => {
@@ -46,6 +57,9 @@ beforeEach(() => {
 
 afterEach(() => {
   Object.values(nextRouterMock).forEach((mockFn) => mockFn.mockReset());
+  releasePointerCapture.mockReset();
+  hasPointerCapture.mockReset();
+  setPointerCapture.mockReset();
   resetIntersectionMocking();
   createObjectURL.mockReset();
   revokeObjectURL.mockReset();
