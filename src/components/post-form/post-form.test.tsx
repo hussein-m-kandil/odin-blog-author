@@ -11,7 +11,7 @@ import { userEvent } from '@testing-library/user-event';
 import { createPostFormAttrs } from './post-form.data';
 import { AuthProvider } from '@/contexts/auth-context';
 import { post, initAuthData } from '@/test-utils';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 import { PostForm } from './post-form';
 import { Toaster } from 'sonner';
 import { Post } from '@/types';

@@ -6,7 +6,7 @@ import { AuthProvider } from '@/contexts/auth-context';
 import { DeletePostForm } from './delete-post-form';
 import { initAuthData, post } from '@/test-utils';
 import { render } from '@testing-library/react';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 
 const DeletePostFormWrapper = (
   props: React.ComponentProps<typeof DeletePostForm>

@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { author, initAuthData, post } from '@/test-utils';
 import { userEvent } from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/auth-context';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 import { CommentForm } from './comment-form';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 

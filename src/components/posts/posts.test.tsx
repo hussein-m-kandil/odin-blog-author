@@ -2,7 +2,7 @@ import { post, initAuthData, mockDialogContext, author } from '@/test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it } from 'vitest';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 import { Posts } from './posts';
 import { AuthProvider } from '@/contexts/auth-context';
 import PostsSkeleton from './posts.skeleton';

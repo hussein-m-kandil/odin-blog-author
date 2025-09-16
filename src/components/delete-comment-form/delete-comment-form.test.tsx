@@ -6,7 +6,7 @@ import { screen, waitFor } from '@testing-library/dom';
 import { AuthProvider } from '@/contexts/auth-context';
 import { initAuthData, post } from '@/test-utils';
 import { render } from '@testing-library/react';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 
 const DeleteCommentFormWrapper = (
   props: React.ComponentProps<typeof DeleteCommentForm>

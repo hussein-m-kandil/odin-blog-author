@@ -4,7 +4,7 @@ import {
   resetIntersectionMocking,
 } from 'react-intersection-observer/test-utils';
 import { vi, beforeAll, beforeEach, afterEach } from 'vitest';
-import { axiosMock } from './__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 
 vi.mock('axios');
 

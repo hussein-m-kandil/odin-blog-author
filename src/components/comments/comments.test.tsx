@@ -9,7 +9,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
 import { CommentsSkeleton } from './comments.skeleton';
 import { AuthProvider } from '@/contexts/auth-context';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 import { Comments } from './comments';
 
 mockDialogContext();

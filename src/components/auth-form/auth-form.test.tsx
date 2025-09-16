@@ -14,7 +14,7 @@ import { AuthFormProps, FormType } from './auth-form.types';
 import { userEvent } from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/auth-context';
 import { author, initAuthData } from '@/test-utils';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 
 const onSuccess = vi.fn();
 const routerMethodMock = vi.fn();

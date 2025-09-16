@@ -7,7 +7,7 @@ import { initAuthData } from '@/test-utils';
 import { AuthProvider } from '@/contexts/auth-context';
 import { Toaster } from 'sonner';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 
 const [useSearchParamsMock, replaceRouteMock] = vi.hoisted(() => {
   return [vi.fn(), vi.fn()];

@@ -5,7 +5,7 @@ import {
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 import { initAuthData } from '@/test-utils';
 import { Toaster } from 'sonner';
 

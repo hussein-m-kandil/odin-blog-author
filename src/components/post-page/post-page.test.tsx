@@ -8,7 +8,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { post, author, initAuthData, image } from '@/test-utils';
 import { PostPageSkeleton } from './post-page.skeleton';
 import { AuthProvider } from '@/contexts/auth-context';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 import { PostPage } from './post-page';
 
 const loaderRegex = /loading .* post page/i;

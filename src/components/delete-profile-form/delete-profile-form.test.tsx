@@ -6,7 +6,7 @@ import { screen, waitFor } from '@testing-library/dom';
 import { AuthProvider } from '@/contexts/auth-context';
 import { author, initAuthData } from '@/test-utils';
 import { render } from '@testing-library/react';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 
 const DeleteProfileFormWrapper = (
   props: React.ComponentProps<typeof DeleteProfileForm>

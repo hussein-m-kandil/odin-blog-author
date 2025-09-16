@@ -7,7 +7,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/auth-context';
 import { image, initAuthData } from '@/test-utils';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 import { ImageForm } from './image-form';
 
 describe('<ImageForm />', () => {

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
 import { render, screen } from '@testing-library/react';
 import { author, initAuthData } from '@/test-utils';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 import { AuthResData } from '@/types';
 
 const newAuthData: AuthResData = {

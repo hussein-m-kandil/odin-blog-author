@@ -4,7 +4,7 @@ import { TagSelector, TagSelectorProps } from './tag-selector';
 import { render, screen } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { AuthProvider } from '@/contexts/auth-context';
-import { axiosMock } from '@/__mocks__/axios';
+import { axiosMock } from '@/../__mocks__/axios';
 import { initAuthData } from '@/test-utils';
 import { MAX_TAGS_NUM } from '@/lib/utils';
 
