@@ -22,15 +22,20 @@ const getInitAuthDataMock = vi.fn(() => initAuthData);
 
 vi.unmock('next/navigation'); // This will be hoisted to unmock the test setup mock
 
-vi.doMock('next/navigation', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('next/navigation')>()),
-  useRouter: () => ({
-    prefetch: routerMethodMock,
-    replace: routerMethodMock,
-    back: routerMethodMock,
-    push: routerMethodMock,
-  }),
-}));
+vi.doMock('next/navigation', async (importOriginal) => {
+  const url = new URL(window.location.href);
+  return {
+    ...(await importOriginal<typeof import('next/navigation')>()),
+    useSearchParams: () => url.searchParams,
+    usePathname: () => url.pathname,
+    useRouter: () => ({
+      prefetch: routerMethodMock,
+      replace: routerMethodMock,
+      back: routerMethodMock,
+      push: routerMethodMock,
+    }),
+  };
+});
 
 const { AuthForm } = await import('./auth-form');
 
@@ -193,7 +198,7 @@ describe(`<AuthForm />`, () => {
       screen.getByRole('button', data.submittingOpts)
     );
     expect(onSuccess).toHaveBeenCalledOnce();
-    expect(routerMethodMock).toHaveBeenCalledOnce();
+    expect(routerMethodMock).toHaveBeenCalled();
   });
 
   it('should throw if `formType` is `update` and could not fin the user data', async () => {

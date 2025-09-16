@@ -22,7 +22,7 @@ import { useAuthData } from '@/contexts/auth-context';
 import { Separator } from '@/components/ui/separator';
 import { AuthFormProps } from './auth-form.types';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { AxiosRequestConfig } from 'axios';
 import { AuthResData } from '@/types';
 import { toast } from 'sonner';
@@ -35,6 +35,7 @@ export function AuthForm({
   onClose,
 }: AuthFormProps) {
   const [submitting, setSubmitting] = React.useState(false);
+  const searchParams = useSearchParams();
   const router = useRouter();
 
   const {
@@ -48,8 +49,8 @@ export function AuthForm({
 
   React.useEffect(() => {
     // Prevent displaying auth form for an authenticated user
-    if (!isUpdate && user) router.replace('/');
-  }, [isUpdate, router, user]);
+    if (!isUpdate && user && !submitting) router.replace('/');
+  }, [submitting, isUpdate, router, user]);
 
   let formData: {
     props: {
@@ -98,9 +99,13 @@ export function AuthForm({
     signin(data);
     onSuccess?.();
     if (isUpdate && data.user) {
-      router.replace(`/profile/${data.user.username}`);
+      const redirectUrl = `/profile/${data.user.username}`;
+      router.replace(redirectUrl);
+      router.replace(redirectUrl);
     } else {
-      router.push('/');
+      const redirectUrl = decodeURIComponent(searchParams.get('url') || '/');
+      router.replace(redirectUrl);
+      router.push(redirectUrl); // To be sure that the redirection happen
     }
   };
 
@@ -194,7 +199,9 @@ export function AuthForm({
             <Link
               tabIndex={submitting ? -1 : 0}
               onClick={preventDefaultIfSubmitting}
-              href={isSignin ? '/signup' : '/signin'}
+              href={`${isSignin ? '/signup' : '/signin'}${
+                searchParams.size ? '?' + searchParams.toString() : ''
+              }`}
               className={cn(
                 submitting && 'opacity-50 pointer-events-none',
                 'p-0'
