@@ -13,7 +13,10 @@ export default async function middleware(req: NextRequest) {
   const isAuthUrl = authUrls.includes(req.nextUrl.pathname);
 
   if (!user && !isAuthUrl) {
-    return NextResponse.redirect(new URL('/signin', req.nextUrl), {
+    const currentURL = `${req.nextUrl.pathname}${req.nextUrl.search}`;
+    const redirectionURL = new URL('/signin', req.nextUrl);
+    redirectionURL.searchParams.set('url', currentURL);
+    return NextResponse.redirect(redirectionURL, {
       headers: { 'Set-Cookie': createAuthCookie('', 0) }, // Clear auth cookie, if exist
       status: 303,
     });
