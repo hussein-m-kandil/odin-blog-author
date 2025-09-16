@@ -16,12 +16,12 @@ export default async function Home({
 }: {
   searchParams: SearchParams;
 }) {
-  const { authFetch } = await getServerAuthData();
+  const authData = await getServerAuthData();
 
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryFn: () => authFetch('/stats'),
+    queryFn: () => authData.authFetch('/stats'),
     queryKey: ['stats'],
   });
 
@@ -39,10 +39,7 @@ export default async function Home({
           </HydrationBoundary>
         </React.Suspense>
         <React.Suspense fallback={<PostsWrapperSkeleton />}>
-          <PostsWrapper
-            searchParams={searchParams}
-            authData={await getServerAuthData()}
-          />
+          <PostsWrapper searchParams={searchParams} authData={authData} />
         </React.Suspense>
       </main>
     </>
