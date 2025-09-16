@@ -54,12 +54,15 @@ export function PostPage({
       ) : (
         <>
           <header className='mt-6'>
-            <div className='flex justify-between items-baseline border-b pb-2'>
+            <div className='flex justify-center items-baseline border-b pb-2'>
               <H1 id={titleId} className='text-3xl text-center'>
                 {post.title}
               </H1>
               {user && (user.isAdmin || user.id === post.authorId) && (
-                <PostOptionsMenu post={post} />
+                <PostOptionsMenu
+                  post={post}
+                  triggerProps={{ className: 'ms-auto' }}
+                />
               )}
             </div>
             <div className='flex items-center justify-between mt-1'>
