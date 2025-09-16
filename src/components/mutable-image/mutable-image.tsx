@@ -33,9 +33,10 @@ export function MutableImage({
           alt={image.alt || ''}
           onLoad={() => setLoading(false)}
           className={cn(loading && 'absolute opacity-0 -z-50')}
-          sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
-          // Use image update time to revalidate the "painful" browser-cache ;)
+          // 1024px is the max width of `main` in post page
+          sizes='(max-width: 1024px) 100vw, 1024px'
           src={
+            // Use image update time to revalidate the "painful" browser-cache ;)
             image.updatedAt
               ? setURlParams(image.src, { updatedAt: image.updatedAt })
               : image.src
