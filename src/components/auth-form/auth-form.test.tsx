@@ -202,7 +202,7 @@ describe(`<AuthForm />`, () => {
       token: '',
       user: null,
     }));
-    expect(() => setup(updateUserFormProps)).rejects.toThrowError(
+    await expect(() => setup(updateUserFormProps)).rejects.toThrowError(
       /invalid .*usage/i
     );
   });
