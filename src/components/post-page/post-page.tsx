@@ -9,9 +9,10 @@ import { PostPageSkeleton } from './post-page.skeleton';
 import { PrivacyIcon } from '@/components/privacy-icon';
 import { useAuthData } from '@/contexts/auth-context';
 import { QueryError } from '@/components/query-error';
-import { Tags } from '@/components/tags';
 import { useQuery } from '@tanstack/react-query';
 import { Comments } from '@/components/comments';
+import { notFound } from 'next/navigation';
+import { Tags } from '@/components/tags';
 import { cn } from '@/lib/utils';
 import { Post } from '@/types';
 
@@ -30,6 +31,7 @@ export function PostPage({
 
   const {
     data: post,
+    error,
     status,
     refetch,
   } = useQuery<Post>({
@@ -38,6 +40,16 @@ export function PostPage({
   });
 
   const titleId = `title-${post?.id}`;
+
+  if (
+    status === 'error' &&
+    'status' in error &&
+    typeof error.status === 'number' &&
+    error.status >= 400 &&
+    error.status < 500
+  ) {
+    return notFound();
+  }
 
   return (
     <div {...props} className={cn('max-w-5xl mx-auto', className)}>
