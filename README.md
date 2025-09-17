@@ -1,12 +1,14 @@
 # [Odin Blog Author](https://odin-blog-author.hussein-kandil.vercel.app/)
 
+![A screenshot of the app's home page showing statistics and blog posts with their images, titles, contents, tags, and more.](./screenshot_2025-09-17.png)
+
 A **blog authoring app** built as part of the required projects at [The Odin Project Node.js course](https://www.theodinproject.com/paths/full-stack-javascript/courses/nodejs).
 
 **The course requirements for this project are divided into 3 pieces**:
 
 1. **Backend API**, which I built as part of the [`generic-express-service`](https://github.com/hussein-m-kandil/generic-express-service).
-2. **Blog author**: which I built in this project for authoring/viewing the blog posts.
-3. **Blog viewer**: which I will build later for only viewing the blog posts and interacting with them.
+2. **Blog viewer**: which I built in [`odin-blog-viewer`](https://github.com/hussein-m-kandil/odin-blog-viewer/).
+3. **Blog author**: which I built in this project for authoring/viewing the blog posts.
 
 **Here are the requirements from the course website**:
 
@@ -23,15 +25,18 @@ A **blog authoring app** built as part of the required projects at [The Odin Pro
 ## Tech Stack
 
 - [TypeScript](https://www.typescriptlang.org/)
-- [React](https://react.dev/) with Context API
+- [Zod](https://zod.dev/) for input validation
+- [React](https://react.dev/) with its Context API
+- [React Hook Form](https://react-hook-form.com/) for controlled form state
+- [React Testing Library](https://testing-library.com/) for component testing
 - [Next.js](https://nextjs.org/) with SSR and `fetch` for server HTTP requests
-- [TanStack Query](https://tanstack.com/query) for data fetching and caching
+- [TanStack Query](https://tanstack.com/query/) for data fetching and caching
 - [Motion (prev Framer Motion)](https://motion.dev/) for animations
 - [axios](https://axios-http.com/) for browser HTTP requests
 - [date-fns](https://date-fns.org/) for date formatting
-- [shadcn/ui](https://ui.shadcn.com) for UI primitives
+- [shadcn/ui](https://ui.shadcn.com/) for UI primitives
 - [Tailwind CSS](https://tailwindcss.com/) for styling
-- [vitest](https://vitest.dev/) for testing
+- [vitest](https://vitest.dev/) for running tests
 
 ---
 
@@ -140,8 +145,9 @@ While building this project, I faced several challenges, such as:
    git clone https://github.com/hussein-m-kandil/odin-blog-author.git
    cd odin-blog-author
    npm install
-   # Copy `env.sample` to `.env` in the project root
-   # Start the frontend dev server
+   cp env.sample .env
+   cp env.sample .env.test
+   npm run test -- --run
    npm run dev
    ```
 
@@ -150,9 +156,10 @@ While building this project, I faced several challenges, such as:
 3. **Useful scripts**
 
    - **Start dev server**: `npm run dev`
+   - **Build**: `npm run build`
    - **Run tests**: `npm test`
    - **Lint**: `npm run lint`
-   - **Build**: `npm run build`
+   - **Type check**: `npm run type-check`
    - **Start production server**: `npm run start`
 
    > **Important Note**: A secure cookie is used for authentication between the browser and the Next.js server, _hence an `https` scheme is mandatory_. So, connecting to the local `http` server via local IP address from another device (e.g, mobile phone), won't work as expected, and _you will never leave the signin/signup pages even after a successful sign-in_. The only solution that I know for this situation is using the [`--experimental-https` option with the Next.js dev server](https://nextjs.org/docs/app/api-reference/cli/next#using-https-during-development).
