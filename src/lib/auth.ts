@@ -75,7 +75,8 @@ export const getServerAuthData = async (): Promise<ServerAuthData> => {
       ...reqInit,
     });
     if (!res.ok) {
-      throw new AuthError('API response is not okay', await res.text());
+      const metadata = { body: await res.text(), status: res.status };
+      throw new AuthError('API response is not okay', JSON.stringify(metadata));
     }
     return res.json();
   };
