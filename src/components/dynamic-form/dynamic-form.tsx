@@ -75,13 +75,14 @@ export function DynamicForm({
             key={name}
             control={hookForm.control}
             name={name}
-            render={({ field }) => {
-              if (attrs.type === 'checkbox') delete field.value;
+            render={({ field: { value, ...field } }) => {
               const fieldProps = {
                 ...field,
                 disabled,
                 autoFocus: i === 0,
                 placeholder: attrs.placeholder,
+                value:
+                  attrs.type !== 'checkbox' ? (value as string) : undefined,
               };
               return (
                 <FormItem>
