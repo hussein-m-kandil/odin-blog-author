@@ -1,4 +1,5 @@
 import {
+  act,
   render,
   screen,
   waitForElementToBeRemoved,
@@ -47,11 +48,23 @@ describe('<PostPage />', () => {
     expect(screen.getByText(/could(n't| not) .* post/i)).toBeInTheDocument();
   });
 
-  it('should show error message on reject', async () => {
-    axiosMock.onGet().reply(400);
+  it('should show error message on reject with server error', async () => {
+    axiosMock.onGet().reply(500);
     render(<PostPageWrapper />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
     expect(screen.getByText(/could(n't| not) .* post/i)).toBeInTheDocument();
+  });
+
+  it('should throw Next.js 404 error on reject with client error', async () => {
+    axiosMock.onGet().reply(400);
+    await expect(
+      act(async () => {
+        render(<PostPageWrapper />);
+        await waitForElementToBeRemoved(() =>
+          screen.getByLabelText(loaderRegex)
+        );
+      })
+    ).rejects.toThrowError();
   });
 
   it('should have the given className on loading', () => {
@@ -69,7 +82,7 @@ describe('<PostPage />', () => {
   });
 
   it('should have the given className on loading error', async () => {
-    axiosMock.onGet().reply(400);
+    axiosMock.onGet().reply(399);
     const className = 'test-class';
     const { container } = render(<PostPageWrapper className={className} />);
     await waitForElementToBeRemoved(() => screen.getByLabelText(loaderRegex));
