@@ -97,8 +97,9 @@ export function PostForm({
       await queryClient.invalidateQueries({
         predicate: getInvalidateQueryPredicate(post),
       });
-      if (!isUpdate) router.push(`/${resPost.id}`);
+      // Redirect after `onSuccess`, to avoid any interceptions (e.g in dialog)
       onSuccess?.();
+      if (!isUpdate) router.push(`/${resPost.id}`);
     },
     onError: async (error, [hookForm]) => {
       refreshNewImageUrl();
