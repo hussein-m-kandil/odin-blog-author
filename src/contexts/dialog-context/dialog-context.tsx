@@ -74,16 +74,15 @@ export function DialogProvider({
     setDialogData(initData);
     setIsDialogOpen(false);
     shouldHideRef.current = initShouldHideFn;
-    window.setTimeout(() => {
-      const oldURl = urlRef.current;
-      if (oldURl) {
-        const currentUrl = new URL(window.location.href);
-        currentUrl.hash = oldURl.hash;
-        if (currentUrl.href == oldURl.href) {
-          router.replace(oldURl.hash, { scroll: false });
-        }
+    const oldURl = urlRef.current;
+    if (oldURl) {
+      const currentUrl = new URL(window.location.href);
+      currentUrl.hash = oldURl.hash;
+      if (currentUrl.href == oldURl.href) {
+        router.replace(oldURl.hash, { scroll: false });
+        router.replace(oldURl.hash, { scroll: false });
       }
-    }, 500);
+    }
   };
 
   const handleOpenChange = async (open: boolean) => {
