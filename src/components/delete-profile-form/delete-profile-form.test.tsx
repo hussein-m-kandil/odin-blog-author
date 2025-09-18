@@ -105,7 +105,7 @@ describe('<DeleteProfileForm />', () => {
     await user.click(screen.getByRole('button', { name: /delete/i }));
     await waitFor(() => screen.getByRole('button', { name: /deleting/i }));
     await waitFor(() =>
-      expect(screen.getByText(/unauthorized/i)).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /deleting/i })).toBeNull()
     );
     expect(onCancel).toHaveBeenCalledTimes(0);
     expect(onSuccess).toHaveBeenCalledTimes(0);

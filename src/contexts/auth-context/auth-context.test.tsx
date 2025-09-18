@@ -1,7 +1,12 @@
+import React from 'react';
+import {
+  render,
+  screen,
+  waitForElementToBeRemoved,
+} from '@testing-library/react';
 import { AuthProvider, useAuthData } from './auth-context';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { userEvent } from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
 import { author, initAuthData } from '@/test-utils';
 import { axiosMock } from '@/../__mocks__/axios';
 import { AuthResData } from '@/types';
@@ -14,9 +19,11 @@ const newAuthData: AuthResData = {
 const reqTriggerName = 'Send authorized request';
 
 function AuthConsumer() {
+  const [errorMessage, setErrorMessage] = React.useState('');
   const { authData, signin, signout } = useAuthData();
   return (
     <div>
+      {errorMessage && <div>{errorMessage}</div>}
       {authData.token && <div>user token: {authData.token}</div>}
       {authData.user && <div>username: {authData.user.username}</div>}
       <div>{authData.backendUrl}</div>
@@ -29,7 +36,20 @@ function AuthConsumer() {
       </button>
       <button
         type='button'
-        onClick={() => authData.authAxios.get(authData.backendUrl)}>
+        onClick={() => {
+          authData.authAxios
+            .get(authData.backendUrl)
+            .then(() => setErrorMessage(''))
+            .catch((error: unknown) => {
+              setErrorMessage(
+                error instanceof Error &&
+                  'status' in error &&
+                  error.status === 401
+                  ? 'Unauthorized'
+                  : 'Something went wrong'
+              );
+            });
+        }}>
         {reqTriggerName}
       </button>
     </div>
@@ -49,7 +69,10 @@ function AuthWrapper(
 }
 
 describe('AuthContext', () => {
-  beforeEach(() => axiosMock.onGet().reply(200));
+  beforeEach(() => {
+    axiosMock.reset();
+    axiosMock.onAny().reply(200);
+  });
 
   it('should `useAuthData` throw if used outside of `AuthProvider`', () => {
     expect(() =>
@@ -103,5 +126,20 @@ describe('AuthContext', () => {
     expect(axiosMock.history.get[0].headers?.Authorization).toBe(
       initAuthData.token
     );
+  });
+
+  it('should signout & `axios` be unauthorized after 401 response', async () => {
+    axiosMock.onGet().reply(401);
+    const user = userEvent.setup();
+    render(<AuthWrapper initAuthData={initAuthData} />);
+    await user.click(screen.getByRole('button', { name: reqTriggerName }));
+    await waitForElementToBeRemoved(() => screen.getByText(/token/i));
+    await user.click(screen.getByRole('button', { name: reqTriggerName }));
+    expect(screen.queryByText(/username/i)).toBeNull();
+    expect(screen.getByText(/unauthorized/i)).toBeInTheDocument();
+    expect(axiosMock.history.get[0].headers?.Authorization).toBe(
+      initAuthData.token
+    );
+    expect(axiosMock.history.get[1].headers?.Authorization).toBe('');
   });
 });
