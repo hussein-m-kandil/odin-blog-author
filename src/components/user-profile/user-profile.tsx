@@ -13,17 +13,15 @@ import { ImageForm } from '@/components/image-form';
 import { AuthForm } from '@/components/auth-form';
 import { Button } from '@/components/ui/button';
 import { H1 } from '@/components/typography/h1';
-import { useRouter } from 'next/navigation';
 import { User } from '@/types';
 
 export function UserProfile({ owner }: { owner: User }) {
-  const router = useRouter();
   const { showDialog, hideDialog } = useDialog();
-  const {
-    authData: { user },
-  } = useAuthData();
 
-  const ownedByCurrentUser = user && user.id === owner.id;
+  const { authData, signin, signout } = useAuthData();
+  const { user, token } = authData;
+
+  const ownedByCurrentUser = token && user && user.id === owner.id;
 
   const editAvatar = () => {
     showDialog(
@@ -36,11 +34,19 @@ export function UserProfile({ owner }: { owner: User }) {
             className='mt-4'
             onClose={hideDialog}
             initImage={owner.avatar?.image}
-            onSuccess={() => (router.refresh(), hideDialog())}
+            onSuccess={(image) => {
+              hideDialog();
+              if (ownedByCurrentUser) {
+                const avatar = image ? { image } : null;
+                signin({ ...authData, token, user: { ...user, avatar } });
+              } else {
+                signout();
+              }
+            }}
           />
         ),
       },
-      () => (router.refresh(), true)
+      () => true
     );
   };
 
