@@ -18,7 +18,7 @@ A **blog authoring app** built as part of the required projects at [The Odin Pro
 
 1. **Multiple Authors**: I have extended the author website (this project) to accept multiple authors, so any signed-up account can author a blog post.
 2. **Guest Sing-in**: I have added the ability to _sign in as a guest_ to facilitate trying the app.
-3. **Backend _State Reset_**: I am building these projects to practice what I am learning and to be part of my portfolio, and I don't plan to continue maintaining them in the future, hence I have implemented a reset logic within the [`generic-express-service`](https://github.com/hussein-m-kandil/generic-express-service) that will periodically delete any non-admin data.
+3. **Backend _State Reset_**: I built these projects to showcase what I am learning in web development, and I don't plan to keep maintaining them; therefore, I added a reset feature within the [`generic-express-service`](https://github.com/hussein-m-kandil/generic-express-service) to periodically delete any non-admin data.
 
 ---
 
